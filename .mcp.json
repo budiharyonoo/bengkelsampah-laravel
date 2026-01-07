@@ -1,0 +1,17 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "docker",
+            "args": [
+                "exec",
+                "-i",
+                "-w",
+                "/var/www/html/bengkelsampah-laravel",
+                "php8.2",
+                "php",
+                "artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
