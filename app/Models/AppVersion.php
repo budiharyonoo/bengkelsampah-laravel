@@ -5,6 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion query()
+ * @mixin \Eloquent
+ */
 class AppVersion extends Model
 {
     use HasFactory;

@@ -5,6 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \App\Models\Address|null $address
+ * @property-read \App\Models\BankSampah|null $bankSampah
+ * @property-read mixed $catatan
+ * @property-read mixed $foto
+ * @property-read mixed $jadwal
+ * @property-read mixed $status_text
+ * @property-read mixed $tipe_setor_text
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Point> $points
+ * @property-read int|null $points_count
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Setoran newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Setoran newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Setoran query()
+ * @mixin \Eloquent
+ */
 class Setoran extends Model
 {
     use HasFactory;

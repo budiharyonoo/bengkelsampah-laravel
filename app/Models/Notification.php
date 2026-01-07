@@ -5,6 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read mixed $created_at
+ * @property-read mixed $is_read
+ * @property-read mixed $message
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification ofType($type)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification read()
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification unread()
+ * @mixin \Eloquent
+ */
 class Notification extends Model
 {
     use HasFactory;

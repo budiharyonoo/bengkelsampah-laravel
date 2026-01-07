@@ -5,6 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \App\Models\KategoriArtikel|null $kategori
+ * @method static \Illuminate\Database\Eloquent\Builder|Artikel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Artikel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Artikel query()
+ * @mixin \Eloquent
+ */
 class Artikel extends Model
 {
     use HasFactory;

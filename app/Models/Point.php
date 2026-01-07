@@ -5,6 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \App\Models\Setoran|null $setoran
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Point newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Point newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Point query()
+ * @mixin \Eloquent
+ */
 class Point extends Model
 {
     use HasFactory;

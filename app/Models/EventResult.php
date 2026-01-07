@@ -5,6 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \App\Models\Admin|null $admin
+ * @property-read \App\Models\Event|null $event
+ * @method static \Illuminate\Database\Eloquent\Builder|EventResult newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|EventResult newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|EventResult query()
+ * @mixin \Eloquent
+ */
 class EventResult extends Model
 {
     use HasFactory;
