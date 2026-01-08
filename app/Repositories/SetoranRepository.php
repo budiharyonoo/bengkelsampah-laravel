@@ -305,7 +305,7 @@ class SetoranRepository
             // Get all completed setorans in date range
             $setorans = Setoran::query()
                 ->select(['items_json'])
-                ->whereIn('status', [Setoran::STATUS_SELESAI, 'berhasil'])
+                ->whereIn('status', [Setoran::STATUS_SELESAI, Setoran::STATUS_BERHASIL])
                 ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->get();
@@ -392,7 +392,7 @@ class SetoranRepository
                     DB::raw('COUNT(*) as total_setoran'),
                     DB::raw('COALESCE(SUM(aktual_total), 0) as total_nilai'),
                 ])
-                ->whereIn('status', [Setoran::STATUS_SELESAI, 'berhasil'])
+                ->whereIn('status', [Setoran::STATUS_SELESAI, Setoran::STATUS_BERHASIL])
                 ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->groupBy('user_id', 'user_name')

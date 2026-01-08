@@ -72,6 +72,7 @@ class Setoran extends Model
     const STATUS_DIJEMPUT = 'dijemput';
     const STATUS_SELESAI = 'selesai';
     const STATUS_BATAL = 'batal';
+    const STATUS_BERHASIL = 'berhasil';
 
     // Tipe setor constants
     const TIPE_JUAL = 'jual';
