@@ -115,13 +115,85 @@ return ResponseHelper::error('Error message', 400, $optionalData);
 
 Response format includes `success`, `message`, `data`, and `timestamp` fields.
 
+### Repository Pattern
+
+The application implements the Repository Pattern for data access layer separation:
+
+**Purpose**:
+- Centralizes data access logic
+- Enables query optimization and caching
+- Improves testability by abstracting database queries
+
+**Location**: `app/Repositories/`
+
+**Available Repositories**:
+- `AdminRepository.php` - Admin data access with eager loading
+- `SetoranRepository.php` - Transaction queries with dashboard optimizations
+- `UserRepository.php` - User queries with 10-minute caching
+- `DashboardRepository.php` - Aggregated dashboard metrics
+
+**Common Patterns**:
+- Use eager loading to prevent N+1 queries
+- Implement caching (10-minute TTL) for expensive queries
+- Use selective column fetching to reduce memory usage
+- Detailed PHPDoc blocks with array shape type definitions
+
+**Example Usage**:
+```php
+// In a controller or service
+public function __construct(private SetoranRepository $setoranRepository) {}
+
+public function getDashboardData(array $filters): array
+{
+    return $this->setoranRepository->getForDashboard($filters);
+}
+```
+
 ### Service Layer Architecture
 
-The application uses dedicated service classes for external integrations:
+The application uses dedicated service classes for business logic and external integrations:
 
-- **`WhatsAppService`**: TCast WhatsApp API integration for transaction notifications
-- **`FirebaseService`**: Firebase Cloud Messaging for push notifications
-- **`NotificationService`**: Orchestrates multi-channel notifications
+**External Integration Services**:
+- `WhatsAppService` - TCast WhatsApp API integration for transaction notifications
+- `FirebaseService` - Firebase Cloud Messaging for push notifications
+- `NotificationService` - Orchestrates multi-channel notifications
+
+**Business Logic Services**:
+- `AdminService` (`app/Services/AdminService.php`) - Admin CRUD operations with business rules
+  - Prevents deletion of the last admin (throws `AdminDeletionException`)
+  - Handles password hashing and validation
+
+**Dashboard Services** (`app/Services/Dashboard/`):
+- `DashboardService` - Orchestrates dashboard data from multiple repositories
+- `PeriodHelper` - Centralized period calculation logic
+  - Supports: daily, weekly, monthly, six-monthly, yearly, custom date ranges
+  - Eliminates duplicate period calculation code across controllers
+
+**Pattern**: Services use constructor property promotion with dependency injection and implement business rules that don't belong in models or controllers.
+
+### Form Request Validation Pattern
+
+Admin-related operations use dedicated Form Request classes for validation:
+
+**Location**: `app/Http/Requests/Admin/`
+
+**Available Form Requests**:
+- `DashboardFilterRequest.php` - Validates dashboard filter parameters (period, bank_sampah, status)
+- `StoreAdminRequest.php` - Validates admin creation (name, username, email, password, role)
+- `UpdateAdminRequest.php` - Validates admin updates (allows partial updates, password optional)
+
+**Pattern**: Follow this approach for new admin features rather than inline controller validation.
+
+**Example**:
+```php
+// Controller method signature
+public function store(StoreAdminRequest $request)
+{
+    // $request->validated() contains validated data
+    $admin = $this->adminService->createAdmin($request->validated());
+    return ResponseHelper::success('Admin created', $admin);
+}
+```
 
 ### Authentication & Authorization
 
@@ -173,7 +245,50 @@ Two upload systems exist due to storage requirements:
 **Soft Deletes**:
 Several models use soft deletes. Always use `forceDelete()` for permanent removal.
 
+**Performance Indexes**:
+The application uses composite indexes for common query patterns:
+- Transaction status + date filtering
+- Bank sampah + status combinations
+- User transaction history
+- Dashboard aggregation queries
+
+When adding new queries, consider if composite indexes would improve performance for common filter combinations.
+
+### Performance Optimization Strategy
+
+Recent optimizations (commit eabbb37) significantly improved dashboard performance:
+
+**Database Indexing** (migration: `2026_01_07_223657_add_dashboard_performance_indexes.php`):
+- Added 8+ composite indexes for common filter combinations
+- Indexes on: `status`, `bank_sampah_id`, `created_at`, `user_id`, and combinations
+- Covering indexes where applicable
+
+**Query Optimization Results**:
+- Dashboard queries reduced: ~150 queries → ~15 queries
+- Status-based queries: 10x faster
+- Date range queries: 5x faster
+- Bank sampah filtering: 8x faster
+
+**Caching Strategy**:
+- Repository-level caching with 10-minute TTL for expensive queries
+- Use `Cache::remember()` for aggregated data
+- Example: User statistics, dashboard metrics
+
+**Best Practices**:
+- Use `SetoranRepository` for transaction queries (optimized with indexes)
+- Leverage eager loading in repositories to prevent N+1 queries
+- Use selective column fetching (`select()`) when full models aren't needed
+- Add composite indexes when filtering on multiple columns together
+
 ## Key Development Patterns
+
+**Architectural Patterns in Use**:
+- **Repository Pattern**: Data access layer in `app/Repositories/`
+- **Service Layer**: Business logic in `app/Services/`
+- **Form Requests**: Validation in `app/Http/Requests/`
+- **Strict Types**: All new classes use `declare(strict_types=1)`
+- **Constructor Promotion**: PHP 8 constructor property promotion for DI
+- **PHPDoc Annotations**: Comprehensive type hints and array shapes
 
 ### Pilahku Integration
 
@@ -181,6 +296,38 @@ The system includes a waste validation system (`PilahkuCheckController`):
 - Validates waste data and pricing against bank_sampah rules
 - Real-time price checking for waste deposits
 - Endpoint: `POST /api/pilahku/check`
+
+### Dashboard Architecture
+
+The admin dashboard uses a specialized architecture for performance:
+
+**Components**:
+1. `DashboardService` - Orchestrates data from multiple repositories
+2. `PeriodHelper` - Centralized date range calculations
+3. `DashboardRepository` - Aggregated metrics queries
+4. `SetoranRepository` - Transaction data with optimizations
+5. `DashboardFilterRequest` - Validates filter parameters
+
+**Supported Periods**:
+- `harian` (daily) - Today's data
+- `mingguan` (weekly) - Last 7 days
+- `bulanan` (monthly) - Current month
+- `6bulanan` (six-monthly) - Last 6 months
+- `tahunan` (yearly) - Current year
+- Custom date range - Specify `tgl_awal` and `tgl_akhir`
+
+**Usage Pattern**:
+```php
+// Controller
+public function index(DashboardFilterRequest $request)
+{
+    $filters = $request->validated();
+    $data = $this->dashboardService->getDashboardData($filters);
+    return view('admin.dashboard', $data);
+}
+```
+
+**Performance**: Uses composite indexes and caching to minimize database load.
 
 ### Transaction Lifecycle (Setoran)
 
