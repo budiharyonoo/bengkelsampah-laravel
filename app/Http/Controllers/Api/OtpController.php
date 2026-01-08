@@ -106,7 +106,7 @@ class OtpController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
-            'type' => 'required|string|in:register,login,forgot,change',
+            'type' => 'required|string',
         ]);
 
         if ($validator->fails()) {

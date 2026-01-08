@@ -14,16 +14,10 @@ use App\Http\Controllers\DashboardRedeemController;
 use App\Http\Controllers\DashboardUserController;
 use App\Http\Controllers\AdminController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+Route::get('/optimize', function() {
+    Artisan::call('optimize');
+    return "php artisan optimize!";
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,7 +44,7 @@ Route::prefix('dashboard')->group(function () {
 // Dashboard Routes (Protected)
 Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
-    
+
     // Transaksi routes
     Route::resource('transaksi', DashboardTransaksiController::class)->names([
         'index' => 'dashboard.transaksi',
@@ -62,7 +56,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('/dashboard/transaksi/export/excel', [DashboardTransaksiController::class, 'exportExcel'])->name('dashboard.transaksi.export.excel');
     Route::post('/dashboard/transaksi/export/csv', [DashboardTransaksiController::class, 'exportCsv'])->name('dashboard.transaksi.export.csv');
     Route::post('/dashboard/transaksi/export/pdf', [DashboardTransaksiController::class, 'exportPdf'])->name('dashboard.transaksi.export.pdf');
-    
+
     // Sampah routes
     Route::resource('sampah', SampahController::class)->names([
         'index' => 'dashboard.sampah',
@@ -91,7 +85,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('category/export/excel', [CategoryController::class, 'exportExcel'])->name('dashboard.category.export.excel');
     Route::post('category/export/csv', [CategoryController::class, 'exportCsv'])->name('dashboard.category.export.csv');
     Route::post('category/export/pdf', [CategoryController::class, 'exportPdf'])->name('dashboard.category.export.pdf');
-    
+
     // Kategori routes (using sidebar kategori)
     Route::resource('kategori', KategoriController::class)->names([
         'index' => 'dashboard.kategori',
@@ -102,10 +96,10 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         'update' => 'dashboard.kategori.update',
         'destroy' => 'dashboard.kategori.destroy',
     ]);
-    
+
     // Force delete kategori beserta semua artikel di dalamnya
     Route::delete('kategori/{id}/force', [KategoriController::class, 'forceDestroy'])->name('dashboard.kategori.force-destroy');
-    
+
     // Bank Sampah routes
     Route::resource('bank-sampah', BankSampahController::class)->names([
         'index' => 'dashboard.bank',
@@ -120,7 +114,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('bank-sampah/export/excel', [BankSampahController::class, 'exportExcel'])->name('dashboard.bank.export.excel');
     Route::post('bank-sampah/export/csv', [BankSampahController::class, 'exportCsv'])->name('dashboard.bank.export.csv');
     Route::post('bank-sampah/export/pdf', [BankSampahController::class, 'exportPdf'])->name('dashboard.bank.export.pdf');
-    
+
     // User routes
     Route::resource('user', DashboardUserController::class)->names([
         'index' => 'dashboard.user',
@@ -133,7 +127,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('user/export/excel', [DashboardUserController::class, 'exportExcel'])->name('dashboard.user.export.excel');
     Route::post('user/export/csv', [DashboardUserController::class, 'exportCsv'])->name('dashboard.user.export.csv');
     Route::post('user/export/pdf', [DashboardUserController::class, 'exportPdf'])->name('dashboard.user.export.pdf');
-    
+
     // Poin routes (for redeem functionality)
     Route::get('/poin', [DashboardRedeemController::class, 'index'])->name('dashboard.poin');
     Route::get('/poin/create', [DashboardRedeemController::class, 'create'])->name('dashboard.poin.create');
@@ -141,7 +135,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::get('/poin/user/{id}', [DashboardRedeemController::class, 'getUserInfo'])->name('dashboard.poin.user-info');
     Route::post('/poin/process', [DashboardRedeemController::class, 'redeem'])->name('dashboard.poin.process');
     Route::get('/poin/export/{type}', [DashboardRedeemController::class, 'export'])->name('dashboard.poin.export');
-    
+
     // Artikel routes
     Route::resource('artikel', ArtikelController::class)->names([
         'index' => 'dashboard.artikel',
@@ -170,13 +164,13 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         'update' => 'dashboard.event.update',
         'destroy' => 'dashboard.event.destroy',
     ]);
-    
+
     // Event result routes
     Route::post('event/{id}/submit-result', [EventController::class, 'submitResult'])->name('dashboard.event.submit-result');
     Route::put('event/{id}/update-result', [EventController::class, 'updateResult'])->name('dashboard.event.update-result');
     Route::get('event/{id}/generate-report', [EventController::class, 'generateReport'])->name('dashboard.event.generate-report');
     Route::post('event/{id}/complete', [EventController::class, 'completeEvent'])->name('dashboard.event.complete');
-    
+
     // Event export routes
     Route::post('event/export/excel', [EventController::class, 'exportExcel'])->name('dashboard.event.export.excel');
     Route::post('event/export/csv', [EventController::class, 'exportCsv'])->name('dashboard.event.export.csv');
