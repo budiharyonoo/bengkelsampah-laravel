@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
+ * @property int $user_type
  * @property mixed $password
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Address> $addresses
  * @property-read int|null $addresses_count
@@ -39,6 +39,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'identifier',
+        'user_type',
         'password',
         'poin',
         'xp',
@@ -64,6 +65,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        'user_type' => 'integer',
     ];
 
     public function level()

@@ -91,10 +91,10 @@ class RegisterController extends Controller
                 function ($attribute, $value, $fail) {
                     // Check if it's a valid email
                     $isEmail = filter_var($value, FILTER_VALIDATE_EMAIL);
-                    
+
                     // Check if it's a valid phone number (Indonesian format)
                     $isPhone = preg_match('/^(\+62|62|0)8[1-9][0-9]{6,9}$/', $value);
-                    
+
                     if (!$isEmail && !$isPhone) {
                         $fail('Identifier harus berupa email atau nomor telepon Indonesia yang valid.');
                     }
@@ -102,7 +102,8 @@ class RegisterController extends Controller
             ],
             'password' => 'required|string|min:8',
             'confirm_password' => 'required|same:password',
-            'otp' => 'required|string|size:6'
+            'user_type' => ['required', 'int', 'min:-1']
+            // 'otp' => 'required|string|size:6'
         ]);
 
         if ($validator->fails()) {
@@ -110,29 +111,30 @@ class RegisterController extends Controller
         }
 
         // Verify OTP
-        $otp = Otp::where('identifier', $request->identifier)
-                  ->where('type', 'register')
-                  ->where('code', $request->otp)
-                  ->first();
+        // $otp = Otp::where('identifier', $request->identifier)
+        //           ->where('type', 'register')
+        //           ->where('code', $request->otp)
+        //           ->first();
 
-        if (!$otp) {
-            return R::error('Kode OTP tidak valid.', 422);
-        }
+        // if (!$otp) {
+        //     return R::error('Kode OTP tidak valid.', 422);
+        // }
 
-        // Check if OTP is expired
-        if (Carbon::parse($otp->expires_at)->isPast()) {
-            return R::error('Kode OTP telah kedaluwarsa. Silakan minta kode baru.', 422);
-        }
+        // // Check if OTP is expired
+        // if (Carbon::parse($otp->expires_at)->isPast()) {
+        //     return R::error('Kode OTP telah kedaluwarsa. Silakan minta kode baru.', 422);
+        // }
 
         // Create user
         $user = User::create([
             'name' => $request->fullname,
             'identifier' => $request->identifier,
             'password' => Hash::make($request->password),
+            'user_type' => $request->user_type
         ]);
 
         // Delete used OTP
-        $otp->delete();
+        // $otp->delete();
 
         // Generate token with 1 year expiration
         $token = $user->createToken('auth_token', ['*'], now()->addYear())->plainTextToken;
@@ -143,4 +145,4 @@ class RegisterController extends Controller
             'token_expires_at' => now()->addYear()->toDateTimeString()
         ], 201);
     }
-} 
+}

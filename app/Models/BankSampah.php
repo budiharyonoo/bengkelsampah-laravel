@@ -38,7 +38,7 @@ class BankSampah extends Model
     {
         // Get all existing kode numbers
         $existingKodes = self::pluck('kode_bank_sampah')->toArray();
-        
+
         if (empty($existingKodes)) {
             return 'BS-001';
         }
@@ -49,9 +49,9 @@ class BankSampah extends Model
             $number = (int) substr($kode, 3);
             $existingNumbers[] = $number;
         }
-        
+
         sort($existingNumbers);
-        
+
         // Find the first missing number starting from 1
         $nextNumber = 1;
         foreach ($existingNumbers as $number) {
@@ -61,7 +61,7 @@ class BankSampah extends Model
                 break; // Found a gap, use this number
             }
         }
-        
+
         return 'BS-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
     }
 

@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## MCP Integration
+
+### Always use these MCP tools:
+- **serena**: Semantic code search and editing across codebase
+- **context7**: Up-to-date documentation for third-party libraries
+- **laravel-boost**: Laravel-specific tools and documentation
+
+### When to use each tool:
+- Use **serena** when:
+  - Finding code by intent: "where do we handle authentication?"
+  - Locating related functions across different files
+  - Understanding code relationships and structure
+
+- Use **context7** when:
+  - Need latest library documentation (Laravel, packages)
+  - Implementing new third-party integrations
+  - Verifying API methods and syntax
+
+- Use **laravel-boost** when:
+  - Querying Eloquent models and database schemas
+  - Searching Laravel-specific documentation
+  - Running artisan commands or tinker
+  - Checking application routes and configurations
+  - Analyzing error logs
+
 ## Project Overview
 
 **Bengkel Sampah** is a Laravel 10.x waste management platform with:

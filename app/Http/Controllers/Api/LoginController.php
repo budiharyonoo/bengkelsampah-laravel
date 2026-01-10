@@ -107,7 +107,6 @@ class LoginController extends Controller
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
             'password' => 'required|string',
-            'otp' => 'required|string|size:6'
         ]);
 
         if ($validator->fails()) {
@@ -117,8 +116,7 @@ class LoginController extends Controller
         // BYPASS untuk akun testing Google
         if (
             $request->identifier === 'testing@bengkelsampah.com' &&
-            $request->password === 'BengkelSampah25' &&
-            $request->otp === '000000'
+            $request->password === 'BengkelSampah25'
         ) {
             $user = User::where('identifier', $request->identifier)->first();
             if (!$user) {
@@ -134,19 +132,19 @@ class LoginController extends Controller
         }
 
         // Verify OTP first
-        $otp = Otp::where('identifier', $request->identifier)
-                  ->where('type', 'login')
-                  ->where('code', $request->otp)
-                  ->first();
+        // $otp = Otp::where('identifier', $request->identifier)
+        //           ->where('type', 'login')
+        //           ->where('code', $request->otp)
+        //           ->first();
 
-        if (!$otp) {
-            return R::error('Kode OTP tidak valid', 422);
-        }
+        // if (!$otp) {
+        //     return R::error('Kode OTP tidak valid', 422);
+        // }
 
         // Check if OTP is expired
-        if (Carbon::parse($otp->expires_at)->isPast()) {
-            return R::error('Kode OTP telah kedaluwarsa', 422);
-        }
+        // if (Carbon::parse($otp->expires_at)->isPast()) {
+        //     return R::error('Kode OTP telah kedaluwarsa', 422);
+        // }
 
         // Get user and verify password
         $user = User::where('identifier', $request->identifier)->first();
@@ -155,7 +153,7 @@ class LoginController extends Controller
         }
 
         // Delete used OTP
-        $otp->delete();
+        // $otp->delete();
 
         // Generate token with 1 year expiration
         $expiresAt = now()->addYear();
@@ -167,4 +165,4 @@ class LoginController extends Controller
             'token_expires_at' => $expiresAt->toDateTimeString()
         ]);
     }
-} 
+}
