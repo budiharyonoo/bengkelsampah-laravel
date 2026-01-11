@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setoran;
 use App\Models\BankSampah;
 use App\Models\Point;
+use App\Models\Setoran;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Helpers\ResponseHelper;
 use App\Services\NotificationService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardTransaksiController extends Controller
 {
@@ -32,7 +30,7 @@ class DashboardTransaksiController extends Controller
             $isCabang = $admin->role !== 'admin' && $admin->id_bank_sampah;
             if ($isCabang) {
                 $query->where('bank_sampah_id', $admin->id_bank_sampah);
-            } else if ($request->has('bank_sampah_id') && $request->bank_sampah_id) {
+            } elseif ($request->has('bank_sampah_id') && $request->bank_sampah_id) {
                 $query->where('bank_sampah_id', $request->bank_sampah_id);
             }
 
@@ -47,11 +45,11 @@ class DashboardTransaksiController extends Controller
             }
 
             // Filter by date range
-                        if ($request->has('start_date') && $request->start_date) {
-                            $query->whereDate('created_at', '>=', $request->start_date);
-                        }
-                        if ($request->has('end_date') && $request->end_date) {
-                            $query->whereDate('created_at', '<=', $request->end_date);
+            if ($request->has('start_date') && $request->start_date) {
+                $query->whereDate('created_at', '>=', $request->start_date);
+            }
+            if ($request->has('end_date') && $request->end_date) {
+                $query->whereDate('created_at', '<=', $request->end_date);
             }
 
             // Search by user name or transaction ID
@@ -59,14 +57,14 @@ class DashboardTransaksiController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('id', 'LIKE', "%{$search}%")
-                      ->orWhere('user_name', 'LIKE', "%{$search}%")
-                      ->orWhere('user_identifier', 'LIKE', "%{$search}%");
+                        ->orWhere('user_name', 'LIKE', "%{$search}%")
+                        ->orWhere('user_identifier', 'LIKE', "%{$search}%");
                 });
             }
 
             // Get paginated results
             $transaksi = $query->orderBy('created_at', 'desc')
-                                 ->paginate(10);
+                ->paginate(10);
 
             // Get all bank sampah for filter dropdown
             $bankSampahList = \App\Models\BankSampah::select('id', 'nama_bank_sampah')->get();
@@ -77,7 +75,7 @@ class DashboardTransaksiController extends Controller
             ));
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -102,18 +100,18 @@ class DashboardTransaksiController extends Controller
                 'petugas_nama' => 'required_if:status,dijemput|nullable|string|max:255',
                 'petugas_contact' => 'required_if:status,dijemput|nullable|string|max:255',
                 'items_json' => 'nullable|string',
-                'aktual_total' => 'nullable|numeric|min:0'
+                'aktual_total' => 'nullable|numeric|min:0',
             ]);
 
             $transaction = Setoran::findOrFail($id);
             $oldStatus = $transaction->status;
-            
+
             $transaction->status = $request->status;
-            
+
             if ($request->status === 'batal' && $request->alasan_pembatalan) {
                 $transaction->alasan_pembatalan = $request->alasan_pembatalan;
             }
-            
+
             if ($request->status === 'dijemput') {
                 $transaction->petugas_nama = $request->petugas_nama;
                 $transaction->petugas_contact = $request->petugas_contact;
@@ -123,11 +121,11 @@ class DashboardTransaksiController extends Controller
             if ($request->status === 'selesai') {
                 if ($request->items_json) {
                     $transaction->items_json = $request->items_json;
-                    
+
                     // Log the items_json for debugging
                     \Log::info("Items JSON received for transaction {$id}:", [
                         'items_json' => $request->items_json,
-                        'decoded_items' => json_decode($request->items_json, true)
+                        'decoded_items' => json_decode($request->items_json, true),
                     ]);
                 }
                 if ($request->aktual_total) {
@@ -152,7 +150,7 @@ class DashboardTransaksiController extends Controller
             return back()->with('success', 'Status transaksi berhasil diperbarui');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -169,7 +167,7 @@ class DashboardTransaksiController extends Controller
                 $points = $aktualTotal;
             }
             // For 'jual' and 'sedekah', points = 0
-            
+
             // XP = total aktual / 1000 (regardless of tipe_setor)
             $xp = $aktualTotal / 1000;
 
@@ -194,7 +192,7 @@ class DashboardTransaksiController extends Controller
                 'jumlah_point' => $points,
                 'xp' => $xp,
                 'setoran_id' => $setoran->id,
-                'keterangan' => "Setoran sampah #{$setoran->id} - {$setoran->tipe_setor} - Total: Rp " . number_format($aktualTotal)
+                'keterangan' => "Setoran sampah #{$setoran->id} - {$setoran->tipe_setor} - Total: Rp ".number_format($aktualTotal),
             ]);
 
             // Update user's stats
@@ -207,7 +205,7 @@ class DashboardTransaksiController extends Controller
             }
 
         } catch (\Exception $e) {
-            \Log::error('Error adding points and XP: ' . $e->getMessage());
+            \Log::error('Error adding points and XP: '.$e->getMessage());
             throw $e;
         }
     }
@@ -219,8 +217,9 @@ class DashboardTransaksiController extends Controller
     {
         try {
             $user = \App\Models\User::find($transaction->user_id);
-            if (!$user) {
+            if (! $user) {
                 \Log::warning('User not found for notification', ['user_id' => $transaction->user_id]);
+
                 return;
             }
 
@@ -255,7 +254,7 @@ class DashboardTransaksiController extends Controller
                 case 'selesai':
                     $title = 'Setoran Selesai';
                     $body = "Setoran sampah Anda telah selesai diproses oleh {$transaction->bank_sampah_name}.";
-                    
+
                     // Add points and XP info if available
                     if ($transaction->aktual_total) {
                         $points = 0;
@@ -263,9 +262,9 @@ class DashboardTransaksiController extends Controller
                             $points = $transaction->aktual_total;
                         }
                         $xp = $transaction->aktual_total / 1000;
-                        
-                        $body .= " Anda mendapatkan {$points} poin dan " . number_format($xp, 1) . " XP.";
-                        
+
+                        $body .= " Anda mendapatkan {$points} poin dan ".number_format($xp, 1).' XP.';
+
                         $data['points_earned'] = $points;
                         $data['xp_earned'] = $xp;
                         $data['aktual_total'] = $transaction->aktual_total;
@@ -305,7 +304,7 @@ class DashboardTransaksiController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error sending status change notification: ' . $e->getMessage(), [
+            \Log::error('Error sending status change notification: '.$e->getMessage(), [
                 'setoran_id' => $transaction->id,
                 'user_id' => $transaction->user_id,
                 'old_status' => $oldStatus,
@@ -336,7 +335,7 @@ class DashboardTransaksiController extends Controller
             if ($request->has('time_filter') && $request->time_filter) {
                 $timeFilter = $request->time_filter;
                 $today = now();
-                
+
                 switch ($timeFilter) {
                     case 'harian':
                         $query->whereDate('created_at', $today->toDateString());
@@ -344,13 +343,13 @@ class DashboardTransaksiController extends Controller
                     case 'mingguan':
                         $query->whereBetween('created_at', [
                             $today->startOfWeek()->toDateTimeString(),
-                            $today->endOfWeek()->toDateTimeString()
+                            $today->endOfWeek()->toDateTimeString(),
                         ]);
                         break;
                     case 'bulanan':
                         $query->whereBetween('created_at', [
                             $today->startOfMonth()->toDateTimeString(),
-                            $today->endOfMonth()->toDateTimeString()
+                            $today->endOfMonth()->toDateTimeString(),
                         ]);
                         break;
                     case 'range':
@@ -367,15 +366,15 @@ class DashboardTransaksiController extends Controller
             $transactions = $query->orderBy('created_at', 'desc')->get();
 
             // Generate CSV
-            $filename = 'transaksi_' . date('Y-m-d_H-i-s') . '.csv';
+            $filename = 'transaksi_'.date('Y-m-d_H-i-s').'.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ];
 
-            $callback = function() use ($transactions) {
+            $callback = function () use ($transactions) {
                 $file = fopen('php://output', 'w');
-                
+
                 // CSV headers
                 fputcsv($file, [
                     'ID Transaksi',
@@ -389,7 +388,7 @@ class DashboardTransaksiController extends Controller
                     'Status',
                     'Total Estimasi',
                     'Catatan',
-                    'Alasan Pembatalan'
+                    'Alasan Pembatalan',
                 ]);
 
                 foreach ($transactions as $transaction) {
@@ -405,7 +404,7 @@ class DashboardTransaksiController extends Controller
                         $transaction->status_text,
                         number_format($transaction->estimasi_total),
                         $transaction->notes,
-                        $transaction->alasan_pembatalan ?? '-'
+                        $transaction->alasan_pembatalan ?? '-',
                     ]);
                 }
 
@@ -415,7 +414,7 @@ class DashboardTransaksiController extends Controller
             return response()->stream($callback, 200, $headers);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat export: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export: '.$e->getMessage());
         }
     }
 
@@ -423,7 +422,7 @@ class DashboardTransaksiController extends Controller
     {
         try {
             $transaction = Setoran::findOrFail($id);
-            
+
             // Only allow printing for completed transactions
             if ($transaction->status !== 'selesai') {
                 return back()->with('error', 'Struk hanya dapat dicetak untuk transaksi yang sudah selesai');
@@ -431,16 +430,16 @@ class DashboardTransaksiController extends Controller
 
             // Get bank sampah info
             $bankSampah = BankSampah::find($transaction->bank_sampah_id);
-            
+
             // Parse items JSON
             $items = json_decode($transaction->items_json, true) ?: [];
-            
+
             // Calculate totals
             $totalEstimasiBerat = array_sum(array_column($items, 'estimasi_berat'));
-            $totalAktualBerat = array_sum(array_map(function($item) {
+            $totalAktualBerat = array_sum(array_map(function ($item) {
                 return isset($item['aktual_berat']) && $item['aktual_berat'] !== null ? $item['aktual_berat'] : 0;
             }, $items));
-            
+
             $data = [
                 'transaction' => $transaction,
                 'bankSampah' => $bankSampah,
@@ -451,11 +450,11 @@ class DashboardTransaksiController extends Controller
 
             // Generate PDF
             $pdf = PDF::loadView('pdf.transaksi-struk', $data);
-            
+
             // PERBAIKAN: Set paper size yang lebih tepat untuk thermal printer
             // 80mm = 226.77 points, tinggi auto dengan max height
             $pdf->setPaper([0, 0, 226.77, 600], 'portrait'); // Reduced max height
-            
+
             // Set options untuk rendering yang lebih baik
             $pdf->setOptions([
                 'isHtml5ParserEnabled' => true,
@@ -470,7 +469,7 @@ class DashboardTransaksiController extends Controller
             return $pdf->download("struk_transaksi_{$transaction->id}.pdf");
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat mencetak struk: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat mencetak struk: '.$e->getMessage());
         }
     }
 
@@ -478,7 +477,7 @@ class DashboardTransaksiController extends Controller
     {
         try {
             $query = Setoran::query();
-            
+
             // Apply filters (sama seperti exportPdf)
             if ($request->has('bank_sampah_id') && $request->bank_sampah_id) {
                 $query->where('bank_sampah_id', $request->bank_sampah_id);
@@ -499,13 +498,13 @@ class DashboardTransaksiController extends Controller
                     case 'mingguan':
                         $query->whereBetween('created_at', [
                             $today->startOfWeek()->toDateTimeString(),
-                            $today->endOfWeek()->toDateTimeString()
+                            $today->endOfWeek()->toDateTimeString(),
                         ]);
                         break;
                     case 'bulanan':
                         $query->whereBetween('created_at', [
                             $today->startOfMonth()->toDateTimeString(),
-                            $today->endOfMonth()->toDateTimeString()
+                            $today->endOfMonth()->toDateTimeString(),
                         ]);
                         break;
                     case 'range':
@@ -518,55 +517,55 @@ class DashboardTransaksiController extends Controller
                         break;
                 }
             }
-            
+
             $transactions = $query->with(['user', 'bankSampah', 'address'])->orderBy('created_at', 'desc')->get();
-            
+
             // Generate Excel using PhpSpreadsheet
-            $spreadsheet = new Spreadsheet();
-            
+            $spreadsheet = new Spreadsheet;
+
             // Sheet 1: Detail Transaksi (sesuai dengan tabel di PDF)
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Detail Transaksi');
-            
+
             // Headers untuk detail transaksi (sesuai dengan PDF)
             $headers = [
-                'No', 'ID Transaksi', 'Tanggal', 'Nama User', 'Identifier User', 'Bank Sampah', 
+                'No', 'ID Transaksi', 'Tanggal', 'Nama User', 'Identifier User', 'Bank Sampah',
                 'Alamat Pickup', 'Tipe Setor', 'Status', 'Estimasi Total (Rp)', 'Aktual Total (Rp)',
                 'Estimasi Total (KG)', 'Aktual Total (KG)', 'Estimasi Total (UNIT)', 'Aktual Total (UNIT)',
-                'Petugas', 'Kontak Petugas', 'Jadwal Penjemputan', 'Tanggal Selesai', 'Items Sampah'
+                'Petugas', 'Kontak Petugas', 'Jadwal Penjemputan', 'Tanggal Selesai', 'Items Sampah',
             ];
-            
+
             $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
             foreach ($headers as $col => $header) {
-                $sheet->setCellValue($columns[$col] . '1', $header);
+                $sheet->setCellValue($columns[$col].'1', $header);
             }
-            
+
             // Add main transaction data
             $row = 2;
             foreach ($transactions as $i => $transaction) {
                 $items = json_decode($transaction->items_json, true) ?: [];
-                
+
                 // Hitung total estimasi dan aktual per satuan
                 $estimasiTotalKg = collect($items)->where('sampah_satuan', 'KG')->sum('estimasi_berat');
                 $aktualTotalKg = collect($items)->where('sampah_satuan', 'KG')->where('aktual_berat', '!=', null)->sum('aktual_berat');
                 $estimasiTotalUnit = collect($items)->where('sampah_satuan', 'UNIT')->sum('estimasi_berat');
                 $aktualTotalUnit = collect($items)->where('sampah_satuan', 'UNIT')->where('aktual_berat', '!=', null)->sum('aktual_berat');
-                
+
                 // Perbaiki perhitungan estimasi dan aktual total Rp
-                $estimasiTotalRp = array_sum(array_map(function($item) {
+                $estimasiTotalRp = array_sum(array_map(function ($item) {
                     return (isset($item['estimasi_berat']) ? $item['estimasi_berat'] : 0) * (isset($item['harga_per_satuan']) ? $item['harga_per_satuan'] : 0);
                 }, $items));
-                $aktualTotalRp = array_sum(array_map(function($item) {
+                $aktualTotalRp = array_sum(array_map(function ($item) {
                     return (isset($item['aktual_berat']) && $item['aktual_berat'] !== null ? $item['aktual_berat'] : 0) * (isset($item['harga_per_satuan']) ? $item['harga_per_satuan'] : 0);
                 }, $items));
-                
+
                 // Format items sampah untuk kolom
                 $itemsText = '';
                 foreach ($items as $item) {
                     $itemName = $item['sampah_nama'] ?? $item['nama_sampah'] ?? 'N/A';
                     $itemStatus = $item['status'] ?? 'normal';
                     $statusText = '';
-                    
+
                     if ($itemStatus === 'dihapus') {
                         $statusText = ' (DIHAPUS)';
                     } elseif ($itemStatus === 'ditambah') {
@@ -574,130 +573,131 @@ class DashboardTransaksiController extends Controller
                     } elseif ($itemStatus === 'dimodifikasi') {
                         $statusText = ' (DIMODIFIKASI)';
                     }
-                    
-                    $itemsText .= $itemName . $statusText . ' - Est: ' . ($item['estimasi_berat'] ?? 0) . ' ' . ($item['sampah_satuan'] ?? 'KG');
+
+                    $itemsText .= $itemName.$statusText.' - Est: '.($item['estimasi_berat'] ?? 0).' '.($item['sampah_satuan'] ?? 'KG');
                     if (isset($item['aktual_berat']) && $item['aktual_berat']) {
-                        $itemsText .= ' | Aktual: ' . $item['aktual_berat'] . ' ' . ($item['sampah_satuan'] ?? 'KG');
+                        $itemsText .= ' | Aktual: '.$item['aktual_berat'].' '.($item['sampah_satuan'] ?? 'KG');
                     }
                     $itemsText .= "\n";
                 }
-                
-                $sheet->setCellValue('A' . $row, $i + 1);
-                $sheet->setCellValue('B' . $row, $transaction->id);
-                $sheet->setCellValue('C' . $row, $transaction->created_at->format('d/m/Y'));
-                $sheet->setCellValue('D' . $row, $transaction->user_name);
-                $sheet->setCellValue('E' . $row, $transaction->user_identifier);
-                $sheet->setCellValue('F' . $row, $transaction->bank_sampah_name);
-                $sheet->setCellValue('G' . $row, $transaction->address_full_address ?? '-');
-                $sheet->setCellValue('H' . $row, ucfirst($transaction->tipe_setor));
-                $sheet->setCellValue('I' . $row, ucfirst($transaction->status));
-                $sheet->setCellValue('J' . $row, number_format($estimasiTotalRp, 0));
-                $sheet->setCellValue('K' . $row, number_format($aktualTotalRp, 0));
-                $sheet->setCellValue('L' . $row, number_format($estimasiTotalKg, 2));
-                $sheet->setCellValue('M' . $row, number_format($aktualTotalKg, 2));
-                $sheet->setCellValue('N' . $row, number_format($estimasiTotalUnit, 2));
-                $sheet->setCellValue('O' . $row, number_format($aktualTotalUnit, 2));
-                $sheet->setCellValue('P' . $row, $transaction->petugas_nama ?? '-');
-                $sheet->setCellValue('Q' . $row, $transaction->petugas_contact ?? '-');
-                $sheet->setCellValue('R' . $row, $transaction->getJadwalAttribute() ?? '-');
-                $sheet->setCellValue('S' . $row, $transaction->tanggal_selesai ? $transaction->tanggal_selesai->format('d/m/Y H:i') : '-');
-                $sheet->setCellValue('T' . $row, trim($itemsText));
+
+                $sheet->setCellValue('A'.$row, $i + 1);
+                $sheet->setCellValue('B'.$row, $transaction->id);
+                $sheet->setCellValue('C'.$row, $transaction->created_at->format('d/m/Y'));
+                $sheet->setCellValue('D'.$row, $transaction->user_name);
+                $sheet->setCellValue('E'.$row, $transaction->user_identifier);
+                $sheet->setCellValue('F'.$row, $transaction->bank_sampah_name);
+                $sheet->setCellValue('G'.$row, $transaction->address_full_address ?? '-');
+                $sheet->setCellValue('H'.$row, ucfirst($transaction->tipe_setor));
+                $sheet->setCellValue('I'.$row, ucfirst($transaction->status));
+                $sheet->setCellValue('J'.$row, number_format($estimasiTotalRp, 0));
+                $sheet->setCellValue('K'.$row, number_format($aktualTotalRp, 0));
+                $sheet->setCellValue('L'.$row, number_format($estimasiTotalKg, 2));
+                $sheet->setCellValue('M'.$row, number_format($aktualTotalKg, 2));
+                $sheet->setCellValue('N'.$row, number_format($estimasiTotalUnit, 2));
+                $sheet->setCellValue('O'.$row, number_format($aktualTotalUnit, 2));
+                $sheet->setCellValue('P'.$row, $transaction->petugas_nama ?? '-');
+                $sheet->setCellValue('Q'.$row, $transaction->petugas_contact ?? '-');
+                $sheet->setCellValue('R'.$row, $transaction->getJadwalAttribute() ?? '-');
+                $sheet->setCellValue('S'.$row, $transaction->tanggal_selesai ? $transaction->tanggal_selesai->format('d/m/Y H:i') : '-');
+                $sheet->setCellValue('T'.$row, trim($itemsText));
                 $row++;
             }
-            
+
             // Sheet 2: Bank Performa (sesuai dengan PDF)
             $sheet2 = $spreadsheet->createSheet();
             $sheet2->setTitle('Bank Performa');
-            
+
             // Headers untuk bank performa
             $bankHeaders = [
-                'Bank', 'Total Transaksi', 'Selesai', 'Completion Rate (%)', 'Estimasi Total (Rp)', 
-                'Realisasi Total (Rp)', 'Estimasi Total (KG)', 'Realisasi Total (KG)', 
-                'Estimasi Total (UNIT)', 'Realisasi Total (UNIT)'
+                'Bank', 'Total Transaksi', 'Selesai', 'Completion Rate (%)', 'Estimasi Total (Rp)',
+                'Realisasi Total (Rp)', 'Estimasi Total (KG)', 'Realisasi Total (KG)',
+                'Estimasi Total (UNIT)', 'Realisasi Total (UNIT)',
             ];
-            
+
             $bankColumns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
             foreach ($bankHeaders as $col => $header) {
-                $sheet2->setCellValue($bankColumns[$col] . '1', $header);
+                $sheet2->setCellValue($bankColumns[$col].'1', $header);
             }
-            
+
             // Hitung bank performance
             $bankPerformance = $transactions->groupBy('bank_sampah_name')
-                ->map(function($group) {
+                ->map(function ($group) {
                     $completed = $group->where('status', 'selesai')->count();
                     $total = $group->count();
                     $rate = $total > 0 ? ($completed / $total) * 100 : 0;
+
                     return [
                         'total' => $total,
                         'completed' => $completed,
                         'rate' => $rate,
-                        'total_value' => $group->sum('estimasi_total')
+                        'total_value' => $group->sum('estimasi_total'),
                     ];
                 });
-            
+
             // Add bank performance data
             $bankRow = 2;
             foreach ($bankPerformance as $bankName => $performance) {
                 // Hitung total estimasi dan realisasi per satuan untuk bank ini
                 $bankTransactions = $transactions->where('bank_sampah_name', $bankName);
                 $allItems = collect();
-                foreach($bankTransactions as $transaction) {
+                foreach ($bankTransactions as $transaction) {
                     $items = json_decode($transaction->items_json, true) ?? [];
-                    foreach($items as $item) {
+                    foreach ($items as $item) {
                         $allItems->push($item);
                     }
                 }
-                
+
                 $estimasiTotalKg = $allItems->where('sampah_satuan', 'KG')->sum('estimasi_berat');
                 $aktualTotalKg = $allItems->where('sampah_satuan', 'KG')->where('aktual_berat', '!=', null)->sum('aktual_berat');
                 $estimasiTotalUnit = $allItems->where('sampah_satuan', 'UNIT')->sum('estimasi_berat');
                 $aktualTotalUnit = $allItems->where('sampah_satuan', 'UNIT')->where('aktual_berat', '!=', null)->sum('aktual_berat');
-                
-                $sheet2->setCellValue('A' . $bankRow, $bankName);
-                $sheet2->setCellValue('B' . $bankRow, $performance['total']);
-                $sheet2->setCellValue('C' . $bankRow, $performance['completed']);
-                $sheet2->setCellValue('D' . $bankRow, number_format($performance['rate'], 1));
-                $sheet2->setCellValue('E' . $bankRow, number_format($performance['total_value'], 0));
-                $sheet2->setCellValue('F' . $bankRow, number_format($bankTransactions->where('aktual_total', '!=', null)->sum('aktual_total'), 0));
-                $sheet2->setCellValue('G' . $bankRow, number_format($estimasiTotalKg, 2));
-                $sheet2->setCellValue('H' . $bankRow, number_format($aktualTotalKg, 2));
-                $sheet2->setCellValue('I' . $bankRow, number_format($estimasiTotalUnit, 2));
-                $sheet2->setCellValue('J' . $bankRow, number_format($aktualTotalUnit, 2));
+
+                $sheet2->setCellValue('A'.$bankRow, $bankName);
+                $sheet2->setCellValue('B'.$bankRow, $performance['total']);
+                $sheet2->setCellValue('C'.$bankRow, $performance['completed']);
+                $sheet2->setCellValue('D'.$bankRow, number_format($performance['rate'], 1));
+                $sheet2->setCellValue('E'.$bankRow, number_format($performance['total_value'], 0));
+                $sheet2->setCellValue('F'.$bankRow, number_format($bankTransactions->where('aktual_total', '!=', null)->sum('aktual_total'), 0));
+                $sheet2->setCellValue('G'.$bankRow, number_format($estimasiTotalKg, 2));
+                $sheet2->setCellValue('H'.$bankRow, number_format($aktualTotalKg, 2));
+                $sheet2->setCellValue('I'.$bankRow, number_format($estimasiTotalUnit, 2));
+                $sheet2->setCellValue('J'.$bankRow, number_format($aktualTotalUnit, 2));
                 $bankRow++;
             }
-            
+
             // Sheet 3: Items by Volume (sesuai dengan PDF)
             $sheet3 = $spreadsheet->createSheet();
             $sheet3->setTitle('Items by Volume');
-            
+
             // Headers untuk items by volume
             $itemHeaders = [
-                'Item', 'Jumlah Transaksi', 'Estimasi Total (KG)', 'Realisasi Total (KG)', 
-                'Estimasi Total (UNIT)', 'Realisasi Total (UNIT)', 'Rata-rata Harga (Rp)'
+                'Item', 'Jumlah Transaksi', 'Estimasi Total (KG)', 'Realisasi Total (KG)',
+                'Estimasi Total (UNIT)', 'Realisasi Total (UNIT)', 'Rata-rata Harga (Rp)',
             ];
-            
+
             $itemColumns = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
             foreach ($itemHeaders as $col => $header) {
-                $sheet3->setCellValue($itemColumns[$col] . '1', $header);
+                $sheet3->setCellValue($itemColumns[$col].'1', $header);
             }
-            
+
             // Hitung item statistics
             $allItems = collect();
-            foreach($transactions as $transaction) {
+            foreach ($transactions as $transaction) {
                 $items = json_decode($transaction->items_json, true) ?? [];
-                foreach($items as $item) {
+                foreach ($items as $item) {
                     $allItems->push($item);
                 }
             }
-            
+
             $itemStats = $allItems->groupBy('sampah_nama')
-                ->map(function($group) {
+                ->map(function ($group) {
                     return [
                         'count' => $group->count(),
-                        'avg_price' => $group->avg('harga_per_satuan')
+                        'avg_price' => $group->avg('harga_per_satuan'),
                     ];
                 });
-            
+
             // Add items data
             $itemRow = 2;
             foreach ($itemStats as $itemName => $stats) {
@@ -705,45 +705,45 @@ class DashboardTransaksiController extends Controller
                 $aktualKg = $allItems->where('sampah_nama', $itemName)->where('sampah_satuan', 'KG')->where('aktual_berat', '!=', null)->sum('aktual_berat');
                 $estimasiUnit = $allItems->where('sampah_nama', $itemName)->where('sampah_satuan', 'UNIT')->sum('estimasi_berat');
                 $aktualUnit = $allItems->where('sampah_nama', $itemName)->where('sampah_satuan', 'UNIT')->where('aktual_berat', '!=', null)->sum('aktual_berat');
-                
-                $sheet3->setCellValue('A' . $itemRow, $itemName);
-                $sheet3->setCellValue('B' . $itemRow, $stats['count']);
-                $sheet3->setCellValue('C' . $itemRow, number_format($estimasiKg, 2));
-                $sheet3->setCellValue('D' . $itemRow, number_format($aktualKg, 2));
-                $sheet3->setCellValue('E' . $itemRow, number_format($estimasiUnit, 2));
-                $sheet3->setCellValue('F' . $itemRow, number_format($aktualUnit, 2));
-                $sheet3->setCellValue('G' . $itemRow, number_format($stats['avg_price'], 0));
+
+                $sheet3->setCellValue('A'.$itemRow, $itemName);
+                $sheet3->setCellValue('B'.$itemRow, $stats['count']);
+                $sheet3->setCellValue('C'.$itemRow, number_format($estimasiKg, 2));
+                $sheet3->setCellValue('D'.$itemRow, number_format($aktualKg, 2));
+                $sheet3->setCellValue('E'.$itemRow, number_format($estimasiUnit, 2));
+                $sheet3->setCellValue('F'.$itemRow, number_format($aktualUnit, 2));
+                $sheet3->setCellValue('G'.$itemRow, number_format($stats['avg_price'], 0));
                 $itemRow++;
             }
-            
+
             // Sheet 4: Summary Statistics
             $sheet4 = $spreadsheet->createSheet();
             $sheet4->setTitle('Summary Statistics');
-            
+
             // Hitung summary statistics
             $totalEstimasi = $transactions->sum('estimasi_total');
             $totalAktual = $transactions->where('aktual_total', '!=', null)->sum('aktual_total');
             $transaksiSelesai = $transactions->where('status', 'selesai')->count();
             $transaksiProses = $transactions->whereIn('status', ['diproses', 'dijemput', 'dikonfirmasi'])->count();
             $transaksiBatal = $transactions->where('status', 'batal')->count();
-            
+
             $completionRate = $transactions->count() > 0 ? ($transaksiSelesai / $transactions->count()) * 100 : 0;
             $cancellationRate = $transactions->count() > 0 ? ($transaksiBatal / $transactions->count()) * 100 : 0;
-            
+
             // Hitung total estimasi dan realisasi per satuan
             $allItemsForSummary = collect();
-            foreach($transactions as $transaction) {
+            foreach ($transactions as $transaction) {
                 $items = json_decode($transaction->items_json, true) ?? [];
-                foreach($items as $item) {
+                foreach ($items as $item) {
                     $allItemsForSummary->push($item);
                 }
             }
-            
+
             $totalEstimasiKg = $allItemsForSummary->where('sampah_satuan', 'KG')->sum('estimasi_berat');
             $totalAktualKg = $allItemsForSummary->where('sampah_satuan', 'KG')->where('aktual_berat', '!=', null)->sum('aktual_berat');
             $totalEstimasiUnit = $allItemsForSummary->where('sampah_satuan', 'UNIT')->sum('estimasi_berat');
             $totalAktualUnit = $allItemsForSummary->where('sampah_satuan', 'UNIT')->where('aktual_berat', '!=', null)->sum('aktual_berat');
-            
+
             // Add summary data
             $summaryData = [
                 ['Metric', 'Value'],
@@ -758,16 +758,16 @@ class DashboardTransaksiController extends Controller
                 ['Cancellation Rate (%)', number_format($cancellationRate, 1)],
                 ['Transaksi Selesai', $transaksiSelesai],
                 ['Transaksi Dalam Proses', $transaksiProses],
-                ['Transaksi Dibatalkan', $transaksiBatal]
+                ['Transaksi Dibatalkan', $transaksiBatal],
             ];
-            
+
             foreach ($summaryData as $rowIndex => $rowData) {
                 foreach ($rowData as $colIndex => $value) {
                     $col = $colIndex === 0 ? 'A' : 'B';
-                    $sheet4->setCellValue($col . ($rowIndex + 1), $value);
+                    $sheet4->setCellValue($col.($rowIndex + 1), $value);
                 }
             }
-            
+
             // Auto-size columns for all sheets
             foreach (range(1, 20) as $col) {
                 $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
@@ -781,23 +781,23 @@ class DashboardTransaksiController extends Controller
             foreach (range(1, 2) as $col) {
                 $sheet4->getColumnDimensionByColumn($col)->setAutoSize(true);
             }
-            
+
             // Set first sheet as active
             $spreadsheet->setActiveSheetIndex(0);
-            
+
             // Create Excel file
             $writer = new Xlsx($spreadsheet);
-            $filename = 'laporan_transaksi_lengkap_' . date('Y-m-d_H-i-s') . '.xlsx';
-            
+            $filename = 'laporan_transaksi_lengkap_'.date('Y-m-d_H-i-s').'.xlsx';
+
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Content-Disposition: attachment;filename="'.$filename.'"');
             header('Cache-Control: max-age=0');
-            
+
             $writer->save('php://output');
             exit;
-            
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan saat export Excel: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan saat export Excel: '.$e->getMessage()], 500);
         }
     }
 
@@ -805,7 +805,7 @@ class DashboardTransaksiController extends Controller
     {
         try {
             $query = Setoran::query();
-            
+
             // Apply filters (sama seperti exportPdf)
             if ($request->has('bank_sampah_id') && $request->bank_sampah_id) {
                 $query->where('bank_sampah_id', $request->bank_sampah_id);
@@ -826,13 +826,13 @@ class DashboardTransaksiController extends Controller
                     case 'mingguan':
                         $query->whereBetween('created_at', [
                             $today->startOfWeek()->toDateTimeString(),
-                            $today->endOfWeek()->toDateTimeString()
+                            $today->endOfWeek()->toDateTimeString(),
                         ]);
                         break;
                     case 'bulanan':
                         $query->whereBetween('created_at', [
                             $today->startOfMonth()->toDateTimeString(),
-                            $today->endOfMonth()->toDateTimeString()
+                            $today->endOfMonth()->toDateTimeString(),
                         ]);
                         break;
                     case 'range':
@@ -845,55 +845,55 @@ class DashboardTransaksiController extends Controller
                         break;
                 }
             }
-            
+
             $transactions = $query->with(['user', 'bankSampah', 'address'])->orderBy('created_at', 'desc')->get();
-            
+
             // Generate CSV
-            $filename = 'laporan_transaksi_lengkap_' . date('Y-m-d_H-i-s') . '.csv';
+            $filename = 'laporan_transaksi_lengkap_'.date('Y-m-d_H-i-s').'.csv';
             $headers = [
                 'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ];
-            
-            $callback = function() use ($transactions) {
+
+            $callback = function () use ($transactions) {
                 $file = fopen('php://output', 'w');
-                
+
                 // Add BOM for UTF-8
                 fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-                
+
                 // Headers untuk detail transaksi (sama seperti Excel)
                 fputcsv($file, [
-                    'No', 'ID Transaksi', 'Tanggal', 'Nama User', 'Identifier User', 'Bank Sampah', 
+                    'No', 'ID Transaksi', 'Tanggal', 'Nama User', 'Identifier User', 'Bank Sampah',
                     'Alamat Pickup', 'Tipe Setor', 'Status', 'Estimasi Total (Rp)', 'Aktual Total (Rp)',
                     'Estimasi Total (KG)', 'Aktual Total (KG)', 'Estimasi Total (UNIT)', 'Aktual Total (UNIT)',
-                    'Petugas', 'Kontak Petugas', 'Jadwal Penjemputan', 'Tanggal Selesai', 'Items Sampah'
+                    'Petugas', 'Kontak Petugas', 'Jadwal Penjemputan', 'Tanggal Selesai', 'Items Sampah',
                 ]);
-                
+
                 foreach ($transactions as $i => $transaction) {
                     $items = json_decode($transaction->items_json, true) ?: [];
-                    
+
                     // Hitung total estimasi dan aktual per satuan
                     $estimasiTotalKg = collect($items)->where('sampah_satuan', 'KG')->sum('estimasi_berat');
                     $aktualTotalKg = collect($items)->where('sampah_satuan', 'KG')->where('aktual_berat', '!=', null)->sum('aktual_berat');
                     $estimasiTotalUnit = collect($items)->where('sampah_satuan', 'UNIT')->sum('estimasi_berat');
                     $aktualTotalUnit = collect($items)->where('sampah_satuan', 'UNIT')->where('aktual_berat', '!=', null)->sum('aktual_berat');
-                    
+
                     // Perbaiki perhitungan estimasi dan aktual total Rp (sama seperti Excel)
-                    $estimasiTotalRp = array_sum(array_map(function($item) {
+                    $estimasiTotalRp = array_sum(array_map(function ($item) {
                         return (isset($item['estimasi_berat']) ? $item['estimasi_berat'] : 0) * (isset($item['harga_per_satuan']) ? $item['harga_per_satuan'] : 0);
                     }, $items));
-                    
-                    $aktualTotalRp = array_sum(array_map(function($item) {
+
+                    $aktualTotalRp = array_sum(array_map(function ($item) {
                         return (isset($item['aktual_berat']) && $item['aktual_berat'] !== null ? $item['aktual_berat'] : 0) * (isset($item['harga_per_satuan']) ? $item['harga_per_satuan'] : 0);
                     }, $items));
-                    
+
                     // Format items sampah untuk kolom
                     $itemsText = '';
                     foreach ($items as $item) {
                         $itemName = $item['sampah_nama'] ?? $item['nama_sampah'] ?? 'N/A';
                         $itemStatus = $item['status'] ?? 'normal';
                         $statusText = '';
-                        
+
                         if ($itemStatus === 'dihapus') {
                             $statusText = ' (DIHAPUS)';
                         } elseif ($itemStatus === 'ditambah') {
@@ -901,14 +901,14 @@ class DashboardTransaksiController extends Controller
                         } elseif ($itemStatus === 'dimodifikasi') {
                             $statusText = ' (DIMODIFIKASI)';
                         }
-                        
-                        $itemsText .= $itemName . $statusText . ' - Est: ' . ($item['estimasi_berat'] ?? 0) . ' ' . ($item['sampah_satuan'] ?? 'KG');
+
+                        $itemsText .= $itemName.$statusText.' - Est: '.($item['estimasi_berat'] ?? 0).' '.($item['sampah_satuan'] ?? 'KG');
                         if (isset($item['aktual_berat']) && $item['aktual_berat']) {
-                            $itemsText .= ' | Aktual: ' . $item['aktual_berat'] . ' ' . ($item['sampah_satuan'] ?? 'KG');
+                            $itemsText .= ' | Aktual: '.$item['aktual_berat'].' '.($item['sampah_satuan'] ?? 'KG');
                         }
                         $itemsText .= "\n";
                     }
-                    
+
                     fputcsv($file, [
                         $i + 1,
                         $transaction->id,
@@ -929,17 +929,17 @@ class DashboardTransaksiController extends Controller
                         $transaction->petugas_contact ?? '-',
                         $transaction->getJadwalAttribute() ?? '-',
                         $transaction->tanggal_selesai ? $transaction->tanggal_selesai->format('d/m/Y H:i') : '-',
-                        trim($itemsText)
+                        trim($itemsText),
                     ]);
                 }
-                
+
                 fclose($file);
             };
-            
+
             return response()->stream($callback, 200, $headers);
-            
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan saat export CSV: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan saat export CSV: '.$e->getMessage()], 500);
         }
     }
 
@@ -947,7 +947,7 @@ class DashboardTransaksiController extends Controller
     {
         try {
             $query = Setoran::query();
-            
+
             // Apply filters (sama seperti exportPdf)
             if ($request->has('bank_sampah_id') && $request->bank_sampah_id) {
                 $query->where('bank_sampah_id', $request->bank_sampah_id);
@@ -968,13 +968,13 @@ class DashboardTransaksiController extends Controller
                     case 'mingguan':
                         $query->whereBetween('created_at', [
                             $today->startOfWeek()->toDateTimeString(),
-                            $today->endOfWeek()->toDateTimeString()
+                            $today->endOfWeek()->toDateTimeString(),
                         ]);
                         break;
                     case 'bulanan':
                         $query->whereBetween('created_at', [
                             $today->startOfMonth()->toDateTimeString(),
-                            $today->endOfMonth()->toDateTimeString()
+                            $today->endOfMonth()->toDateTimeString(),
                         ]);
                         break;
                     case 'range':
@@ -987,22 +987,23 @@ class DashboardTransaksiController extends Controller
                         break;
                 }
             }
-            
+
             $transactions = $query->with(['user', 'bankSampah', 'address'])->orderBy('created_at', 'desc')->get();
-            
+
             // Calculate comprehensive statistics
             $stats = $this->calculateTransactionStats($transactions);
-            
+
             $pdf = PDF::loadView('pdf.transaksi-report', [
                 'transactions' => $transactions,
                 'filters' => $request->all(),
-                'stats' => $stats
+                'stats' => $stats,
             ]);
             $pdf->setPaper('A4', 'landscape');
-            return $pdf->download('laporan_transaksi_lengkap_' . date('Y-m-d_H-i-s') . '.pdf');
-            
+
+            return $pdf->download('laporan_transaksi_lengkap_'.date('Y-m-d_H-i-s').'.pdf');
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan saat export PDF: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan saat export PDF: '.$e->getMessage()], 500);
         }
     }
 
@@ -1022,39 +1023,39 @@ class DashboardTransaksiController extends Controller
             'items_modified' => 0,
             'total_items' => 0,
             'avg_completion_time' => 0,
-            'completion_times' => []
+            'completion_times' => [],
         ];
 
         foreach ($transactions as $transaction) {
             $items = json_decode($transaction->items_json, true) ?: [];
-            
+
             // Calculate totals
             $estimasiTotalKg = array_sum(array_column($items, 'estimasi_berat'));
-            $aktualTotalKg = array_sum(array_map(function($item) {
+            $aktualTotalKg = array_sum(array_map(function ($item) {
                 return isset($item['aktual_berat']) && $item['aktual_berat'] !== null ? $item['aktual_berat'] : 0;
             }, $items));
             $estimasiTotalRp = array_sum(array_column($items, 'estimasi_harga'));
-            $aktualTotalRp = array_sum(array_map(function($item) {
+            $aktualTotalRp = array_sum(array_map(function ($item) {
                 return isset($item['aktual_harga']) && $item['aktual_harga'] !== null ? $item['aktual_harga'] : 0;
             }, $items));
-            
+
             $stats['total_estimasi_kg'] += $estimasiTotalKg;
             $stats['total_aktual_kg'] += $aktualTotalKg;
             $stats['total_estimasi_rp'] += $estimasiTotalRp;
             $stats['total_aktual_rp'] += $aktualTotalRp;
-            
+
             // Count status
             $status = $transaction->status;
             $stats['status_counts'][$status] = ($stats['status_counts'][$status] ?? 0) + 1;
-            
+
             // Count tipe setor
             $tipe = $transaction->tipe_setor;
             $stats['tipe_counts'][$tipe] = ($stats['tipe_counts'][$tipe] ?? 0) + 1;
-            
+
             // Count bank sampah
             $bank = $transaction->bank_sampah_name;
             $stats['bank_counts'][$bank] = ($stats['bank_counts'][$bank] ?? 0) + 1;
-            
+
             // Count items
             $stats['total_items'] += count($items);
             foreach ($items as $item) {
@@ -1072,19 +1073,19 @@ class DashboardTransaksiController extends Controller
                     }
                 }
             }
-            
+
             // Calculate completion time
             if ($transaction->status === 'selesai' && $transaction->tanggal_selesai) {
                 $completionTime = $transaction->created_at->diffInHours($transaction->tanggal_selesai);
                 $stats['completion_times'][] = $completionTime;
             }
         }
-        
+
         // Calculate average completion time
-        if (!empty($stats['completion_times'])) {
+        if (! empty($stats['completion_times'])) {
             $stats['avg_completion_time'] = array_sum($stats['completion_times']) / count($stats['completion_times']);
         }
-        
+
         return $stats;
     }
-} 
+}

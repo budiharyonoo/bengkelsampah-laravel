@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property-read \App\Models\Event|null $event
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant query()
+ *
  * @mixin \Eloquent
  */
 class EventParticipant extends Model

@@ -16,9 +16,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Point> $points
  * @property-read int|null $points_count
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Setoran newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Setoran newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Setoran query()
+ *
  * @mixin \Eloquent
  */
 class Setoran extends Model
@@ -68,20 +70,29 @@ class Setoran extends Model
 
     // Status constants
     const STATUS_DIKONFIRMASI = 'dikonfirmasi';
+
     const STATUS_DIPROSES = 'diproses';
+
     const STATUS_DIJEMPUT = 'dijemput';
+
     const STATUS_SELESAI = 'selesai';
+
     const STATUS_BATAL = 'batal';
+
     const STATUS_BERHASIL = 'berhasil';
 
     // Tipe setor constants
     const TIPE_JUAL = 'jual';
+
     const TIPE_SEDEKAH = 'sedekah';
+
     const TIPE_TABUNG = 'tabung';
 
     // Tipe layanan constants
     const LAYANAN_JEMPUT = 'jemput';
+
     const LAYANAN_TEMPAT = 'tempat';
+
     const LAYANAN_KEDUANYA = 'keduanya';
 
     /**
@@ -176,8 +187,9 @@ class Setoran extends Model
     public function getJadwalAttribute()
     {
         if ($this->tanggal_penjemputan && $this->waktu_penjemputan) {
-            return $this->tanggal_penjemputan->format('d/m/Y') . ' ' . $this->waktu_penjemputan->format('H:i');
+            return $this->tanggal_penjemputan->format('d/m/Y').' '.$this->waktu_penjemputan->format('H:i');
         }
+
         return null;
     }
 

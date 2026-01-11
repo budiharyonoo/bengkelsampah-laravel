@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper as R;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Otp;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use App\Helpers\ResponseHelper as R;
 
 class RegisterController extends Controller
 {
@@ -19,10 +19,13 @@ class RegisterController extends Controller
      *     tags={"Autentikasi"},
      *     summary="Daftar pengguna baru",
      *     description="Endpoint untuk mendaftarkan pengguna baru dengan verifikasi OTP",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"fullname","identifier","password","confirm_password","otp"},
+     *
      *             @OA\Property(property="fullname", type="string", example="John Doe"),
      *             @OA\Property(property="identifier", type="string", example="john@example.com", description="Email atau nomor telepon Indonesia"),
      *             @OA\Property(property="password", type="string", format="password", example="password123", minLength=8),
@@ -30,10 +33,13 @@ class RegisterController extends Controller
      *             @OA\Property(property="otp", type="string", example="123456", description="Kode OTP yang dikirim ke email/WhatsApp")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Registrasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Registrasi berhasil"),
      *             @OA\Property(
@@ -53,10 +59,13 @@ class RegisterController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Validasi gagal"),
      *             @OA\Property(
@@ -65,15 +74,19 @@ class RegisterController extends Controller
      *                 @OA\Property(
      *                     property="identifier",
      *                     type="array",
+     *
      *                     @OA\Items(type="string", example="Identifier harus berupa email atau nomor telepon Indonesia yang valid.")
      *                 )
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=500,
      *         description="Kesalahan server",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Gagal membuat token autentikasi.")
      *         )
@@ -95,14 +108,14 @@ class RegisterController extends Controller
                     // Check if it's a valid phone number (Indonesian format)
                     $isPhone = preg_match('/^(\+62|62|0)8[1-9][0-9]{6,9}$/', $value);
 
-                    if (!$isEmail && !$isPhone) {
+                    if (! $isEmail && ! $isPhone) {
                         $fail('Identifier harus berupa email atau nomor telepon Indonesia yang valid.');
                     }
                 },
             ],
             'password' => 'required|string|min:8',
             'confirm_password' => 'required|same:password',
-            'user_type' => ['required', 'int', 'min:-1']
+            'user_type' => ['required', 'int', 'min:-1'],
             // 'otp' => 'required|string|size:6'
         ]);
 
@@ -130,7 +143,7 @@ class RegisterController extends Controller
             'name' => $request->fullname,
             'identifier' => $request->identifier,
             'password' => Hash::make($request->password),
-            'user_type' => $request->user_type
+            'user_type' => $request->user_type,
         ]);
 
         // Delete used OTP
@@ -142,7 +155,7 @@ class RegisterController extends Controller
         return R::success('Registrasi berhasil', [
             'user' => $user,
             'token' => $token,
-            'token_expires_at' => now()->addYear()->toDateTimeString()
+            'token_expires_at' => now()->addYear()->toDateTimeString(),
         ], 201);
     }
 }

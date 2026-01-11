@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Level;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
-use App\Models\User;
-use App\Models\Level;
 
 class ProfileController extends Controller
 {
@@ -18,10 +18,13 @@ class ProfileController extends Controller
      *     operationId="getProfileData",
      *     tags={"Profil"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -33,18 +36,24 @@ class ProfileController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Pengguna tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Pengguna tidak ditemukan.")
      *         )
@@ -55,27 +64,27 @@ class ProfileController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -90,8 +99,8 @@ class ProfileController extends Controller
                 'nama' => $user->name,
                 'identifier' => $user->identifier,
                 'level' => $currentLevel ? $currentLevel->nama : null,
-                'poin' => $user->poin
-            ]
+                'poin' => $user->poin,
+            ],
         ]);
     }
 }

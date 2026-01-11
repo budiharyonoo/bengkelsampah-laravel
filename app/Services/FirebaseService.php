@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class FirebaseService
 {
     protected $accessToken;
+
     protected $projectId;
 
     public function __construct()
@@ -23,16 +24,18 @@ class FirebaseService
     {
         try {
             $serviceAccountPath = storage_path('app/firebase-service-account.json');
-            
-            if (!file_exists($serviceAccountPath)) {
-                Log::error('Firebase service account file not found: ' . $serviceAccountPath);
+
+            if (! file_exists($serviceAccountPath)) {
+                Log::error('Firebase service account file not found: '.$serviceAccountPath);
+
                 return null;
             }
 
             $serviceAccountKey = json_decode(file_get_contents($serviceAccountPath), true);
-            
-            if (!$serviceAccountKey) {
+
+            if (! $serviceAccountKey) {
                 Log::error('Invalid Firebase service account JSON');
+
                 return null;
             }
 
@@ -43,18 +46,21 @@ class FirebaseService
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return $data['access_token'] ?? null;
             } else {
                 Log::error('Failed to get Firebase access token', [
                     'error' => $response->body(),
                     'status' => $response->status(),
                 ]);
+
                 return null;
             }
         } catch (\Exception $e) {
             Log::error('Error getting Firebase access token', [
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -80,18 +86,18 @@ class FirebaseService
 
         $headerEncoded = $this->base64UrlEncode(json_encode($header));
         $payloadEncoded = $this->base64UrlEncode(json_encode($payload));
-        
+
         $signature = '';
         openssl_sign(
-            $headerEncoded . '.' . $payloadEncoded,
+            $headerEncoded.'.'.$payloadEncoded,
             $signature,
             $serviceAccountKey['private_key'],
             'SHA256'
         );
-        
+
         $signatureEncoded = $this->base64UrlEncode($signature);
-        
-        return $headerEncoded . '.' . $payloadEncoded . '.' . $signatureEncoded;
+
+        return $headerEncoded.'.'.$payloadEncoded.'.'.$signatureEncoded;
     }
 
     /**
@@ -108,8 +114,9 @@ class FirebaseService
     public function sendToUser($fcmToken, $title, $body, $data = [])
     {
         try {
-            if (!$this->accessToken) {
+            if (! $this->accessToken) {
                 Log::error('Firebase access token not available');
+
                 return [
                     'success' => false,
                     'error' => 'Firebase access token not available',
@@ -142,7 +149,7 @@ class FirebaseService
             ];
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer '.$this->accessToken,
                 'Content-Type' => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", $message);
 
@@ -159,7 +166,7 @@ class FirebaseService
                     'name' => $result['name'] ?? null,
                 ];
             }
-            
+
             Log::error('Firebase notification failed', [
                 'fcm_token' => $fcmToken,
                 'error' => $response->body(),
@@ -191,8 +198,9 @@ class FirebaseService
     public function sendToMultipleUsers($fcmTokens, $title, $body, $data = [])
     {
         try {
-            if (!$this->accessToken) {
+            if (! $this->accessToken) {
                 Log::error('Firebase access token not available');
+
                 return [
                     'success' => false,
                     'error' => 'Firebase access token not available',
@@ -251,8 +259,9 @@ class FirebaseService
     public function sendToTopic($topic, $title, $body, $data = [])
     {
         try {
-            if (!$this->accessToken) {
+            if (! $this->accessToken) {
                 Log::error('Firebase access token not available');
+
                 return [
                     'success' => false,
                     'error' => 'Firebase access token not available',
@@ -285,7 +294,7 @@ class FirebaseService
             ];
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer '.$this->accessToken,
                 'Content-Type' => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", $message);
 
@@ -334,8 +343,9 @@ class FirebaseService
     public function subscribeToTopic($fcmToken, $topic)
     {
         try {
-            if (!$this->accessToken) {
+            if (! $this->accessToken) {
                 Log::error('Firebase access token not available');
+
                 return [
                     'success' => false,
                     'error' => 'Firebase access token not available',
@@ -343,7 +353,7 @@ class FirebaseService
             }
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer '.$this->accessToken,
                 'Content-Type' => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", [
                 'message' => [
@@ -393,8 +403,9 @@ class FirebaseService
     public function unsubscribeFromTopic($fcmToken, $topic)
     {
         try {
-            if (!$this->accessToken) {
+            if (! $this->accessToken) {
                 Log::error('Firebase access token not available');
+
                 return [
                     'success' => false,
                     'error' => 'Firebase access token not available',
@@ -443,11 +454,12 @@ class FirebaseService
             } elseif (is_bool($value)) {
                 $convertedData[$key] = $value ? 'true' : 'false';
             } elseif (is_numeric($value)) {
-                $convertedData[$key] = (string)$value;
+                $convertedData[$key] = (string) $value;
             } else {
-                $convertedData[$key] = (string)$value;
+                $convertedData[$key] = (string) $value;
             }
         }
+
         return $convertedData;
     }
-} 
+}

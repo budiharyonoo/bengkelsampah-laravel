@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -17,7 +15,7 @@ return new class extends Migration
             ->whereNotNull('cover')
             ->where('cover', 'not like', 'http%')
             ->update([
-                'cover' => DB::raw("CONCAT('" . env('APP_URL') . "/uploads/', cover)")
+                'cover' => DB::raw("CONCAT('".env('APP_URL')."/uploads/', cover)"),
             ]);
     }
 
@@ -29,9 +27,9 @@ return new class extends Migration
         // Revert back to relative paths
         DB::table('events')
             ->whereNotNull('cover')
-            ->where('cover', 'like', env('APP_URL') . '/uploads/%')
+            ->where('cover', 'like', env('APP_URL').'/uploads/%')
             ->update([
-                'cover' => DB::raw("REPLACE(cover, '" . env('APP_URL') . "/uploads/', '')")
+                'cover' => DB::raw("REPLACE(cover, '".env('APP_URL')."/uploads/', '')"),
             ]);
     }
 };

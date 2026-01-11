@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion query()
+ *
  * @mixin \Eloquent
  */
 class AppVersion extends Model
@@ -48,8 +49,8 @@ class AppVersion extends Model
     public static function isUpdateRequired($platform, $currentVersionCode)
     {
         $latestVersion = self::getLatestVersion($platform);
-        
-        if (!$latestVersion) {
+
+        if (! $latestVersion) {
             return false;
         }
 
@@ -62,8 +63,8 @@ class AppVersion extends Model
     public static function isUpdateAvailable($platform, $currentVersionCode)
     {
         $latestVersion = self::getLatestVersion($platform);
-        
-        if (!$latestVersion) {
+
+        if (! $latestVersion) {
             return false;
         }
 
@@ -76,8 +77,8 @@ class AppVersion extends Model
     public static function getUpdateInfo($platform, $currentVersionCode)
     {
         $latestVersion = self::getLatestVersion($platform);
-        
-        if (!$latestVersion) {
+
+        if (! $latestVersion) {
             return null;
         }
 

@@ -27,8 +27,7 @@ class AdminService
     /**
      * Get admin by ID with bank sampah relation.
      *
-     * @param int $id Admin ID
-     * @return Admin
+     * @param  int  $id  Admin ID
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
@@ -40,8 +39,7 @@ class AdminService
     /**
      * Create a new admin.
      *
-     * @param array{name: string, email: string, password: string, id_bank_sampah: int} $data
-     * @return Admin
+     * @param  array{name: string, email: string, password: string, id_bank_sampah: int}  $data
      *
      * @throws \Exception
      */
@@ -66,9 +64,8 @@ class AdminService
     /**
      * Update an existing admin.
      *
-     * @param int $id Admin ID
-     * @param array{name: string, email: string, password?: string, id_bank_sampah: int} $data
-     * @return Admin
+     * @param  int  $id  Admin ID
+     * @param  array{name: string, email: string, password?: string, id_bank_sampah: int}  $data
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      * @throws \Exception
@@ -101,8 +98,7 @@ class AdminService
      *
      * Business rule: Cannot delete the last admin of a bank sampah.
      *
-     * @param int $id Admin ID
-     * @return bool
+     * @param  int  $id  Admin ID
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      * @throws AdminDeletionException

@@ -24,6 +24,7 @@ class RedirectIfAuthenticated
                 if ($guard === 'admin') {
                     return redirect()->route('dashboard');
                 }
+
                 return redirect(RouteServiceProvider::HOME);
             }
         }

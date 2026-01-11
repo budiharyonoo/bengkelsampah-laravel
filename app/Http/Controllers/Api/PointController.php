@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Laravel\Sanctum\PersonalAccessToken;
-use App\Models\User;
 use App\Models\Level;
 use App\Models\Point;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class PointController extends Controller
 {
@@ -19,17 +19,22 @@ class PointController extends Controller
      *     operationId="getPointData",
      *     tags={"Poin"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Halaman untuk history poin (opsional)",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", default=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -45,8 +50,10 @@ class PointController extends Controller
      *                 @OA\Property(
      *                     property="levels",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="nama", type="string", example="Pemula"),
      *                         @OA\Property(property="xp", type="integer", example=0)
@@ -59,8 +66,10 @@ class PointController extends Controller
      *                     @OA\Property(
      *                         property="data",
      *                         type="array",
+     *
      *                         @OA\Items(
      *                             type="object",
+     *
      *                             @OA\Property(property="id", type="integer", example=1),
      *                             @OA\Property(property="type", type="string", example="setor"),
      *                             @OA\Property(property="tanggal", type="string", format="date", example="2024-01-15"),
@@ -80,18 +89,24 @@ class PointController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Pengguna tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Pengguna tidak ditemukan.")
      *         )
@@ -102,27 +117,27 @@ class PointController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -137,7 +152,7 @@ class PointController extends Controller
         // Get point history with pagination (latest first)
         $page = $request->get('page', 1);
         $perPage = 10;
-        
+
         $pointHistory = Point::where('user_id', $user->id)
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
@@ -152,7 +167,7 @@ class PointController extends Controller
                     'nama' => $currentLevel->nama,
                     'xp' => (int) $currentLevel->xp,
                 ] : null,
-                'levels' => $levels->map(function($level) {
+                'levels' => $levels->map(function ($level) {
                     return [
                         'id' => $level->id,
                         'nama' => $level->nama,
@@ -168,8 +183,8 @@ class PointController extends Controller
                     'total' => $pointHistory->total(),
                     'next_page_url' => $pointHistory->nextPageUrl(),
                     'prev_page_url' => $pointHistory->previousPageUrl(),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 }

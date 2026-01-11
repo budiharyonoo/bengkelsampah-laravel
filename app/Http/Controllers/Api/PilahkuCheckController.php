@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\BankSampah;
-use App\Models\Sampah;
 use App\Models\Price;
+use App\Models\Sampah;
+use Illuminate\Http\Request;
 
 class PilahkuCheckController extends Controller
 {
     /**
      * Mengecek status bank sampah, sampah, tipe layanan, detail, dan harga.
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      *
      * Request body:
@@ -52,19 +51,21 @@ class PilahkuCheckController extends Controller
 
             // 1. Cek bank sampah
             $bank = BankSampah::find($item['bank_sampah_id']);
-            if (!$bank) {
+            if (! $bank) {
                 $result['status'] = 'bank_sampah_not_found';
                 $result['messages'][] = 'Bank sampah sudah tidak tersedia.';
                 $results[] = $result;
+
                 continue;
             }
 
             // 2. Cek sampah
             $sampah = Sampah::find($item['sampah_id']);
-            if (!$sampah) {
+            if (! $sampah) {
                 $result['status'] = 'sampah_not_found';
                 $result['messages'][] = 'Sampah sudah tidak tersedia.';
                 $results[] = $result;
+
                 continue;
             }
 
@@ -79,13 +80,13 @@ class PilahkuCheckController extends Controller
             $detailChanged = false;
             $detailDiff = [];
             foreach ([
-                'nama', 'satuan', 'deskripsi'
+                'nama', 'satuan', 'deskripsi',
             ] as $field) {
-                if (isset($item['detail_sampah'][$field]) && $sampah->$field !== $item['detail_sampah'][$field]) {
+                if (isset($item['detail_sampah'][$field]) && $item['detail_sampah'][$field] !== $sampah->$field) {
                     $detailChanged = true;
                     $detailDiff[$field] = [
                         'old' => $item['detail_sampah'][$field],
-                        'new' => $sampah->$field
+                        'new' => $sampah->$field,
                     ];
                 }
             }
@@ -99,7 +100,7 @@ class PilahkuCheckController extends Controller
             $price = Price::where('bank_sampah_id', $item['bank_sampah_id'])
                 ->where('sampah_id', $item['sampah_id'])
                 ->first();
-            if (!$price || $price->harga != $item['harga']) {
+            if (! $price || $price->harga != $item['harga']) {
                 $result['status'] = 'harga_changed';
                 $result['messages'][] = 'Harga sampah di cabang ini telah berubah.';
                 $result['changes']['harga'] = $price ? $price->harga : null;
@@ -110,7 +111,7 @@ class PilahkuCheckController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'results' => $results
+            'results' => $results,
         ]);
     }
-} 
+}

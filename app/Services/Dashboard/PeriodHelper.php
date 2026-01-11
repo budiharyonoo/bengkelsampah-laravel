@@ -31,7 +31,7 @@ final class PeriodHelper
      *
      * Supports formats: "YYYY-MM-DD to YYYY-MM-DD" or "YYYY-MM-DD - YYYY-MM-DD"
      *
-     * @param string|null $rangeDate Raw date range string
+     * @param  string|null  $rangeDate  Raw date range string
      * @return array{startDate: string|null, endDate: string|null}
      */
     public static function parseDateRange(?string $rangeDate): array
@@ -61,10 +61,10 @@ final class PeriodHelper
     /**
      * Get period date range for current or previous period.
      *
-     * @param string $periode Period type (harian, mingguan, bulanan, etc.)
-     * @param string|null $startDate Custom start date
-     * @param string|null $endDate Custom end date (for range)
-     * @param bool $previous Whether to get previous period
+     * @param  string  $periode  Period type (harian, mingguan, bulanan, etc.)
+     * @param  string|null  $startDate  Custom start date
+     * @param  string|null  $endDate  Custom end date (for range)
+     * @param  bool  $previous  Whether to get previous period
      * @return array{0: Carbon, 1: Carbon} [start, end]
      */
     public static function getPeriodRange(
@@ -95,9 +95,9 @@ final class PeriodHelper
     /**
      * Get legend labels for current and previous periods.
      *
-     * @param string $periode Period type
-     * @param string|null $startDate Custom start date
-     * @param string|null $endDate Custom end date
+     * @param  string  $periode  Period type
+     * @param  string|null  $startDate  Custom start date
+     * @param  string|null  $endDate  Custom end date
      * @return array{current: string, previous: string}
      */
     public static function getPeriodLegends(
@@ -113,9 +113,9 @@ final class PeriodHelper
                 'previous' => $date->copy()->subDay()->translatedFormat('d F Y'),
             ],
             self::PERIOD_MINGGUAN => [
-                'current' => $date->copy()->startOfWeek()->translatedFormat('d F Y') . ' - ' .
+                'current' => $date->copy()->startOfWeek()->translatedFormat('d F Y').' - '.
                     $date->copy()->endOfWeek()->translatedFormat('d F Y'),
-                'previous' => $date->copy()->subWeek()->startOfWeek()->translatedFormat('d F Y') . ' - ' .
+                'previous' => $date->copy()->subWeek()->startOfWeek()->translatedFormat('d F Y').' - '.
                     $date->copy()->subWeek()->endOfWeek()->translatedFormat('d F Y'),
             ],
             self::PERIOD_BULANAN => [
@@ -123,9 +123,9 @@ final class PeriodHelper
                 'previous' => $date->copy()->subMonth()->translatedFormat('F Y'),
             ],
             self::PERIOD_ENAM_BULANAN => [
-                'current' => $date->copy()->subMonths(5)->translatedFormat('F') . ' - ' .
+                'current' => $date->copy()->subMonths(5)->translatedFormat('F').' - '.
                     $date->translatedFormat('F Y'),
-                'previous' => $date->copy()->subMonths(11)->translatedFormat('F') . ' - ' .
+                'previous' => $date->copy()->subMonths(11)->translatedFormat('F').' - '.
                     $date->copy()->subMonths(6)->translatedFormat('F Y'),
             ],
             self::PERIOD_TAHUNAN => [
@@ -229,8 +229,8 @@ final class PeriodHelper
         $prevStart = $prevEnd->copy()->subDays($days);
 
         return [
-            'current' => $start->translatedFormat('d M Y') . ' - ' . $end->translatedFormat('d M Y'),
-            'previous' => $prevStart->translatedFormat('d M Y') . ' - ' . $prevEnd->translatedFormat('d M Y'),
+            'current' => $start->translatedFormat('d M Y').' - '.$end->translatedFormat('d M Y'),
+            'previous' => $prevStart->translatedFormat('d M Y').' - '.$prevEnd->translatedFormat('d M Y'),
         ];
     }
 }

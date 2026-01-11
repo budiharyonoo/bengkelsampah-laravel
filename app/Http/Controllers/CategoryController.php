@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Sampah;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class CategoryController extends Controller
 {
@@ -24,21 +24,22 @@ class CategoryController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('nama', 'like', '%' . $search . '%');
+            $query->where('nama', 'like', '%'.$search.'%');
         }
 
         $categories = $query->orderBy('created_at', 'desc')->paginate(10);
 
         // Transform data untuk response
-        $categories->getCollection()->transform(function($category) {
+        $categories->getCollection()->transform(function ($category) {
             $category->sampah_count = $category->sampah_count;
+
             return $category;
         });
 
         // Return JSON for AJAX requests
         if ($request->ajax()) {
             return response()->json([
-                'categories' => $categories
+                'categories' => $categories,
             ]);
         }
 
@@ -51,6 +52,7 @@ class CategoryController extends Controller
     public function create()
     {
         $sampahList = Sampah::orderBy('nama')->get();
+
         return view('dashboard-category-create', compact('sampahList'));
     }
 
@@ -74,14 +76,15 @@ class CategoryController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Kategori berhasil dibuat',
-                'data' => $category
+                'data' => $category,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in CategoryController@store: ' . $e->getMessage());
+            \Log::error('Error in CategoryController@store: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat kategori: ' . $e->getMessage()
+                'message' => 'Gagal membuat kategori: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -92,6 +95,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         $category = Category::findOrFail($id);
+
         return view('dashboard-category-show', compact('category'));
     }
 
@@ -102,6 +106,7 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         $sampahList = Sampah::orderBy('nama')->get();
+
         return view('dashboard-category-edit', compact('category', 'sampahList'));
     }
 
@@ -112,7 +117,7 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
-            
+
             $request->validate([
                 'nama' => 'required|string|max:255',
                 'sampah_ids' => 'required|array|min:1',
@@ -127,14 +132,15 @@ class CategoryController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Kategori berhasil diupdate',
-                'data' => $category
+                'data' => $category,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in CategoryController@update: ' . $e->getMessage());
+            \Log::error('Error in CategoryController@update: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengupdate kategori: ' . $e->getMessage()
+                'message' => 'Gagal mengupdate kategori: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -149,10 +155,10 @@ class CategoryController extends Controller
             if ($id == 0 && $request->has('ids')) {
                 $ids = $request->ids;
                 Category::whereIn('id', $ids)->delete();
-                
+
                 return response()->json([
                     'success' => true,
-                    'message' => count($ids) . ' kategori berhasil dihapus'
+                    'message' => count($ids).' kategori berhasil dihapus',
                 ]);
             }
 
@@ -162,14 +168,15 @@ class CategoryController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Kategori berhasil dihapus'
+                'message' => 'Kategori berhasil dihapus',
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in CategoryController@destroy: ' . $e->getMessage());
+            \Log::error('Error in CategoryController@destroy: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus kategori: ' . $e->getMessage()
+                'message' => 'Gagal menghapus kategori: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -186,10 +193,11 @@ class CategoryController extends Controller
             return $this->generateExcelFile($categories);
 
         } catch (\Exception $e) {
-            \Log::error('Error in CategoryController@exportExcel: ' . $e->getMessage());
+            \Log::error('Error in CategoryController@exportExcel: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export Excel: ' . $e->getMessage()
+                'message' => 'Gagal export Excel: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -200,7 +208,7 @@ class CategoryController extends Controller
     private function generateExcelFile($categories)
     {
         // Create new Spreadsheet
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set document properties
@@ -242,13 +250,13 @@ class CategoryController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set subtitle
-        $sheet->setCellValue('A2', 'Total Data: ' . $categories->count() . ' kategori');
+        $sheet->setCellValue('A2', 'Total Data: '.$categories->count().' kategori');
         $sheet->mergeCells('A2:F2');
         $sheet->getStyle('A2')->getFont()->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set export date
-        $sheet->setCellValue('A3', 'Tanggal Export: ' . now()->format('d F Y H:i:s'));
+        $sheet->setCellValue('A3', 'Tanggal Export: '.now()->format('d F Y H:i:s'));
         $sheet->mergeCells('A3:F3');
         $sheet->getStyle('A3')->getFont()->setSize(10);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -276,23 +284,23 @@ class CategoryController extends Controller
             // Get sampah items for this category
             $sampahItems = $category->sampah_items;
             $sampahList = '';
-            
+
             if ($sampahItems && count($sampahItems) > 0) {
                 $sampahNames = [];
                 foreach ($sampahItems as $sampah) {
-                    $sampahNames[] = $sampah->nama . ' (' . strtoupper($sampah->satuan) . ')';
+                    $sampahNames[] = $sampah->nama.' ('.strtoupper($sampah->satuan).')';
                 }
                 $sampahList = implode(', ', $sampahNames);
             } else {
                 $sampahList = 'Tidak ada data';
             }
-            
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $category->id);
-            $sheet->setCellValue('C' . $row, $category->nama);
-            $sheet->setCellValue('D' . $row, $category->sampah_count);
-            $sheet->setCellValue('E' . $row, $sampahList);
-            $sheet->setCellValue('F' . $row, $category->created_at->format('d/m/Y H:i'));
+
+            $sheet->setCellValue('A'.$row, $index + 1);
+            $sheet->setCellValue('B'.$row, $category->id);
+            $sheet->setCellValue('C'.$row, $category->nama);
+            $sheet->setCellValue('D'.$row, $category->sampah_count);
+            $sheet->setCellValue('E'.$row, $sampahList);
+            $sheet->setCellValue('F'.$row, $category->created_at->format('d/m/Y H:i'));
             $row++;
         }
 
@@ -311,14 +319,14 @@ class CategoryController extends Controller
 
         // Create Excel file
         $writer = new Xlsx($spreadsheet);
-        
+
         // Set headers for download
-        $filename = 'kategori_export_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-        
+        $filename = 'kategori_export_'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         $writer->save('php://output');
         exit;
     }
@@ -335,10 +343,11 @@ class CategoryController extends Controller
             return $this->generateCsvFile($categories);
 
         } catch (\Exception $e) {
-            \Log::error('Error in CategoryController@exportCsv: ' . $e->getMessage());
+            \Log::error('Error in CategoryController@exportCsv: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export CSV: ' . $e->getMessage()
+                'message' => 'Gagal export CSV: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -349,18 +358,18 @@ class CategoryController extends Controller
     private function generateCsvFile($categories)
     {
         // Set headers for download
-        $filename = 'kategori_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        
+        $filename = 'kategori_export_'.now()->format('Y-m-d_H-i-s').'.csv';
+
         header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         // Add BOM for UTF-8 to ensure proper encoding in Excel
         echo "\xEF\xBB\xBF";
-        
+
         // Create output stream
         $output = fopen('php://output', 'w');
-        
+
         // Add headers
         fputcsv($output, [
             'No',
@@ -368,7 +377,7 @@ class CategoryController extends Controller
             'Nama Kategori',
             'Jumlah Sampah',
             'Daftar Sampah',
-            'Tanggal Dibuat'
+            'Tanggal Dibuat',
         ]);
 
         // Add data rows
@@ -376,27 +385,27 @@ class CategoryController extends Controller
             // Get sampah items for this category
             $sampahItems = $category->sampah_items;
             $sampahList = '';
-            
+
             if ($sampahItems && count($sampahItems) > 0) {
                 $sampahNames = [];
                 foreach ($sampahItems as $sampah) {
-                    $sampahNames[] = $sampah->nama . ' (' . strtoupper($sampah->satuan) . ')';
+                    $sampahNames[] = $sampah->nama.' ('.strtoupper($sampah->satuan).')';
                 }
                 $sampahList = implode(', ', $sampahNames);
             } else {
                 $sampahList = 'Tidak ada data';
             }
-            
+
             fputcsv($output, [
                 $index + 1,
                 $category->id,
                 $category->nama,
                 $category->sampah_count,
                 $sampahList,
-                $category->created_at->format('d/m/Y H:i')
+                $category->created_at->format('d/m/Y H:i'),
             ]);
         }
-        
+
         fclose($output);
         exit;
     }
@@ -413,10 +422,11 @@ class CategoryController extends Controller
             return $this->generatePdfFile($categories);
 
         } catch (\Exception $e) {
-            \Log::error('Error in CategoryController@exportPdf: ' . $e->getMessage());
+            \Log::error('Error in CategoryController@exportPdf: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export PDF: ' . $e->getMessage()
+                'message' => 'Gagal export PDF: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -430,6 +440,7 @@ class CategoryController extends Controller
         $categoriesWithSampah = $categories->map(function ($category) {
             $category->sampahItems = $category->sampah_items;
             $category->sampah_count = $category->sampah_count;
+
             return $category;
         });
 
@@ -443,11 +454,9 @@ class CategoryController extends Controller
         ];
 
         $pdf = Pdf::loadView('exports.category', $data);
-        
-        $filename = 'kategori_export_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-        
+
+        $filename = 'kategori_export_'.now()->format('Y-m-d_H-i-s').'.pdf';
+
         return $pdf->download($filename);
     }
-
-
 }

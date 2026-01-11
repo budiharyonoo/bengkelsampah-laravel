@@ -16,20 +16,25 @@ class EventController extends Controller
      *     operationId="getEvents",
      *     tags={"Events"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Nomor halaman untuk paginasi",
      *         required=false,
+     *
      *         @OA\Schema(
      *             type="integer",
      *             default=1
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -37,8 +42,10 @@ class EventController extends Controller
      *                 @OA\Property(
      *                     property="events",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="title", type="string", example="Bersih-bersih Pantai"),
      *                         @OA\Property(property="description", type="string", example="Kegiatan membersihkan pantai dari sampah plastik..."),
@@ -67,10 +74,13 @@ class EventController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
@@ -101,7 +111,7 @@ class EventController extends Controller
                 'has_result' => $event->hasResult(),
                 'created_at' => $event->created_at,
                 'updated_at' => $event->updated_at,
-                'admin_name' => $event->admin_name
+                'admin_name' => $event->admin_name,
             ];
         });
 
@@ -115,8 +125,8 @@ class EventController extends Controller
                     'per_page' => $events->perPage(),
                     'total' => $events->total(),
                     'has_more_pages' => $events->hasMorePages(),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -128,19 +138,24 @@ class EventController extends Controller
      *     operationId="getEventDetails",
      *     tags={"Events"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="ID event",
      *         required=true,
+     *
      *         @OA\Schema(
      *             type="integer"
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -170,8 +185,10 @@ class EventController extends Controller
      *                     @OA\Property(
      *                         property="participants",
      *                         type="array",
+     *
      *                         @OA\Items(
      *                             type="object",
+     *
      *                             @OA\Property(property="id", type="integer", example=1),
      *                             @OA\Property(property="user_name", type="string", example="John Doe"),
      *                             @OA\Property(property="user_identifier", type="string", example="081234567890"),
@@ -182,18 +199,24 @@ class EventController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Event tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Event tidak ditemukan")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
@@ -206,23 +229,23 @@ class EventController extends Controller
             ->withCount('participants')
             ->find($id);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Event tidak ditemukan'
+                'message' => 'Event tidak ditemukan',
             ], 404);
         }
 
         // Debug: Log participants data
-        \Log::info('Event participants count: ' . $event->participants->count());
+        \Log::info('Event participants count: '.$event->participants->count());
         foreach ($event->participants as $participant) {
-            \Log::info('Participant: ' . $participant->user_name . ' | ' . $participant->user_identifier);
+            \Log::info('Participant: '.$participant->user_name.' | '.$participant->user_identifier);
         }
 
         // Check if authenticated user has joined this event
         $user = auth()->user();
         $userHasJoined = false;
-        
+
         if ($user) {
             $userHasJoined = $event->participants()
                 ->where('user_identifier', $user->identifier)
@@ -235,8 +258,8 @@ class EventController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
-                'event' => $event
-            ]
+                'event' => $event,
+            ],
         ]);
     }
 
@@ -248,19 +271,24 @@ class EventController extends Controller
      *     operationId="toggleEventJoin",
      *     tags={"Events"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="ID event",
      *         required=true,
+     *
      *         @OA\Schema(
      *             type="integer"
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Berhasil join event"),
      *             @OA\Property(
@@ -271,26 +299,35 @@ class EventController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Event tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Event tidak ditemukan")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Event tidak aktif atau sudah penuh",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Event tidak aktif atau sudah penuh")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
@@ -301,10 +338,10 @@ class EventController extends Controller
     {
         $event = Event::find($id);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Event tidak ditemukan'
+                'message' => 'Event tidak ditemukan',
             ], 404);
         }
 
@@ -318,14 +355,14 @@ class EventController extends Controller
         if ($existingParticipant) {
             // User is already joined, so unjoin
             $existingParticipant->delete();
-            
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Berhasil unjoin event',
                 'data' => [
                     'action' => 'unjoined',
-                    'user_has_joined' => false
-                ]
+                    'user_has_joined' => false,
+                ],
             ]);
         } else {
             // User is not joined, so join
@@ -333,7 +370,7 @@ class EventController extends Controller
             if ($event->status !== 'active') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Event tidak aktif'
+                    'message' => 'Event tidak aktif',
                 ], 400);
             }
 
@@ -341,7 +378,7 @@ class EventController extends Controller
             if ($event->max_participants && $event->participants()->count() >= $event->max_participants) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Event sudah penuh'
+                    'message' => 'Event sudah penuh',
                 ], 400);
             }
 
@@ -358,9 +395,9 @@ class EventController extends Controller
                 'message' => 'Berhasil join event',
                 'data' => [
                     'action' => 'joined',
-                    'user_has_joined' => true
-                ]
+                    'user_has_joined' => true,
+                ],
             ]);
         }
     }
-} 
+}

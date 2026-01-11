@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use App\Models\Sampah;
 use App\Models\Price;
-use App\Models\BankSampah;
+use App\Models\Sampah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -25,24 +24,31 @@ class KatalogController extends Controller
      *     description="Mendapatkan daftar kategori dan sampah berdasarkan kategori dan pencarian. Jika category kosong, akan menampilkan data dari kategori pertama.",
      *     tags={"Katalog"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="category",
      *         in="query",
      *         description="ID kategori yang dipilih (opsional, jika kosong akan menggunakan kategori pertama)",
      *         required=false,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
      *         description="Kata kunci pencarian (opsional)",
      *         required=false,
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Berhasil mendapatkan data katalog",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Katalog berhasil diambil"),
      *             @OA\Property(
@@ -51,7 +57,9 @@ class KatalogController extends Controller
      *                 @OA\Property(
      *                     property="categories",
      *                     type="array",
+     *
      *                     @OA\Items(
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="nama", type="string", example="Sampah Organik"),
      *                         @OA\Property(property="sampah_count", type="integer", example=5)
@@ -60,7 +68,9 @@ class KatalogController extends Controller
      *                 @OA\Property(
      *                     property="sampah",
      *                     type="array",
+     *
      *                     @OA\Items(
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="nama", type="string", example="Botol Plastik"),
      *                         @OA\Property(property="deskripsi", type="string", example="Deskripsi sampah"),
@@ -77,26 +87,35 @@ class KatalogController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Parameter tidak valid",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Parameter tidak valid")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Kategori tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Kategori tidak ditemukan")
      *         )
@@ -108,11 +127,11 @@ class KatalogController extends Controller
         try {
             // Check if user is authenticated
             $user = auth()->user();
-            
-            if (!$user) {
+
+            if (! $user) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                    'message' => 'Tidak terautentikasi. Token tidak diberikan.',
                 ], 401);
             }
 
@@ -126,7 +145,7 @@ class KatalogController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Parameter tidak valid',
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 400);
             }
 
@@ -137,31 +156,31 @@ class KatalogController extends Controller
                     return [
                         'id' => $category->id,
                         'nama' => $category->nama,
-                        'sampah_count' => $category->sampah_count
+                        'sampah_count' => $category->sampah_count,
                     ];
                 });
 
             // Tentukan kategori yang akan digunakan
             $selectedCategory = null;
-            
+
             if ($request->filled('category')) {
                 // Jika category dikirim, gunakan category tersebut
                 $selectedCategory = Category::find($request->category);
-                
-                if (!$selectedCategory) {
+
+                if (! $selectedCategory) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Kategori tidak ditemukan'
+                        'message' => 'Kategori tidak ditemukan',
                     ], 404);
                 }
             } else {
                 // Jika category kosong, gunakan kategori pertama
                 $selectedCategory = Category::first();
-                
-                if (!$selectedCategory) {
+
+                if (! $selectedCategory) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Tidak ada kategori yang tersedia'
+                        'message' => 'Tidak ada kategori yang tersedia',
                     ], 404);
                 }
             }
@@ -172,7 +191,7 @@ class KatalogController extends Controller
             // Jika ada search, filter berdasarkan nama sampah
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-                $sampahQuery->where('nama', 'like', '%' . $searchTerm . '%');
+                $sampahQuery->where('nama', 'like', '%'.$searchTerm.'%');
             }
 
             // Ambil data sampah dengan field yang diperlukan
@@ -184,7 +203,7 @@ class KatalogController extends Controller
                         'nama' => $item->nama,
                         'deskripsi' => $item->deskripsi,
                         'satuan' => strtoupper($item->satuan),
-                        'gambar' => $item->gambar ? $item->gambar : null
+                        'gambar' => $item->gambar ? $item->gambar : null,
                     ];
                 });
 
@@ -196,16 +215,17 @@ class KatalogController extends Controller
                     'sampah' => $sampah,
                     'selected_category' => [
                         'id' => $selectedCategory->id,
-                        'nama' => $selectedCategory->nama
-                    ]
-                ]
+                        'nama' => $selectedCategory->nama,
+                    ],
+                ],
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in KatalogController@index: ' . $e->getMessage());
+            \Log::error('Error in KatalogController@index: '.$e->getMessage());
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan server'
+                'message' => 'Terjadi kesalahan server',
             ], 500);
         }
     }
@@ -217,17 +237,22 @@ class KatalogController extends Controller
      *     description="Mendapatkan detail lengkap sampah beserta daftar harga di berbagai cabang bank sampah",
      *     tags={"Katalog"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         description="ID sampah",
      *         required=true,
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Berhasil mendapatkan detail sampah",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Detail sampah berhasil diambil"),
      *             @OA\Property(
@@ -247,7 +272,9 @@ class KatalogController extends Controller
      *                 @OA\Property(
      *                     property="prices",
      *                     type="array",
+     *
      *                     @OA\Items(
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="bank_sampah_id", type="integer", example=1),
      *                         @OA\Property(property="bank_sampah_nama", type="string", example="Bank Sampah Indah"),
@@ -261,18 +288,24 @@ class KatalogController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Sampah tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Sampah tidak ditemukan")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
@@ -284,11 +317,11 @@ class KatalogController extends Controller
         try {
             // Check if user is authenticated
             $user = auth()->user();
-            
-            if (!$user) {
+
+            if (! $user) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                    'message' => 'Tidak terautentikasi. Token tidak diberikan.',
                 ], 401);
             }
 
@@ -301,17 +334,17 @@ class KatalogController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'ID sampah tidak valid',
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 400);
             }
 
             // Ambil detail sampah
             $sampah = Sampah::find($id);
-            
-            if (!$sampah) {
+
+            if (! $sampah) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Sampah tidak ditemukan'
+                    'message' => 'Sampah tidak ditemukan',
                 ], 404);
             }
 
@@ -328,7 +361,7 @@ class KatalogController extends Controller
                         'bank_sampah_tipe_layanan' => $price->bankSampah ? $price->bankSampah->tipe_layanan : null,
                         'harga' => $price->harga,
                         'created_at' => $price->created_at,
-                        'updated_at' => $price->updated_at
+                        'updated_at' => $price->updated_at,
                     ];
                 });
 
@@ -340,7 +373,7 @@ class KatalogController extends Controller
                 'satuan' => strtoupper($sampah->satuan),
                 'gambar' => $sampah->gambar ? $sampah->gambar : null,
                 'created_at' => $sampah->created_at,
-                'updated_at' => $sampah->updated_at
+                'updated_at' => $sampah->updated_at,
             ];
 
             return response()->json([
@@ -348,15 +381,16 @@ class KatalogController extends Controller
                 'message' => 'Detail sampah berhasil diambil',
                 'data' => [
                     'sampah' => $sampahData,
-                    'prices' => $prices
-                ]
+                    'prices' => $prices,
+                ],
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in KatalogController@show: ' . $e->getMessage());
+            \Log::error('Error in KatalogController@show: '.$e->getMessage());
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan server'
+                'message' => 'Terjadi kesalahan server',
             ], 500);
         }
     }

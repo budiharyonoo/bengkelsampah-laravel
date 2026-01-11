@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\Admin|null $admin
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Setoran> $setorans
  * @property-read int|null $setorans_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah query()
+ *
  * @mixin \Eloquent
  */
 class BankSampah extends Model
@@ -28,6 +30,8 @@ class BankSampah extends Model
         'kontak_penanggung_jawab',
         'foto',
         'gmaps_link',
+        'latitude',
+        'longitude',
         'tipe_layanan',
     ];
 
@@ -62,7 +66,7 @@ class BankSampah extends Model
             }
         }
 
-        return 'BS-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        return 'BS-'.str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
     /**

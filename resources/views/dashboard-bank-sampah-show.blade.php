@@ -656,6 +656,26 @@
                             @endif
                         </div>
                     </div>
+                    <div class="info-item">
+                        <span class="info-label">Latitude</span>
+                        <div class="info-value">
+                            @if($bankSampah->latitude)
+                                <span style="color: #374151;">{{ $bankSampah->latitude }}</span>
+                            @else
+                                <span style="color: #9ca3af;">-</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Longitude</span>
+                        <div class="info-value">
+                            @if($bankSampah->longitude)
+                                <span style="color: #374151;">{{ $bankSampah->longitude }}</span>
+                            @else
+                                <span style="color: #9ca3af;">-</span>
+                            @endif
+                        </div>
+                    </div>
                         <div class="info-item full-width">
                             <span class="info-label">Foto Bank Sampah</span>
                             <div class="info-value" style="padding: 0; background: none; border: none;">

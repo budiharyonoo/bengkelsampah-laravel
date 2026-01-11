@@ -1045,6 +1045,7 @@
                         <th>Kontak</th>
                         <th>Layanan</th>
                         <th>Maps</th>
+                        <th>Koordinat</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -1095,6 +1096,13 @@
                                 <a href="{{ $bank->gmaps_link }}" target="_blank" class="maps-link">
                                     <span style="color: #39746E; font-weight: 600; font-size: 12px; text-decoration: underline; cursor: pointer;">Lihat Maps</span>
                                 </a>
+                            @else
+                                <span style="color: #9ca3af; font-size: 12px;">-</span>
+                            @endif
+                        </td>
+                        <td class="koordinat-cell">
+                            @if($bank->latitude && $bank->longitude)
+                                <span style="color: #374151; font-size: 12px;">{{ $bank->latitude }}, {{ $bank->longitude }}</span>
                             @else
                                 <span style="color: #9ca3af; font-size: 12px;">-</span>
                             @endif

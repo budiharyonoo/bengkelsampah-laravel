@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Notification as NotificationModel;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class NotificationService
@@ -22,8 +22,9 @@ class NotificationService
     {
         try {
             $user = User::find($userId);
-            if (!$user) {
+            if (! $user) {
                 Log::error('User not found for notification', ['user_id' => $userId]);
+
                 return false;
             }
 
@@ -52,7 +53,7 @@ class NotificationService
                     $firebaseData
                 );
 
-                if (!$result['success']) {
+                if (! $result['success']) {
                     Log::warning('Firebase notification failed for user', [
                         'user_id' => $userId,
                         'error' => $result['error'] ?? 'Unknown error',
@@ -64,7 +65,7 @@ class NotificationService
                 'user_id' => $userId,
                 'notification_id' => $notification->id,
                 'type' => $type,
-                'has_fcm_token' => !empty($user->fcm_token),
+                'has_fcm_token' => ! empty($user->fcm_token),
             ]);
 
             return $notification;
@@ -73,6 +74,7 @@ class NotificationService
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -84,7 +86,7 @@ class NotificationService
     {
         $title = 'Redeem Poin Berhasil';
         $body = "Redeem poin sebesar {$jumlahPoint} poin telah diproses. Alasan: {$alasanRedeem}";
-        
+
         return $this->sendToUser(
             $userId,
             $title,
@@ -104,7 +106,7 @@ class NotificationService
     {
         $title = 'Setoran Selesai';
         $body = "Setoran sampah Anda telah selesai diproses. Anda mendapatkan {$totalPoint} poin dan {$totalXp} XP.";
-        
+
         return $this->sendToUser(
             $userId,
             $title,
@@ -125,7 +127,7 @@ class NotificationService
     {
         $title = 'Event Baru';
         $body = "Event baru: {$eventTitle} - {$eventDescription}";
-        
+
         return $this->sendToUser(
             $userId,
             $title,
@@ -153,7 +155,7 @@ class NotificationService
     {
         $users = User::whereIn('id', $userIds)->get();
         $fcmTokens = $users->pluck('fcm_token')->filter()->toArray();
-        
+
         // Save notifications to database
         $notifications = [];
         foreach ($userIds as $userId) {
@@ -168,11 +170,11 @@ class NotificationService
                 'updated_at' => now(),
             ];
         }
-        
+
         NotificationModel::insert($notifications);
 
         // Send push notifications
-        if (!empty($fcmTokens)) {
+        if (! empty($fcmTokens)) {
             $firebaseData = array_merge($data, [
                 'type' => $type,
             ]);
@@ -201,6 +203,7 @@ class NotificationService
     public function sendToAllUsers($title, $body, $type = 'general', $data = [])
     {
         $userIds = User::pluck('id')->toArray();
+
         return $this->sendToMultipleUsers($userIds, $title, $body, $type, $data);
     }
 
@@ -275,4 +278,4 @@ class NotificationService
             ->where('user_id', $userId)
             ->delete();
     }
-} 
+}

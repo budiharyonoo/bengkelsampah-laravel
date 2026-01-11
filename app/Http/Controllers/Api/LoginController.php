@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper as R;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Otp;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use App\Helpers\ResponseHelper as R;
 
 class LoginController extends Controller
 {
@@ -19,10 +19,13 @@ class LoginController extends Controller
      *     tags={"Autentikasi"},
      *     summary="Login pengguna",
      *     description="Endpoint untuk login pengguna dengan verifikasi OTP. Token yang dihasilkan berlaku selama 1 tahun.",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"identifier","password","otp"},
+     *
      *             @OA\Property(
      *                 property="identifier",
      *                 type="string",
@@ -44,10 +47,13 @@ class LoginController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Login berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Login berhasil"),
      *             @OA\Property(
@@ -67,12 +73,16 @@ class LoginController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
      *             oneOf={
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Validasi gagal"),
      *                     @OA\Property(
@@ -81,19 +91,26 @@ class LoginController extends Controller
      *                         @OA\Property(
      *                             property="identifier",
      *                             type="array",
+     *
      *                             @OA\Items(type="string", example="Field identifier wajib diisi.")
      *                         )
      *                     )
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Kata sandi salah")
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Kode OTP tidak valid")
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Kode OTP telah kedaluwarsa")
      *                 )
@@ -119,15 +136,16 @@ class LoginController extends Controller
             $request->password === 'BengkelSampah25'
         ) {
             $user = User::where('identifier', $request->identifier)->first();
-            if (!$user) {
+            if (! $user) {
                 return R::error('Akun testing tidak ditemukan', 422);
             }
             $expiresAt = now()->addYear();
             $token = $user->createToken('auth_token', ['*'], $expiresAt)->plainTextToken;
+
             return R::success('Login berhasil (bypass testing)', [
                 'user' => $user,
                 'token' => $token,
-                'token_expires_at' => $expiresAt->toDateTimeString()
+                'token_expires_at' => $expiresAt->toDateTimeString(),
             ]);
         }
 
@@ -148,7 +166,7 @@ class LoginController extends Controller
 
         // Get user and verify password
         $user = User::where('identifier', $request->identifier)->first();
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             return R::error('Kata sandi salah', 422);
         }
 
@@ -162,7 +180,7 @@ class LoginController extends Controller
         return R::success('Login berhasil', [
             'user' => $user,
             'token' => $token,
-            'token_expires_at' => $expiresAt->toDateTimeString()
+            'token_expires_at' => $expiresAt->toDateTimeString(),
         ]);
     }
 }

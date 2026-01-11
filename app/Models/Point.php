@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property-read \App\Models\Setoran|null $setoran
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Point newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Point newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Point query()
+ *
  * @mixin \Eloquent
  */
 class Point extends Model
@@ -38,6 +40,7 @@ class Point extends Model
 
     // Type constants
     const TYPE_SETOR = 'setor';
+
     const TYPE_REDEEM = 'redeem';
 
     /**

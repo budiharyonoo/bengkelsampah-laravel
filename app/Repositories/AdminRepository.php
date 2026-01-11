@@ -17,8 +17,7 @@ class AdminRepository
     /**
      * Find admin by ID with bank sampah relation.
      *
-     * @param int $id Admin ID
-     * @return Admin
+     * @param  int  $id  Admin ID
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
@@ -32,8 +31,7 @@ class AdminRepository
     /**
      * Find admin by ID.
      *
-     * @param int $id Admin ID
-     * @return Admin
+     * @param  int  $id  Admin ID
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
@@ -45,8 +43,7 @@ class AdminRepository
     /**
      * Create a new admin.
      *
-     * @param array{name: string, email: string, password: string, role: string, id_bank_sampah: int} $data
-     * @return Admin
+     * @param  array{name: string, email: string, password: string, role: string, id_bank_sampah: int}  $data
      */
     public function create(array $data): Admin
     {
@@ -56,9 +53,8 @@ class AdminRepository
     /**
      * Update an existing admin.
      *
-     * @param Admin $admin Admin instance
-     * @param array<string, mixed> $data Data to update
-     * @return Admin
+     * @param  Admin  $admin  Admin instance
+     * @param  array<string, mixed>  $data  Data to update
      */
     public function update(Admin $admin, array $data): Admin
     {
@@ -70,8 +66,7 @@ class AdminRepository
     /**
      * Delete an admin.
      *
-     * @param Admin $admin Admin instance
-     * @return bool
+     * @param  Admin  $admin  Admin instance
      */
     public function delete(Admin $admin): bool
     {
@@ -81,8 +76,7 @@ class AdminRepository
     /**
      * Count admins for a specific bank sampah.
      *
-     * @param int $bankSampahId Bank sampah ID
-     * @return int
+     * @param  int  $bankSampahId  Bank sampah ID
      */
     public function countByBankSampah(int $bankSampahId): int
     {
@@ -94,7 +88,7 @@ class AdminRepository
     /**
      * Get all admins for a bank sampah.
      *
-     * @param int $bankSampahId Bank sampah ID
+     * @param  int  $bankSampahId  Bank sampah ID
      * @return Collection<int, Admin>
      */
     public function getByBankSampah(int $bankSampahId): Collection

@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Sampah;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
@@ -28,7 +27,7 @@ class CategorySeeder extends Seeder
                     $sampahIds['Sisa Makanan'] ?? null,
                     $sampahIds['Kulit Buah'] ?? null,
                     $sampahIds['Kulit Telur'] ?? null,
-                ]
+                ],
             ],
             [
                 'nama' => 'Sampah Plastik',
@@ -37,7 +36,7 @@ class CategorySeeder extends Seeder
                     $sampahIds['Kantong Plastik'] ?? null,
                     $sampahIds['Sedotan Plastik'] ?? null,
                     $sampahIds['Wadah Makanan'] ?? null,
-                ]
+                ],
             ],
             [
                 'nama' => 'Sampah Kertas',
@@ -46,43 +45,43 @@ class CategorySeeder extends Seeder
                     $sampahIds['Kardus'] ?? null,
                     $sampahIds['Koran Bekas'] ?? null,
                     $sampahIds['Buku Bekas'] ?? null,
-                ]
+                ],
             ],
             [
                 'nama' => 'Sampah Logam',
                 'sampah' => [
                     $sampahIds['Kaleng Minuman'] ?? null,
-                ]
+                ],
             ],
             [
                 'nama' => 'Sampah Kaca',
                 'sampah' => [
                     $sampahIds['Botol Kaca'] ?? null,
-                ]
+                ],
             ],
             [
                 'nama' => 'Sampah Elektronik',
                 'sampah' => [
                     $sampahIds['Baterai Bekas'] ?? null,
-                ]
+                ],
             ],
             [
                 'nama' => 'Sampah Tekstil',
                 'sampah' => [
                     $sampahIds['Pakaian Bekas'] ?? null,
-                ]
-            ]
+                ],
+            ],
         ];
 
         foreach ($categories as $categoryData) {
             // Filter out null values from sampah array
-            $categoryData['sampah'] = array_filter($categoryData['sampah'], function($value) {
+            $categoryData['sampah'] = array_filter($categoryData['sampah'], function ($value) {
                 return $value !== null;
             });
-            
+
             // Only create category if it has sampah items
-            if (!empty($categoryData['sampah'])) {
-            Category::create($categoryData);
+            if (! empty($categoryData['sampah'])) {
+                Category::create($categoryData);
             }
         }
 

@@ -26,7 +26,7 @@ class UserRepository
     /**
      * Get recent users.
      *
-     * @param int $limit Number of records
+     * @param  int  $limit  Number of records
      * @return \Illuminate\Database\Eloquent\Collection<int, User>
      */
     public function getRecentUsers(int $limit = 10): \Illuminate\Database\Eloquent\Collection
@@ -43,8 +43,8 @@ class UserRepository
      *
      * Optimized: Single query with window function instead of 6 separate queries.
      *
-     * @param int|null $bankSampahId Filter by bank sampah (via setorans)
-     * @param int $months Number of months to retrieve
+     * @param  int|null  $bankSampahId  Filter by bank sampah (via setorans)
+     * @param  int  $months  Number of months to retrieve
      * @return array{labels: array<string>, values: array<int>}
      */
     public function getMonthlyGrowth(?int $bankSampahId, int $months = 6): array
@@ -117,10 +117,9 @@ class UserRepository
     /**
      * Count users with transactions in a specific period.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
-     * @return int
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      */
     public function countUsersWithTransactions(
         ?int $bankSampahId,

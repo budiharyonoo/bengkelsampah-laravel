@@ -97,7 +97,7 @@
             </form>
         </div>
         <div style="display:flex;align-items:center;gap:1.2rem;">
-            @if (!$isCabang)
+            {{-- @if (!$isCabang)
                 <!-- Zenziva Balance Cards -->
                 <div style="display:flex;gap:0.8rem;align-items:center;">
                     <div
@@ -112,7 +112,7 @@
                         </div>
                     </div>
                 </div>
-            @endif
+            @endif --}}
 
             <!-- Avatar User with Dropdown -->
             <div style="position:relative;">

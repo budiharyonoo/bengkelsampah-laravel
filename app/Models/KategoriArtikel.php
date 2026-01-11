@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Artikel> $artikels
  * @property-read int|null $artikels_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|KategoriArtikel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|KategoriArtikel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|KategoriArtikel query()
+ *
  * @mixin \Eloquent
  */
 class KategoriArtikel extends Model

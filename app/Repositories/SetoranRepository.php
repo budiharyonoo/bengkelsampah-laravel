@@ -32,10 +32,10 @@ class SetoranRepository
     /**
      * Get recent transactions with user relation.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date filter
-     * @param Carbon $endDate End date filter
-     * @param int $limit Number of records to return
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date filter
+     * @param  Carbon  $endDate  End date filter
+     * @param  int  $limit  Number of records to return
      * @return Collection<int, Setoran>
      */
     public function getRecentTransactions(
@@ -70,9 +70,9 @@ class SetoranRepository
      *
      * Optimized: Single query with conditional aggregation instead of multiple queries.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date filter
-     * @param Carbon $endDate End date filter
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date filter
+     * @param  Carbon  $endDate  End date filter
      * @return array{count: int, total_value: float, tabung_total: float}
      */
     public function getCompletedTransactionStats(
@@ -107,7 +107,7 @@ class SetoranRepository
      *
      * Optimized: Single query with GROUP BY instead of 5 separate queries.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
+     * @param  int|null  $bankSampahId  Filter by bank sampah
      * @return array<string, int>
      */
     public function getStatusDistribution(?int $bankSampahId): array
@@ -138,8 +138,8 @@ class SetoranRepository
      *
      * Optimized: Single query with date grouping instead of 30 separate queries.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param int $days Number of days to retrieve
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  int  $days  Number of days to retrieve
      * @return array{labels: array<string>, values: array<int>}
      */
     public function getDailyTrend(?int $bankSampahId, int $days = 30): array
@@ -180,8 +180,8 @@ class SetoranRepository
      *
      * Optimized: Single query with date grouping and SUM instead of 30+ queries.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param int $days Number of days
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  int  $days  Number of days
      * @return array{labels: array<string>, values: array<float>}
      */
     public function getDailyRevenue(?int $bankSampahId, int $days = 30): array
@@ -238,8 +238,8 @@ class SetoranRepository
      *
      * Optimized: Fetches all completed setorans in one query and processes in memory.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param int $limit Number of items to return
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  int  $limit  Number of items to return
      * @return array<int, array{nama: string, total_berat: float}>
      */
     public function getTopWasteTypes(?int $bankSampahId, int $limit = 5): array
@@ -287,10 +287,10 @@ class SetoranRepository
      *
      * Optimized: Preloads all Sampah records in one query to prevent N+1.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
-     * @param int $limit Number of items
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
+     * @param  int  $limit  Number of items
      * @return array<int, array{nama: string, total_berat: float, jumlah_transaksi: int, gambar: string|null}>
      */
     public function getTopWasteWithImages(
@@ -370,10 +370,10 @@ class SetoranRepository
      *
      * Optimized: Uses eager loading for user relation.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
-     * @param int $limit Number of users
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
+     * @param  int  $limit  Number of users
      * @return array<int, array{user_id: int|null, name: string, total_setoran: int, total_nilai: float}>
      */
     public function getTopUsersByDeposits(
@@ -412,9 +412,9 @@ class SetoranRepository
     /**
      * Get waste totals by unit type (kg vs unit).
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      * @return array{kg: float, unit: float}
      */
     public function getWasteTotals(
@@ -459,12 +459,12 @@ class SetoranRepository
      *
      * Optimized: Fetches all data in batched queries per period.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param string $periode Period type (harian, mingguan, bulanan, etc.)
-     * @param Carbon $currentStart Current period start
-     * @param Carbon $currentEnd Current period end
-     * @param Carbon $previousStart Previous period start
-     * @param Carbon $previousEnd Previous period end
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  string  $periode  Period type (harian, mingguan, bulanan, etc.)
+     * @param  Carbon  $currentStart  Current period start
+     * @param  Carbon  $currentEnd  Current period end
+     * @param  Carbon  $previousStart  Previous period start
+     * @param  Carbon  $previousEnd  Previous period end
      * @return array{current: array, previous: array}
      */
     public function getComparisonChartData(
@@ -475,7 +475,7 @@ class SetoranRepository
         Carbon $previousStart,
         Carbon $previousEnd
     ): array {
-        $cacheKey = $this->buildCacheKey('comparison', $bankSampahId, $currentStart, $currentEnd) . ':' . $periode;
+        $cacheKey = $this->buildCacheKey('comparison', $bankSampahId, $currentStart, $currentEnd).':'.$periode;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use (
             $bankSampahId,
@@ -499,10 +499,10 @@ class SetoranRepository
     /**
      * Fetch aggregated period data based on period type.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $start Start date
-     * @param Carbon $end End date
-     * @param string $periode Period type
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $start  Start date
+     * @param  Carbon  $end  End date
+     * @param  string  $periode  Period type
      * @return array<int, array{label: string, value: float}>
      */
     private function fetchPeriodData(
@@ -606,10 +606,9 @@ class SetoranRepository
     /**
      * Count unique users with transactions in period.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param Carbon $startDate Start date
-     * @param Carbon $endDate End date
-     * @return int
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  Carbon  $startDate  Start date
+     * @param  Carbon  $endDate  End date
      */
     public function countUniqueUsers(
         ?int $bankSampahId,
@@ -642,7 +641,7 @@ class SetoranRepository
         Carbon $endDate
     ): string {
         $bankKey = $bankSampahId ?? 'all';
-        $dateKey = $startDate->format('Ymd') . '_' . $endDate->format('Ymd');
+        $dateKey = $startDate->format('Ymd').'_'.$endDate->format('Ymd');
 
         return "dashboard:{$type}:{$bankKey}:{$dateKey}";
     }

@@ -66,8 +66,6 @@ class DashboardFilterRequest extends FormRequest
 
     /**
      * Get validated bank sampah ID.
-     *
-     * @return int|null
      */
     public function getBankSampahId(): ?int
     {
@@ -79,8 +77,6 @@ class DashboardFilterRequest extends FormRequest
 
     /**
      * Get validated periode.
-     *
-     * @return string
      */
     public function getPeriode(): string
     {
@@ -91,8 +87,6 @@ class DashboardFilterRequest extends FormRequest
 
     /**
      * Get validated range date.
-     *
-     * @return string|null
      */
     public function getRangeDate(): ?string
     {

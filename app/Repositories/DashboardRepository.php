@@ -44,7 +44,7 @@ class DashboardRepository
     /**
      * Get recent setorans with user and bank sampah relations.
      *
-     * @param int $limit Number of records
+     * @param  int  $limit  Number of records
      * @return Collection<int, Setoran>
      */
     public function getRecentSetorans(int $limit = 10): Collection
@@ -73,7 +73,7 @@ class DashboardRepository
     /**
      * Get recent events with participant count.
      *
-     * @param int $limit Number of records
+     * @param  int  $limit  Number of records
      * @return Collection<int, Event>
      */
     public function getRecentEvents(int $limit = 10): Collection
@@ -125,7 +125,7 @@ class DashboardRepository
     /**
      * Get recent articles.
      *
-     * @param int $limit Number of records
+     * @param  int  $limit  Number of records
      * @return Collection<int, Artikel>
      */
     public function getRecentArticles(int $limit = 10): Collection
@@ -140,7 +140,7 @@ class DashboardRepository
     /**
      * Get recent delete account requests.
      *
-     * @param int $limit Number of records
+     * @param  int  $limit  Number of records
      * @return Collection<int, DeleteAccountRequest>
      */
     public function getDeleteRequests(int $limit = 10): Collection

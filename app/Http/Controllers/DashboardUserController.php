@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DashboardUserController extends Controller
 {
@@ -24,9 +21,9 @@ class DashboardUserController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('identifier', 'like', "%{$search}%");
+                    ->orWhere('identifier', 'like', "%{$search}%");
             });
         }
 
@@ -42,9 +39,9 @@ class DashboardUserController extends Controller
 
     public function show($id)
     {
-        $user = User::with(['points' => function($query) {
+        $user = User::with(['points' => function ($query) {
             $query->orderBy('created_at', 'desc')->limit(10);
-        }, 'setorans' => function($query) {
+        }, 'setorans' => function ($query) {
             $query->orderBy('created_at', 'desc')->limit(10);
         }, 'addresses'])->findOrFail($id);
 
@@ -54,30 +51,31 @@ class DashboardUserController extends Controller
     public function searchUser(Request $request)
     {
         $query = $request->get('query');
-        
+
         $users = User::where('name', 'like', "%{$query}%")
-                    ->orWhere('identifier', 'like', "%{$query}%")
-                    ->select('id', 'name', 'identifier', 'poin', 'xp', 'setor', 'sampah')
-                    ->get();
-        
+            ->orWhere('identifier', 'like', "%{$query}%")
+            ->select('id', 'name', 'identifier', 'poin', 'xp', 'setor', 'sampah')
+            ->get();
+
         return response()->json($users);
     }
 
     public function getUserInfo($id)
     {
         $user = User::select('id', 'name', 'identifier', 'poin', 'xp', 'setor', 'sampah')
-                   ->find($id);
-        
-        if (!$user) {
+            ->find($id);
+
+        if (! $user) {
             return response()->json(['error' => 'User tidak ditemukan'], 404);
         }
-        
+
         return response()->json($user);
     }
 
     public function edit($id)
     {
         $user = User::findOrFail($id);
+
         return view('dashboard-user-edit', compact('user'));
     }
 
@@ -96,7 +94,7 @@ class DashboardUserController extends Controller
 
         // Process poin input
         $poinInput = str_replace([' ', '.', ','], ['', '', '.'], $request->poin); // Hapus spasi, titik ribuan, koma jadi titik
-        if (!is_numeric($poinInput)) {
+        if (! is_numeric($poinInput)) {
             return back()->withErrors(['poin' => 'Format poin tidak valid'])->withInput();
         }
         $poin = floatval($poinInput);
@@ -105,7 +103,7 @@ class DashboardUserController extends Controller
         $xp = null;
         if ($request->filled('xp')) {
             $xpInput = str_replace([' ', '.', ','], ['', '', ''], $request->xp);
-            if (!is_numeric($xpInput) || strpos($xpInput, '.') !== false) {
+            if (! is_numeric($xpInput) || strpos($xpInput, '.') !== false) {
                 return back()->withErrors(['xp' => 'Format XP tidak valid (harus angka bulat)'])->withInput();
             }
             $xp = intval($xpInput);
@@ -115,7 +113,7 @@ class DashboardUserController extends Controller
         $setor = null;
         if ($request->filled('setor')) {
             $setorInput = str_replace([' ', '.', ','], ['', '', ''], $request->setor);
-            if (!is_numeric($setorInput) || strpos($setorInput, '.') !== false) {
+            if (! is_numeric($setorInput) || strpos($setorInput, '.') !== false) {
                 return back()->withErrors(['setor' => 'Format total setoran tidak valid (harus angka bulat)'])->withInput();
             }
             $setor = intval($setorInput);
@@ -125,7 +123,7 @@ class DashboardUserController extends Controller
         $sampah = null;
         if ($request->filled('sampah')) {
             $sampahInput = str_replace([' ', '.', ','], ['', '', '.'], $request->sampah);
-            if (!is_numeric($sampahInput)) {
+            if (! is_numeric($sampahInput)) {
                 return back()->withErrors(['sampah' => 'Format total sampah tidak valid'])->withInput();
             }
             $sampah = floatval($sampahInput);
@@ -157,6 +155,7 @@ class DashboardUserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
+
         return redirect()->route('dashboard.user')->with('success', 'User berhasil dihapus');
     }
 
@@ -164,7 +163,7 @@ class DashboardUserController extends Controller
     {
         $request->validate([
             'user_ids' => 'required|array',
-            'user_ids.*' => 'exists:users,id'
+            'user_ids.*' => 'exists:users,id',
         ]);
 
         $deletedCount = 0;
@@ -174,8 +173,9 @@ class DashboardUserController extends Controller
         try {
             foreach ($request->user_ids as $userId) {
                 $user = User::find($userId);
-                if (!$user) {
+                if (! $user) {
                     $errorCount++;
+
                     continue;
                 }
                 $user->delete();
@@ -189,18 +189,19 @@ class DashboardUserController extends Controller
 
             // Always return JSON for AJAX requests
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'message' => $message,
                 'deleted_count' => $deletedCount,
                 'error_count' => $errorCount,
-                'error_messages' => $errorMessages
+                'error_messages' => $errorMessages,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Bulk delete error: ' . $e->getMessage());
+            \Log::error('Bulk delete error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menghapus user: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat menghapus user: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -214,10 +215,11 @@ class DashboardUserController extends Controller
             return $this->generateExcelFile($users);
 
         } catch (\Exception $e) {
-            \Log::error('Error in DashboardUserController@exportExcel: ' . $e->getMessage());
+            \Log::error('Error in DashboardUserController@exportExcel: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export Excel: ' . $e->getMessage()
+                'message' => 'Gagal export Excel: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -228,7 +230,7 @@ class DashboardUserController extends Controller
     private function generateExcelFile($users)
     {
         // Create new Spreadsheet
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set document properties
@@ -270,21 +272,21 @@ class DashboardUserController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set subtitle
-        $sheet->setCellValue('A2', 'Tanggal Export: ' . now()->format('d F Y H:i:s'));
+        $sheet->setCellValue('A2', 'Tanggal Export: '.now()->format('d F Y H:i:s'));
         $sheet->mergeCells('A2:H2');
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set headers
         $headers = [
-            'No', 'ID', 'Nama Lengkap', 'Identifier', 'Point', 'XP', 
-            'Jumlah Setoran', 'Alamat'
+            'No', 'ID', 'Nama Lengkap', 'Identifier', 'Point', 'XP',
+            'Jumlah Setoran', 'Alamat',
         ];
 
         $col = 'A';
         $row = 4;
         foreach ($headers as $header) {
-            $sheet->setCellValue($col . $row, $header);
-            $sheet->getStyle($col . $row)->applyFromArray($headerStyle);
+            $sheet->setCellValue($col.$row, $header);
+            $sheet->getStyle($col.$row)->applyFromArray($headerStyle);
             $col++;
         }
 
@@ -297,35 +299,35 @@ class DashboardUserController extends Controller
                 // Try to find default address first
                 $defaultAddress = $user->addresses->where('is_default', true)->first();
                 if ($defaultAddress) {
-                    $userAddress = $defaultAddress->label_alamat . ' (' . $defaultAddress->nomor_handphone . ') ' . 
-                                  $defaultAddress->detail_lain . ', ' . $defaultAddress->kecamatan . ', ' . 
-                                  $defaultAddress->kota_kabupaten . ', ' . $defaultAddress->provinsi . ' ' . 
+                    $userAddress = $defaultAddress->label_alamat.' ('.$defaultAddress->nomor_handphone.') '.
+                                  $defaultAddress->detail_lain.', '.$defaultAddress->kecamatan.', '.
+                                  $defaultAddress->kota_kabupaten.', '.$defaultAddress->provinsi.' '.
                                   $defaultAddress->kode_pos;
                 } else {
                     // Use first address if no default
                     $firstAddress = $user->addresses->first();
-                    $userAddress = $firstAddress->label_alamat . ' (' . $firstAddress->nomor_handphone . ') ' . 
-                                  $firstAddress->detail_lain . ', ' . $firstAddress->kecamatan . ', ' . 
-                                  $firstAddress->kota_kabupaten . ', ' . $firstAddress->provinsi . ' ' . 
+                    $userAddress = $firstAddress->label_alamat.' ('.$firstAddress->nomor_handphone.') '.
+                                  $firstAddress->detail_lain.', '.$firstAddress->kecamatan.', '.
+                                  $firstAddress->kota_kabupaten.', '.$firstAddress->provinsi.' '.
                                   $firstAddress->kode_pos;
                 }
             }
 
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $user->id);
-            $sheet->setCellValue('C' . $row, $user->name);
-            $sheet->setCellValue('D' . $row, $user->identifier);
-            $sheet->setCellValue('E' . $row, number_format($user->poin ?? 0, 0));
-            $sheet->setCellValue('F' . $row, number_format($user->xp ?? 0, 0));
-            $sheet->setCellValue('G' . $row, $user->setor ?? 0);
-            $sheet->setCellValue('H' . $row, $userAddress);
+            $sheet->setCellValue('A'.$row, $index + 1);
+            $sheet->setCellValue('B'.$row, $user->id);
+            $sheet->setCellValue('C'.$row, $user->name);
+            $sheet->setCellValue('D'.$row, $user->identifier);
+            $sheet->setCellValue('E'.$row, number_format($user->poin ?? 0, 0));
+            $sheet->setCellValue('F'.$row, number_format($user->xp ?? 0, 0));
+            $sheet->setCellValue('G'.$row, $user->setor ?? 0);
+            $sheet->setCellValue('H'.$row, $userAddress);
 
             // Center align numeric columns
-            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('E' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('G' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('B'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('E'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('F'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             $row++;
         }
@@ -336,22 +338,22 @@ class DashboardUserController extends Controller
         }
 
         // Add borders to data
-        $dataRange = 'A4:H' . ($row - 1);
+        $dataRange = 'A4:H'.($row - 1);
         $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         // Create the Excel file
         $writer = new Xlsx($spreadsheet);
-        
+
         // Set filename
-        $filename = 'user_export_all_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-        
+        $filename = 'user_export_all_'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
         // Save to temporary file
-        $tempFile = storage_path('app/temp/' . $filename);
-        if (!file_exists(dirname($tempFile))) {
+        $tempFile = storage_path('app/temp/'.$filename);
+        if (! file_exists(dirname($tempFile))) {
             mkdir(dirname($tempFile), 0755, true);
         }
         $writer->save($tempFile);
-        
+
         // Return file for download
         return response()->download($tempFile, $filename)->deleteFileAfterSend();
     }
@@ -365,10 +367,11 @@ class DashboardUserController extends Controller
             return $this->generateCsvFile($users);
 
         } catch (\Exception $e) {
-            \Log::error('Error in DashboardUserController@exportCsv: ' . $e->getMessage());
+            \Log::error('Error in DashboardUserController@exportCsv: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export CSV: ' . $e->getMessage()
+                'message' => 'Gagal export CSV: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -381,22 +384,22 @@ class DashboardUserController extends Controller
         // Set headers for CSV download
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="user_export_all_' . now()->format('Y-m-d_H-i-s') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="user_export_all_'.now()->format('Y-m-d_H-i-s').'.csv"',
         ];
 
         // Create CSV content
-        $callback = function() use ($users) {
+        $callback = function () use ($users) {
             $file = fopen('php://output', 'w');
-            
+
             // Add BOM for UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+
             // Headers
             fputcsv($file, [
-                'No', 'ID', 'Nama Lengkap', 'Identifier', 'Point', 'XP', 
-                'Jumlah Setoran', 'Alamat'
+                'No', 'ID', 'Nama Lengkap', 'Identifier', 'Point', 'XP',
+                'Jumlah Setoran', 'Alamat',
             ]);
-            
+
             // Data
             foreach ($users as $index => $user) {
                 // Get user address
@@ -405,16 +408,16 @@ class DashboardUserController extends Controller
                     // Try to find default address first
                     $defaultAddress = $user->addresses->where('is_default', true)->first();
                     if ($defaultAddress) {
-                        $userAddress = $defaultAddress->label_alamat . ' (' . $defaultAddress->nomor_handphone . ') ' . 
-                                      $defaultAddress->detail_lain . ', ' . $defaultAddress->kecamatan . ', ' . 
-                                      $defaultAddress->kota_kabupaten . ', ' . $defaultAddress->provinsi . ' ' . 
+                        $userAddress = $defaultAddress->label_alamat.' ('.$defaultAddress->nomor_handphone.') '.
+                                      $defaultAddress->detail_lain.', '.$defaultAddress->kecamatan.', '.
+                                      $defaultAddress->kota_kabupaten.', '.$defaultAddress->provinsi.' '.
                                       $defaultAddress->kode_pos;
                     } else {
                         // Use first address if no default
                         $firstAddress = $user->addresses->first();
-                        $userAddress = $firstAddress->label_alamat . ' (' . $firstAddress->nomor_handphone . ') ' . 
-                                      $firstAddress->detail_lain . ', ' . $firstAddress->kecamatan . ', ' . 
-                                      $firstAddress->kota_kabupaten . ', ' . $firstAddress->provinsi . ' ' . 
+                        $userAddress = $firstAddress->label_alamat.' ('.$firstAddress->nomor_handphone.') '.
+                                      $firstAddress->detail_lain.', '.$firstAddress->kecamatan.', '.
+                                      $firstAddress->kota_kabupaten.', '.$firstAddress->provinsi.' '.
                                       $firstAddress->kode_pos;
                     }
                 }
@@ -427,10 +430,10 @@ class DashboardUserController extends Controller
                     number_format($user->poin ?? 0, 0),
                     number_format($user->xp ?? 0, 0),
                     $user->setor ?? 0,
-                    $userAddress
+                    $userAddress,
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -446,10 +449,11 @@ class DashboardUserController extends Controller
             return $this->generatePdfFile($users);
 
         } catch (\Exception $e) {
-            \Log::error('Error in DashboardUserController@exportPdf: ' . $e->getMessage());
+            \Log::error('Error in DashboardUserController@exportPdf: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export PDF: ' . $e->getMessage()
+                'message' => 'Gagal export PDF: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -461,22 +465,22 @@ class DashboardUserController extends Controller
     {
         // Get comprehensive statistics
         $stats = $this->getComprehensiveUserStats($users);
-        
+
         // Generate PDF using DomPDF
         $pdf = \PDF::loadView('pdf.user-report', [
             'users' => $users,
             'totalUsers' => $stats['totalUsers'],
             'totalSetoran' => $stats['totalSetoran'],
             'totalSampah' => $stats['totalSampah'],
-            'totalPoint' => $stats['totalPoint']
+            'totalPoint' => $stats['totalPoint'],
         ]);
 
         // Set paper to A4 landscape
         $pdf->setPaper('A4', 'landscape');
-        
+
         // Set filename
-        $filename = 'user_export_all_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-        
+        $filename = 'user_export_all_'.now()->format('Y-m-d_H-i-s').'.pdf';
+
         // Return PDF for download
         return $pdf->download($filename);
     }
@@ -487,17 +491,17 @@ class DashboardUserController extends Controller
     private function getComprehensiveUserStats($users)
     {
         $userIds = $users->pluck('id')->toArray();
-        
+
         // Get setoran data (only completed)
         $setorans = \App\Models\Setoran::whereIn('user_id', $userIds)
             ->where('status', 'selesai')
             ->get();
-        
+
         // Calculate statistics
         $totalSetoran = $setorans->count();
         $totalSampah = 0;
         $totalPoint = 0;
-        
+
         foreach ($users as $user) {
             // Calculate from user's sampah field
             if ($user->sampah) {
@@ -509,7 +513,7 @@ class DashboardUserController extends Controller
                     }
                 }
             }
-            
+
             // Get points from user's poin field
             $totalPoint += ($user->poin ?? 0);
         }
@@ -518,7 +522,7 @@ class DashboardUserController extends Controller
             'totalUsers' => $users->count(),
             'totalSetoran' => $totalSetoran,
             'totalSampah' => $totalSampah,
-            'totalPoint' => $totalPoint
+            'totalPoint' => $totalPoint,
         ];
     }
-} 
+}

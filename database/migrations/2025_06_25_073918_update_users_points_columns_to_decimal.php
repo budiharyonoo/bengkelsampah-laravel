@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Change poin column to decimal
             $table->decimal('poin', 15, 2)->default(0)->change();
-            
+
             // Change sampah column to decimal
             $table->decimal('sampah', 10, 2)->default(0)->change();
-            
+
             // Change xp column to decimal
             $table->decimal('xp', 10, 2)->default(0)->change();
         });

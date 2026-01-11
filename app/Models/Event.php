@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $participants_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventParticipant> $participants
  * @property-read \App\Models\EventResult|null $result
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Event newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Event newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Event query()
+ *
  * @mixin \Eloquent
  */
 class Event extends Model
@@ -86,7 +88,7 @@ class Event extends Model
      */
     public function isActive()
     {
-        return $this->status === 'active' && !$this->isExpired();
+        return $this->status === 'active' && ! $this->isExpired();
     }
 
     /**
@@ -94,7 +96,7 @@ class Event extends Model
      */
     public function hasResult()
     {
-        return !is_null($this->result_submitted_at);
+        return ! is_null($this->result_submitted_at);
     }
 
     /**

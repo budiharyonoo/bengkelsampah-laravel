@@ -82,7 +82,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat admin: ' . $e->getMessage(),
+                'message' => 'Gagal membuat admin: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -104,7 +104,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil data admin: ' . $e->getMessage(),
+                'message' => 'Gagal mengambil data admin: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -127,7 +127,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengupdate admin: ' . $e->getMessage(),
+                'message' => 'Gagal mengupdate admin: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -154,7 +154,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus admin: ' . $e->getMessage(),
+                'message' => 'Gagal menghapus admin: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -164,8 +164,8 @@ class AdminController extends Controller
      *
      * Maintains backward compatibility with existing Blade templates.
      *
-     * @param array<string, mixed> $data Dashboard data from service
-     * @param mixed $otpBalance OTP balance data
+     * @param  array<string, mixed>  $data  Dashboard data from service
+     * @param  mixed  $otpBalance  OTP balance data
      * @return array<string, mixed>
      */
     private function transformForView(array $data, mixed $otpBalance): array

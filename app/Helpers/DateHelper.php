@@ -8,10 +8,12 @@ class DateHelper
 {
     public static function formatIndonesian($date, $format = 'd F Y H:i')
     {
-        if (!$date) return '-';
-        
+        if (! $date) {
+            return '-';
+        }
+
         $carbon = $date instanceof Carbon ? $date : Carbon::parse($date);
-        
+
         $months = [
             'January' => 'Januari',
             'February' => 'Februari',
@@ -24,24 +26,26 @@ class DateHelper
             'September' => 'September',
             'October' => 'Oktober',
             'November' => 'November',
-            'December' => 'Desember'
+            'December' => 'Desember',
         ];
-        
+
         $formatted = $carbon->format($format);
-        
+
         foreach ($months as $english => $indonesian) {
             $formatted = str_replace($english, $indonesian, $formatted);
         }
-        
+
         return $formatted;
     }
-    
+
     public static function formatIndonesianShort($date, $format = 'd M Y H:i')
     {
-        if (!$date) return '-';
-        
+        if (! $date) {
+            return '-';
+        }
+
         $carbon = $date instanceof Carbon ? $date : Carbon::parse($date);
-        
+
         $months = [
             'Jan' => 'Jan',
             'Feb' => 'Feb',
@@ -54,15 +58,15 @@ class DateHelper
             'Sep' => 'Sep',
             'Oct' => 'Okt',
             'Nov' => 'Nov',
-            'Dec' => 'Des'
+            'Dec' => 'Des',
         ];
-        
+
         $formatted = $carbon->format($format);
-        
+
         foreach ($months as $english => $indonesian) {
             $formatted = str_replace($english, $indonesian, $formatted);
         }
-        
+
         return $formatted;
     }
-} 
+}

@@ -3,24 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Setoran;
-use App\Models\Point;
-use App\Models\User;
-use App\Models\BankSampah;
 use App\Models\Address;
-use Laravel\Sanctum\PersonalAccessToken;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
+use App\Models\BankSampah;
+use App\Models\Point;
+use App\Models\Setoran;
+use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\WhatsAppService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class SetoranController extends Controller
 {
     protected $notificationService;
+
     protected $whatsappService;
 
     public function __construct(NotificationService $notificationService, WhatsAppService $whatsappService)
@@ -32,17 +31,16 @@ class SetoranController extends Controller
     /**
      * Create a new deposit
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
         // Get authenticated user
         $user = $this->getAuthenticatedUser($request);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi'
+                'message' => 'Tidak terautentikasi',
             ], 401);
         }
 
@@ -63,13 +61,13 @@ class SetoranController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 400);
         }
 
         // Decode items JSON
         $items = json_decode($request->items, true);
-        if (!is_array($items)) {
+        if (! is_array($items)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Format items tidak valid',
@@ -79,7 +77,7 @@ class SetoranController extends Controller
         try {
             // Get bank sampah data
             $bankSampah = BankSampah::findOrFail($request->bank_sampah_id);
-            
+
             // Get address data
             $address = Address::where('id', $request->address_id)
                 ->where('user_id', $user->id)
@@ -89,23 +87,23 @@ class SetoranController extends Controller
             $fotoUrl = null;
             if ($request->hasFile('foto_sampah')) {
                 $file = $request->file('foto_sampah');
-                $filename = time() . '_' . Str::random(10) . '_setoran_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                
+                $filename = time().'_'.Str::random(10).'_setoran_'.uniqid().'.'.$file->getClientOriginalExtension();
+
                 // Create directory if it doesn't exist
                 $uploadPath = base_path('../uploads/setoran');
-                if (!file_exists($uploadPath)) {
+                if (! file_exists($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
-                
+
                 // Store the file using public disk
                 $path = $file->storeAs('setoran', $filename, 'public');
-                
-                if (!$path) {
+
+                if (! $path) {
                     throw new \Exception('Failed to upload file');
                 }
-                
+
                 // Get the full URL for the image
-                $fotoUrl = env('APP_URL') . '/uploads/' . $path;
+                $fotoUrl = env('APP_URL').'/uploads/'.$path;
             }
 
             // Create setoran
@@ -121,7 +119,7 @@ class SetoranController extends Controller
                 'address_id' => $address->id,
                 'address_name' => $address->nama,
                 'address_phone' => $address->nomor_handphone,
-                'address_full_address' => $address->label_alamat . ', ' . $address->detail_lain . ', ' . $address->kecamatan . ', ' . $address->kota_kabupaten . ', ' . $address->provinsi . ', ' . $address->kode_pos,
+                'address_full_address' => $address->label_alamat.', '.$address->detail_lain.', '.$address->kecamatan.', '.$address->kota_kabupaten.', '.$address->provinsi.', '.$address->kode_pos,
                 'address_is_default' => $address->is_default,
                 'tipe_setor' => $request->tipe_setor,
                 'status' => Setoran::STATUS_DIKONFIRMASI,
@@ -145,13 +143,13 @@ class SetoranController extends Controller
                     'tipe_setor' => $setoran->tipe_setor,
                     'estimasi_total' => $setoran->estimasi_total,
                     'created_at' => $setoran->created_at,
-                ]
+                ],
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat membuat setoran: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat membuat setoran: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -159,17 +157,16 @@ class SetoranController extends Controller
     /**
      * Get user's deposit history
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
         // Get authenticated user
         $user = $this->getAuthenticatedUser($request);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi'
+                'message' => 'Tidak terautentikasi',
             ], 401);
         }
 
@@ -191,13 +188,13 @@ class SetoranController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => $setorans
+                'data' => $setorans,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat mengambil data setoran: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat mengambil data setoran: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -205,18 +202,17 @@ class SetoranController extends Controller
     /**
      * Get specific deposit detail
      *
-     * @param Request $request
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, $id)
     {
         // Get authenticated user
         $user = $this->getAuthenticatedUser($request);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi'
+                'message' => 'Tidak terautentikasi',
             ], 401);
         }
 
@@ -225,22 +221,22 @@ class SetoranController extends Controller
                 ->where('user_id', $user->id)
                 ->first();
 
-            if (!$setoran) {
+            if (! $setoran) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Setoran tidak ditemukan'
+                    'message' => 'Setoran tidak ditemukan',
                 ], 404);
             }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $setoran
+                'data' => $setoran,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat mengambil detail setoran: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat mengambil detail setoran: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -252,10 +248,10 @@ class SetoranController extends Controller
     {
         try {
             $user = auth()->user();
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Unauthorized'
+                    'message' => 'Unauthorized',
                 ], 401);
             }
 
@@ -263,10 +259,10 @@ class SetoranController extends Controller
                 ->where('user_id', $user->id)
                 ->first();
 
-            if (!$setoran) {
+            if (! $setoran) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Setoran tidak ditemukan'
+                    'message' => 'Setoran tidak ditemukan',
                 ], 404);
             }
 
@@ -274,18 +270,18 @@ class SetoranController extends Controller
             if ($setoran->status !== Setoran::STATUS_DIKONFIRMASI) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Setoran tidak dapat dibatalkan. Hanya setoran dengan status dikonfirmasi yang dapat dibatalkan.'
+                    'message' => 'Setoran tidak dapat dibatalkan. Hanya setoran dengan status dikonfirmasi yang dapat dibatalkan.',
                 ], 400);
             }
 
             $request->validate([
-                'alasan_pembatalan' => 'required|string|max:500'
+                'alasan_pembatalan' => 'required|string|max:500',
             ]);
 
             $setoran->update([
                 'status' => Setoran::STATUS_BATAL,
                 'alasan_pembatalan' => $request->alasan_pembatalan,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
             return response()->json([
@@ -295,20 +291,20 @@ class SetoranController extends Controller
                     'id' => $setoran->id,
                     'status' => $setoran->status,
                     'alasan_pembatalan' => $setoran->alasan_pembatalan,
-                    'updated_at' => $setoran->updated_at
-                ]
+                    'updated_at' => $setoran->updated_at,
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validasi gagal',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat membatalkan setoran: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat membatalkan setoran: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -320,14 +316,14 @@ class SetoranController extends Controller
     {
         try {
             $setoran = Setoran::findOrFail($id);
-            
+
             $request->validate([
                 'status' => 'required|in:dikonfirmasi,diproses,dijemput,selesai,batal',
                 'alasan_pembatalan' => 'nullable|string|max:500',
                 'petugas_nama' => 'nullable|string|max:255',
                 'petugas_contact' => 'nullable|string|max:255',
                 'items_json' => 'nullable|string',
-                'aktual_total' => 'nullable|numeric|min:0'
+                'aktual_total' => 'nullable|numeric|min:0',
             ]);
 
             $oldStatus = $setoran->status;
@@ -336,7 +332,7 @@ class SetoranController extends Controller
             // Update setoran data
             $updateData = [
                 'status' => $newStatus,
-                'updated_at' => now()
+                'updated_at' => now(),
             ];
 
             // Add conditional fields
@@ -375,20 +371,20 @@ class SetoranController extends Controller
                     'id' => $setoran->id,
                     'status' => $setoran->status,
                     'old_status' => $oldStatus,
-                    'updated_at' => $setoran->updated_at
-                ]
+                    'updated_at' => $setoran->updated_at,
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validasi gagal',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terjadi kesalahan saat memperbarui status: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat memperbarui status: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -406,7 +402,7 @@ class SetoranController extends Controller
                 $points = $aktualTotal;
             }
             // For 'jual' and 'sedekah', points = 0
-            
+
             // XP = total aktual / 1000 (regardless of tipe_setor)
             $xp = $aktualTotal / 1000;
 
@@ -431,7 +427,7 @@ class SetoranController extends Controller
                 'jumlah_point' => $points,
                 'xp' => $xp,
                 'setoran_id' => $setoran->id,
-                'keterangan' => "Setoran sampah #{$setoran->id} - {$setoran->tipe_setor} - Total: Rp " . number_format($aktualTotal)
+                'keterangan' => "Setoran sampah #{$setoran->id} - {$setoran->tipe_setor} - Total: Rp ".number_format($aktualTotal),
             ]);
 
             // Update user points and XP
@@ -441,7 +437,7 @@ class SetoranController extends Controller
                 $user->increment('xp', $xp);
                 $user->increment('setor');
                 $user->increment('sampah', $totalWeight);
-                
+
                 // Send notification to user about completed setoran
                 $this->notificationService->sendSetoranCompletedNotification(
                     $user->id,
@@ -452,7 +448,7 @@ class SetoranController extends Controller
             }
 
         } catch (\Exception $e) {
-            \Log::error('Error adding points and XP: ' . $e->getMessage());
+            \Log::error('Error adding points and XP: '.$e->getMessage());
             throw $e;
         }
     }
@@ -460,15 +456,16 @@ class SetoranController extends Controller
     /**
      * Send WhatsApp notification to bank sampah penanggung jawab asynchronously
      *
-     * @param Setoran $setoran
+     * @param  Setoran  $setoran
      * @return void
      */
     private function sendWhatsAppNotificationAsync($setoran)
     {
         // Get bank sampah penanggung jawab phone number
         $bankSampah = BankSampah::find($setoran->bank_sampah_id);
-        if (!$bankSampah || !$bankSampah->kontak_penanggung_jawab) {
+        if (! $bankSampah || ! $bankSampah->kontak_penanggung_jawab) {
             \Log::warning("Bank sampah or contact not found for setoran #{$setoran->id}");
+
             return;
         }
 
@@ -493,7 +490,7 @@ class SetoranController extends Controller
                 $setoranData
             );
         } catch (\Exception $e) {
-            \Log::error("Failed to send WhatsApp notification for setoran #{$setoran->id}: " . $e->getMessage());
+            \Log::error("Failed to send WhatsApp notification for setoran #{$setoran->id}: ".$e->getMessage());
         }
     }
 
@@ -503,12 +500,12 @@ class SetoranController extends Controller
     private function getAuthenticatedUser(Request $request)
     {
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return null;
         }
 
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return null;
         }
 

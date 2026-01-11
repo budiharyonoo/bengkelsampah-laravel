@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\OtpController;
 use App\Repositories\DashboardRepository;
 use App\Repositories\SetoranRepository;
 use App\Repositories\UserRepository;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -33,9 +32,9 @@ class DashboardService
     /**
      * Get complete dashboard data for view.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param string $periode Period type
-     * @param string|null $rangeDate Raw date range string
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  string  $periode  Period type
+     * @param  string|null  $rangeDate  Raw date range string
      * @return array<string, mixed>
      */
     public function getDashboardData(
@@ -120,8 +119,6 @@ class DashboardService
 
     /**
      * Get OTP balance from external service.
-     *
-     * @return mixed
      */
     public function getOtpBalance(): mixed
     {
@@ -140,10 +137,10 @@ class DashboardService
     /**
      * Get dashboard summary statistics.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param string $periode Period type
-     * @param string|null $startDate Custom start date
-     * @param string|null $endDate Custom end date
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  string  $periode  Period type
+     * @param  string|null  $startDate  Custom start date
+     * @param  string|null  $endDate  Custom end date
      * @return array<string, mixed>
      */
     private function getDashboardSummary(
@@ -205,10 +202,10 @@ class DashboardService
     /**
      * Get comparison chart data for current vs previous period.
      *
-     * @param int|null $bankSampahId Filter by bank sampah
-     * @param string $periode Period type
-     * @param string|null $startDate Custom start date
-     * @param string|null $endDate Custom end date
+     * @param  int|null  $bankSampahId  Filter by bank sampah
+     * @param  string  $periode  Period type
+     * @param  string|null  $startDate  Custom start date
+     * @param  string|null  $endDate  Custom end date
      * @return array{current: array, previous: array}
      */
     private function getComparisonChartData(
@@ -233,7 +230,7 @@ class DashboardService
     /**
      * Clear all dashboard caches.
      *
-     * @param int|null $bankSampahId Optional bank sampah to clear cache for
+     * @param  int|null  $bankSampahId  Optional bank sampah to clear cache for
      */
     public function clearCache(?int $bankSampahId = null): void
     {

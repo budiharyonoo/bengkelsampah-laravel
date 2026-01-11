@@ -1,22 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AdminAuthController;
-use App\Http\Controllers\ArtikelController;
-use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\SampahController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\BankSampahController;
-use App\Http\Controllers\DeleteAccountController;
-use App\Http\Controllers\DashboardTransaksiController;
-use App\Http\Controllers\DashboardRedeemController;
-use App\Http\Controllers\DashboardUserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ArtikelController;
+use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\BankSampahController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardRedeemController;
+use App\Http\Controllers\DashboardTransaksiController;
+use App\Http\Controllers\DashboardUserController;
+use App\Http\Controllers\DeleteAccountController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\SampahController;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/optimize', function() {
+Route::get('/optimize', function () {
     Artisan::call('optimize');
-    return "php artisan optimize!";
+
+    return 'php artisan optimize!';
 });
 
 Route::get('/', function () {
@@ -184,6 +185,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
 
     Route::get('/dashboard/profile', function () {
         $admin = auth('admin')->user();
+
         return view('viewprofile', compact('admin'));
     })->name('admin.profile');
 
@@ -191,15 +193,16 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         $admin = auth('admin')->user();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:admins,email,' . $admin->id,
+            'email' => 'required|email|max:255|unique:admins,email,'.$admin->id,
             'password' => 'nullable|string|min:6',
         ]);
         $admin->name = $validated['name'];
         $admin->email = $validated['email'];
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $admin->password = bcrypt($validated['password']);
         }
         $admin->save();
+
         return redirect()->route('admin.profile')->with('success', 'Profil berhasil diperbarui!');
     })->name('admin.profile.update');
 });

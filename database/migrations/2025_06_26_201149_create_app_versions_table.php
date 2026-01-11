@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('store_url')->nullable(); // play store/app store url
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             $table->index(['platform', 'is_active']);
         });
     }

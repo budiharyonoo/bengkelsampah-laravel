@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Point;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class PointSeeder extends Seeder
 {
@@ -20,6 +19,7 @@ class PointSeeder extends Seeder
 
         if ($users->isEmpty()) {
             $this->command->warn('Skipping PointSeeder: No users found');
+
             return;
         }
 
@@ -43,11 +43,11 @@ class PointSeeder extends Seeder
             'Redeem Voucher Transport',
             'Redeem Voucher Entertainment',
             'Redeem Voucher Education',
-            'Redeem Voucher Health'
+            'Redeem Voucher Health',
         ];
 
         $redeemAmounts = [
-            1000, 2000, 5000, 10000, 15000, 20000, 25000, 30000, 50000, 75000, 100000
+            1000, 2000, 5000, 10000, 15000, 20000, 25000, 30000, 50000, 75000, 100000,
         ];
 
         // Create sample redeem data (negative points for redeem)
@@ -55,14 +55,14 @@ class PointSeeder extends Seeder
             $user = $users->random();
             $redeemReason = $redeemReasons[array_rand($redeemReasons)];
             $redeemAmount = $redeemAmounts[array_rand($redeemAmounts)];
-            
+
             // Random date within last 6 months
             $randomDate = Carbon::now()->subDays(rand(1, 180));
-            
+
             $point = Point::create([
                 'user_id' => $user->id,
-                'user_name' => $user->name ?? 'User ' . $user->id,
-                'user_identifier' => $user->email ?? $user->phone ?? 'user_' . $user->id,
+                'user_name' => $user->name ?? 'User '.$user->id,
+                'user_identifier' => $user->email ?? $user->phone ?? 'user_'.$user->id,
                 'type' => 'redeem',
                 'tanggal' => $randomDate->format('Y-m-d'),
                 'jumlah_point' => -$redeemAmount, // Negative for redeem
@@ -78,14 +78,14 @@ class PointSeeder extends Seeder
         for ($i = 1; $i <= 30; $i++) {
             $user = $users->random();
             $earnAmount = rand(100, 5000); // Smaller amounts for earning
-            
+
             // Random date within last 6 months
             $randomDate = Carbon::now()->subDays(rand(1, 180));
-            
+
             $point = Point::create([
                 'user_id' => $user->id,
-                'user_name' => $user->name ?? 'User ' . $user->id,
-                'user_identifier' => $user->email ?? $user->phone ?? 'user_' . $user->id,
+                'user_name' => $user->name ?? 'User '.$user->id,
+                'user_identifier' => $user->email ?? $user->phone ?? 'user_'.$user->id,
                 'type' => 'setor',
                 'tanggal' => $randomDate->format('Y-m-d'),
                 'jumlah_point' => $earnAmount, // Positive for earning
@@ -112,6 +112,7 @@ class PointSeeder extends Seeder
             'uploads/redeem/proof_4.png',
             'uploads/redeem/proof_5.png',
         ];
+
         return $proofImages[array_rand($proofImages)];
     }
-} 
+}

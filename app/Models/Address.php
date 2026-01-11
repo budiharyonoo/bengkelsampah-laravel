@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Address newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Address newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Address query()
+ *
  * @mixin \Eloquent
  */
 class Address extends Model
@@ -31,7 +33,7 @@ class Address extends Model
         'kecamatan',
         'kode_pos',
         'detail_lain',
-        'is_default'
+        'is_default',
     ];
 
     /**

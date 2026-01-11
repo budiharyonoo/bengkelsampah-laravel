@@ -36,7 +36,7 @@ class UpdateAdminRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:admins,email,' . $adminId],
+            'email' => ['required', 'email', 'max:255', 'unique:admins,email,'.$adminId],
             'password' => ['nullable', 'string', 'min:6'],
             'id_bank_sampah' => ['required', 'exists:bank_sampah,id'],
         ];

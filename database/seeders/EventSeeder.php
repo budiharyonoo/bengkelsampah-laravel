@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Event;
 use App\Models\Admin;
+use App\Models\Event;
+use Illuminate\Database\Seeder;
 
 class EventSeeder extends Seeder
 {
@@ -16,7 +15,7 @@ class EventSeeder extends Seeder
     {
         // Get first admin or create one if none exists
         $admin = Admin::first();
-        if (!$admin) {
+        if (! $admin) {
             $admin = Admin::create([
                 'name' => 'Admin Bengkel Sampah',
                 'email' => 'admin@bengkelsampah.com',
@@ -92,7 +91,7 @@ class EventSeeder extends Seeder
         $statuses = ['active', 'completed', 'cancelled'];
         for ($i = 0; $i < 25; $i++) {
             $start = $faker->dateTimeBetween('-2 months', '+2 months');
-            $end = (clone $start)->modify('+'.rand(2,8).' hours');
+            $end = (clone $start)->modify('+'.rand(2, 8).' hours');
             Event::create([
                 'title' => $faker->sentence(4),
                 'description' => $faker->paragraph(3),

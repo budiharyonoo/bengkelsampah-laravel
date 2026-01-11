@@ -43,7 +43,7 @@ class NotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve notifications: ' . $e->getMessage(),
+                'message' => 'Failed to retrieve notifications: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -85,7 +85,7 @@ class NotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to mark notification as read: ' . $e->getMessage(),
+                'message' => 'Failed to mark notification as read: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -106,7 +106,7 @@ class NotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to mark all notifications as read: ' . $e->getMessage(),
+                'message' => 'Failed to mark all notifications as read: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -148,7 +148,7 @@ class NotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete notification: ' . $e->getMessage(),
+                'message' => 'Failed to delete notification: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -183,7 +183,7 @@ class NotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update FCM token: ' . $e->getMessage(),
+                'message' => 'Failed to update FCM token: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -195,8 +195,8 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
-            if (!$user->fcm_token) {
+
+            if (! $user->fcm_token) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User does not have FCM token',
@@ -225,8 +225,8 @@ class NotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send test notification: ' . $e->getMessage(),
+                'message' => 'Failed to send test notification: '.$e->getMessage(),
             ], 500);
         }
     }
-} 
+}

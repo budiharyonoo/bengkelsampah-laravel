@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $reason_text
  * @property-read mixed $status_badge_class
  * @property-read mixed $status_text
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|DeleteAccountRequest newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|DeleteAccountRequest newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|DeleteAccountRequest query()
+ *
  * @mixin \Eloquent
  */
 class DeleteAccountRequest extends Model
@@ -83,4 +85,4 @@ class DeleteAccountRequest extends Model
 
         return $classes[$this->status] ?? 'badge-secondary';
     }
-} 
+}

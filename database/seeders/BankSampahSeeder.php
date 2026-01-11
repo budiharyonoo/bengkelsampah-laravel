@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\BankSampah;
+use Illuminate\Database\Seeder;
 
 class BankSampahSeeder extends Seeder
 {
@@ -93,7 +92,7 @@ class BankSampahSeeder extends Seeder
                 'nama_penanggung_jawab' => 'Yuni Safitri',
                 'kontak_penanggung_jawab' => '021-5550309',
                 'tipe_layanan' => 'keduanya',
-            ]
+            ],
         ];
 
         foreach ($bankSampahList as $bankData) {
@@ -105,4 +104,4 @@ class BankSampahSeeder extends Seeder
 
         $this->command->info('Bank Sampah data seeded successfully!');
     }
-} 
+}

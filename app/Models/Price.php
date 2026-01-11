@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property-read \App\Models\BankSampah|null $bankSampah
  * @property-read \App\Models\Sampah|null $sampah
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Price newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Price newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Price query()
+ *
  * @mixin \Eloquent
  */
 class Price extends Model
