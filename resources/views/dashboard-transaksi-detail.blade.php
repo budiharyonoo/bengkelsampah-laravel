@@ -63,9 +63,9 @@
         .item-input:focus { outline: none; border-color: #39746E; }
         /* Calculator input wrapper */
         .calc-wrapper { display: flex; gap: 6px; align-items: center; }
-        .calc-input { width: 90px; padding: 4px 8px; border: 1px solid #E5E6E6; border-radius: 4px; font-size: 13px; text-align: center; background: #FFFBEB; }
-        .calc-input:focus { outline: none; border-color: #F59E0B; }
-        .calc-input::placeholder { color: #9CA3AF; font-size: 11px; }
+        .calc-input { width: 90px; padding: 4px 8px; border: 1px solid #E5E6E6; border-radius: 4px; font-size: 13px; text-align: center; }
+        .calc-input:focus { outline: none; border-color: #39746E; }
+        .calc-input::placeholder {  font-size: 11px; }
         .item-total { font-weight: 600; color: #0FB7A6; }
         .item-actions { display: flex; gap: 8px; }
         .btn-small { padding: 4px 8px; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; }
@@ -92,6 +92,10 @@
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #39746E; }
         .form-control { width: 100%; padding: 8px 12px; border: 1px solid #E5E6E6; border-radius: 6px; font-size: 14px; }
         .form-control:focus { outline: none; border-color: #39746E; }
+        /* Calculator input in modal */
+        #modal_calc { background: #fff; text-align: center; }
+        /* Readonly input styling */
+        .form-control[readonly] { background: #F8F9FA; cursor: not-allowed; }
 
         /* ========================================
            MOBILE RESPONSIVE STYLES
@@ -559,8 +563,7 @@
                                     <input type="number" class="item-input" name="aktual_berat[{{ $index }}]"
                                            id="aktual-berat-{{ $index }}"
                                            value="{{ $item['aktual_berat'] ?? '' }}"
-                                           step="0.1" min="0"
-                                           onchange="updateItemTotal({{ $index }}, this.value, {{ $item['harga_per_satuan'] ?? 0 }})"
+                                           step="0.1" min="0" readonly
                                            @if(isset($item['status']) && $item['status'] === 'dihapus') disabled @endif>
                                 </div>
                             @else
@@ -761,8 +764,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="aktual_berat">Berat Aktual: <span style="color: #DC2626;">*</span></label>
-                    <input type="number" name="aktual_berat" id="aktual_berat" class="form-control" step="0.1" required oninput="calculateTotal()">
+                    <label for="aktual_berat">Aktual (kg): <span style="color: #DC2626;">*</span></label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="modal_calc" class="form-control" placeholder="cth: 1+2+3" oninput="calculateModalExpression(this.value)" style="flex: 2;">
+                        <input type="number" name="aktual_berat" id="aktual_berat" class="form-control" step="0.1" required readonly style="flex: 1;">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1014,6 +1020,34 @@
             }
         }
 
+        // Calculate expression from modal calculator input
+        function calculateModalExpression(expression) {
+            if (!expression || expression.trim() === '') {
+                return;
+            }
+
+            try {
+                // Only allow numbers and basic operators (+, -, *, /)
+                const sanitized = expression.replace(/[^0-9+\-*/.]/g, '');
+                if (sanitized === '') return;
+
+                // Evaluate the expression safely
+                const result = Function('"use strict"; return (' + sanitized + ')')();
+
+                if (!isNaN(result) && isFinite(result)) {
+                    const rounded = Math.round(result * 10) / 10; // Round to 1 decimal
+                    const beratInput = document.getElementById('aktual_berat');
+                    if (beratInput) {
+                        beratInput.value = rounded;
+                        // Trigger the calculateTotal function
+                        calculateTotal();
+                    }
+                }
+            } catch (e) {
+                // Invalid expression, ignore
+            }
+        }
+
         // Calculate total when berat is changed
         function calculateTotal() {
             const berat = parseFloat(document.getElementById('aktual_berat').value) || 0;
@@ -1097,8 +1131,7 @@
                         <input type="number" class="item-input" name="aktual_berat[${index}]"
                                id="aktual-berat-${index}"
                                value="${item.aktual_berat || ''}"
-                               step="0.1" min="0"
-                               onchange="updateItemTotal(${index}, this.value, ${item.harga_per_satuan})">
+                               step="0.1" min="0" readonly>
                     </div>
                 </td>
                 <td data-label="Aktual Total" class="item-total" id="aktual-total-${index}">

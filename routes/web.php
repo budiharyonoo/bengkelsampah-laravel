@@ -12,11 +12,11 @@ use App\Http\Controllers\DeleteAccountController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\SampahController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/optimize', function () {
     Artisan::call('optimize');
-
     return 'php artisan optimize!';
 });
 
@@ -193,7 +193,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         $admin = auth('admin')->user();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:admins,email,'.$admin->id,
+            'email' => 'required|email|max:255|unique:admins,email,' . $admin->id,
             'password' => 'nullable|string|min:6',
         ]);
         $admin->name = $validated['name'];
