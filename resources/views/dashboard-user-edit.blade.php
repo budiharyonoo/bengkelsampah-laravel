@@ -99,6 +99,26 @@
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
+                            <label class="form-label" for="user_type">Jenis Nasabah *</label>
+                            <select class="form-select" id="user_type" name="user_type" required>
+                                <option value="-1" {{ old('user_type', $user->user_type) == -1 ? 'selected' : '' }}>Instansi</option>
+                                <option value="0" {{ old('user_type', $user->user_type) == 0 ? 'selected' : '' }}>Umum</option>
+                                @foreach($bankSampahList as $bankSampah)
+                                    <option value="{{ $bankSampah->id }}" {{ old('user_type', $user->user_type) == $bankSampah->id ? 'selected' : '' }}>
+                                        {{ $bankSampah->nama_bank_sampah }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text">Pilih jenis nasabah: Instansi, Umum, atau Bank Sampah tertentu</small>
+                            @error('user_type')
+                                <div class="form-text" style="color:#F73541;">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
                             <label class="form-label" for="password">Password Baru</label>
                             <input type="password" class="form-input" id="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah password">
                         </div>

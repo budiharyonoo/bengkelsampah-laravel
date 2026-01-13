@@ -98,4 +98,29 @@ class User extends Authenticatable
     {
         return $this->hasMany(Setoran::class);
     }
+
+    /**
+     * Get the bank sampah for this user (when user_type >= 1)
+     */
+    public function bankSampah()
+    {
+        return $this->belongsTo(BankSampah::class, 'user_type');
+    }
+
+    /**
+     * Get the customer type display text
+     */
+    public function getJenisNasabahAttribute()
+    {
+        if ($this->user_type === -1) {
+            return 'Instansi';
+        }
+
+        if ($this->user_type === 0) {
+            return 'Umum';
+        }
+
+        // user_type >= 1 means it's a bank_sampah_id
+        return $this->bankSampah?->nama_bank_sampah ?? 'Bank Sampah #'.$this->user_type;
+    }
 }

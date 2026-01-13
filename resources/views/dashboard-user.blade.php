@@ -699,6 +699,7 @@
                                 </th>
                                 <th>Nama</th>
                                 <th>Identifier</th>
+                                <th>Jenis Nasabah</th>
                                 <th>Poin</th>
                                 <th>XP</th>
                                 <th>Setoran</th>
@@ -715,6 +716,7 @@
                                 </td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->identifier }}</td>
+                                <td>{{ $user->jenis_nasabah }}</td>
                         <td>{{ number_format($user->poin, 2, ',', '.') }}</td>
                         <td>{{ number_format($user->xp, 0) }}</td>
                                 <td>{{ $user->setor }}</td>

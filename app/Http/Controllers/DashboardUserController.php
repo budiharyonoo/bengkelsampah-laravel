@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankSampah;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class DashboardUserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::query()->with('bankSampah');
 
         // Search functionality
         if ($request->filled('search')) {
@@ -39,7 +40,7 @@ class DashboardUserController extends Controller
 
     public function show($id)
     {
-        $user = User::with(['points' => function ($query) {
+        $user = User::with(['bankSampah', 'points' => function ($query) {
             $query->orderBy('created_at', 'desc')->limit(10);
         }, 'setorans' => function ($query) {
             $query->orderBy('created_at', 'desc')->limit(10);
@@ -74,9 +75,10 @@ class DashboardUserController extends Controller
 
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('bankSampah')->findOrFail($id);
+        $bankSampahList = BankSampah::orderBy('nama_bank_sampah')->get();
 
-        return view('dashboard-user-edit', compact('user'));
+        return view('dashboard-user-edit', compact('user', 'bankSampahList'));
     }
 
     public function update(Request $request, $id)
@@ -86,6 +88,7 @@ class DashboardUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'identifier' => ['required', 'string', Rule::unique('users')->ignore($id), 'max:255'],
+            'user_type' => ['required', 'integer', 'min:-1'],
             'poin' => 'required',
             'xp' => 'nullable|numeric|min:0',
             'setor' => 'nullable|numeric|min:0',
@@ -132,6 +135,7 @@ class DashboardUserController extends Controller
         $updateData = [
             'name' => $request->name,
             'identifier' => $request->identifier,
+            'user_type' => $request->user_type,
             'poin' => $poin,
         ];
 
@@ -209,7 +213,7 @@ class DashboardUserController extends Controller
     public function exportExcel(Request $request)
     {
         try {
-            $users = User::with('addresses')->orderBy('created_at', 'desc')->get();
+            $users = User::with(['addresses', 'bankSampah'])->orderBy('created_at', 'desc')->get();
 
             // Generate Excel file
             return $this->generateExcelFile($users);
@@ -267,18 +271,18 @@ class DashboardUserController extends Controller
 
         // Set title
         $sheet->setCellValue('A1', 'LAPORAN DATA USER BENGKEL SAMPAH');
-        $sheet->mergeCells('A1:H1');
+        $sheet->mergeCells('A1:I1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set subtitle
         $sheet->setCellValue('A2', 'Tanggal Export: '.now()->format('d F Y H:i:s'));
-        $sheet->mergeCells('A2:H2');
+        $sheet->mergeCells('A2:I2');
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set headers
         $headers = [
-            'No', 'ID', 'Nama Lengkap', 'Identifier', 'Point', 'XP',
+            'No', 'ID', 'Nama Lengkap', 'Identifier', 'Jenis Nasabah', 'Point', 'XP',
             'Jumlah Setoran', 'Alamat',
         ];
 
@@ -317,28 +321,29 @@ class DashboardUserController extends Controller
             $sheet->setCellValue('B'.$row, $user->id);
             $sheet->setCellValue('C'.$row, $user->name);
             $sheet->setCellValue('D'.$row, $user->identifier);
-            $sheet->setCellValue('E'.$row, number_format($user->poin ?? 0, 0));
-            $sheet->setCellValue('F'.$row, number_format($user->xp ?? 0, 0));
-            $sheet->setCellValue('G'.$row, $user->setor ?? 0);
-            $sheet->setCellValue('H'.$row, $userAddress);
+            $sheet->setCellValue('E'.$row, $user->jenis_nasabah);
+            $sheet->setCellValue('F'.$row, number_format($user->poin ?? 0, 0));
+            $sheet->setCellValue('G'.$row, number_format($user->xp ?? 0, 0));
+            $sheet->setCellValue('H'.$row, $user->setor ?? 0);
+            $sheet->setCellValue('I'.$row, $userAddress);
 
             // Center align numeric columns
             $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('B'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('E'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('F'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('G'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('H'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             $row++;
         }
 
         // Auto-size columns
-        foreach (range('A', 'H') as $col) {
+        foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         // Add borders to data
-        $dataRange = 'A4:H'.($row - 1);
+        $dataRange = 'A4:I'.($row - 1);
         $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         // Create the Excel file
@@ -361,7 +366,7 @@ class DashboardUserController extends Controller
     public function exportCsv(Request $request)
     {
         try {
-            $users = User::with('addresses')->orderBy('created_at', 'desc')->get();
+            $users = User::with(['addresses', 'bankSampah'])->orderBy('created_at', 'desc')->get();
 
             // Generate CSV file
             return $this->generateCsvFile($users);
@@ -396,7 +401,7 @@ class DashboardUserController extends Controller
 
             // Headers
             fputcsv($file, [
-                'No', 'ID', 'Nama Lengkap', 'Identifier', 'Point', 'XP',
+                'No', 'ID', 'Nama Lengkap', 'Identifier', 'Jenis Nasabah', 'Point', 'XP',
                 'Jumlah Setoran', 'Alamat',
             ]);
 
@@ -427,6 +432,7 @@ class DashboardUserController extends Controller
                     $user->id,
                     $user->name,
                     $user->identifier,
+                    $user->jenis_nasabah,
                     number_format($user->poin ?? 0, 0),
                     number_format($user->xp ?? 0, 0),
                     $user->setor ?? 0,
@@ -524,5 +530,408 @@ class DashboardUserController extends Controller
             'totalSampah' => $totalSampah,
             'totalPoint' => $totalPoint,
         ];
+    }
+
+    /**
+     * Export single user detail to Excel
+     */
+    public function exportUserDetailExcel($id)
+    {
+        try {
+            $user = User::with(['bankSampah', 'addresses', 'points' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }, 'setorans' => function ($query) {
+                $query->with('bankSampah')->orderBy('created_at', 'desc');
+            }])->findOrFail($id);
+
+            return $this->generateUserDetailExcelFile($user);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in DashboardUserController@exportUserDetailExcel: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal export Excel: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate Excel file for single user detail
+     */
+    private function generateUserDetailExcelFile($user)
+    {
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set document properties
+        $spreadsheet->getProperties()
+            ->setCreator('Bengkel Sampah Admin')
+            ->setLastModifiedBy('Bengkel Sampah Admin')
+            ->setTitle('Detail User - '.$user->name)
+            ->setSubject('Detail User')
+            ->setDescription('Detail data user Bengkel Sampah')
+            ->setKeywords('user, detail, bengkel sampah')
+            ->setCategory('Laporan');
+
+        // Styles
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '39746E']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
+        ];
+
+        $sectionHeaderStyle = [
+            'font' => ['bold' => true, 'size' => 12],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8F5F3']],
+        ];
+
+        $row = 1;
+
+        // Title
+        $sheet->setCellValue('A'.$row, 'DETAIL USER - '.strtoupper($user->name));
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $row++;
+
+        // Export date
+        $sheet->setCellValue('A'.$row, 'Tanggal Export: '.now()->format('d F Y H:i:s'));
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $row += 2;
+
+        // Section 1: User Information
+        $sheet->setCellValue('A'.$row, 'INFORMASI USER');
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->applyFromArray($sectionHeaderStyle);
+        $row++;
+
+        $userInfo = [
+            ['Identifier', $user->identifier],
+            ['Nama', $user->name],
+            ['Jenis Nasabah', $user->jenis_nasabah],
+            ['No. Telepon', $user->phone ?? '-'],
+            ['Tanggal Registrasi', $user->created_at->format('d F Y H:i')],
+            ['Bank Sampah', $user->bankSampah->nama_bank_sampah ?? '-'],
+        ];
+
+        foreach ($userInfo as $info) {
+            $sheet->setCellValue('A'.$row, $info[0]);
+            $sheet->setCellValue('B'.$row, $info[1]);
+            $sheet->getStyle('A'.$row)->getFont()->setBold(true);
+            $row++;
+        }
+        $row++;
+
+        // Section 2: Statistics
+        $sheet->setCellValue('A'.$row, 'STATISTIK');
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->applyFromArray($sectionHeaderStyle);
+        $row++;
+
+        $statsHeaders = ['Total Setoran', 'Total Poin', 'Total XP', 'Total Sampah (kg)', 'Total Sampah (unit)'];
+        $statsValues = [
+            number_format($user->setor ?? 0),
+            number_format($user->poin ?? 0, 2, ',', '.'),
+            number_format($user->xp ?? 0),
+            number_format($user->sampah ?? 0, 1),
+            number_format($user->sampah_unit ?? 0),
+        ];
+
+        $col = 'A';
+        foreach ($statsHeaders as $header) {
+            $sheet->setCellValue($col.$row, $header);
+            $sheet->getStyle($col.$row)->applyFromArray($headerStyle);
+            $col++;
+        }
+        $row++;
+
+        $col = 'A';
+        foreach ($statsValues as $value) {
+            $sheet->setCellValue($col.$row, $value);
+            $sheet->getStyle($col.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $col++;
+        }
+        $row += 2;
+
+        // Section 3: Setorans
+        $sheet->setCellValue('A'.$row, 'RIWAYAT SETORAN');
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->applyFromArray($sectionHeaderStyle);
+        $row++;
+
+        if ($user->setorans && $user->setorans->count() > 0) {
+            $setoranHeaders = ['No', 'Bank Sampah', 'Tanggal', 'Jumlah (Rp)', 'Status'];
+            $col = 'A';
+            foreach ($setoranHeaders as $header) {
+                $sheet->setCellValue($col.$row, $header);
+                $sheet->getStyle($col.$row)->applyFromArray($headerStyle);
+                $col++;
+            }
+            $row++;
+
+            foreach ($user->setorans as $index => $setoran) {
+                $sheet->setCellValue('A'.$row, $index + 1);
+                $sheet->setCellValue('B'.$row, $setoran->bankSampah->nama_bank_sampah ?? '-');
+                $sheet->setCellValue('C'.$row, $setoran->created_at->format('d/m/Y H:i'));
+                $sheet->setCellValue('D'.$row, 'Rp '.number_format($setoran->total_harga ?? 0, 0, ',', '.'));
+                $sheet->setCellValue('E'.$row, ucfirst($setoran->status));
+                $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $row++;
+            }
+        } else {
+            $sheet->setCellValue('A'.$row, 'Tidak ada data setoran');
+            $sheet->mergeCells('A'.$row.':F'.$row);
+            $row++;
+        }
+        $row++;
+
+        // Section 4: Points History
+        $sheet->setCellValue('A'.$row, 'RIWAYAT POIN');
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->applyFromArray($sectionHeaderStyle);
+        $row++;
+
+        if ($user->points && $user->points->count() > 0) {
+            $pointHeaders = ['No', 'Keterangan', 'Tanggal', 'Jumlah', 'Tipe'];
+            $col = 'A';
+            foreach ($pointHeaders as $header) {
+                $sheet->setCellValue($col.$row, $header);
+                $sheet->getStyle($col.$row)->applyFromArray($headerStyle);
+                $col++;
+            }
+            $row++;
+
+            foreach ($user->points as $index => $point) {
+                $prefix = $point->tipe === 'setor' ? '+' : '-';
+                $sheet->setCellValue('A'.$row, $index + 1);
+                $sheet->setCellValue('B'.$row, $point->keterangan ?? '-');
+                $sheet->setCellValue('C'.$row, $point->created_at->format('d/m/Y H:i'));
+                $sheet->setCellValue('D'.$row, $prefix.number_format($point->jumlah ?? 0, 2, ',', '.'));
+                $sheet->setCellValue('E'.$row, ucfirst($point->tipe));
+                $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $row++;
+            }
+        } else {
+            $sheet->setCellValue('A'.$row, 'Tidak ada riwayat poin');
+            $sheet->mergeCells('A'.$row.':F'.$row);
+            $row++;
+        }
+        $row++;
+
+        // Section 5: Addresses
+        $sheet->setCellValue('A'.$row, 'DAFTAR ALAMAT');
+        $sheet->mergeCells('A'.$row.':F'.$row);
+        $sheet->getStyle('A'.$row)->applyFromArray($sectionHeaderStyle);
+        $row++;
+
+        if ($user->addresses && $user->addresses->count() > 0) {
+            $addressHeaders = ['No', 'Label', 'Alamat Lengkap', 'No. Telepon', 'Default'];
+            $col = 'A';
+            foreach ($addressHeaders as $header) {
+                $sheet->setCellValue($col.$row, $header);
+                $sheet->getStyle($col.$row)->applyFromArray($headerStyle);
+                $col++;
+            }
+            $row++;
+
+            foreach ($user->addresses as $index => $address) {
+                $fullAddress = $address->detail_lain.', '.$address->kecamatan.', '.
+                              $address->kota_kabupaten.', '.$address->provinsi.' '.$address->kode_pos;
+                $sheet->setCellValue('A'.$row, $index + 1);
+                $sheet->setCellValue('B'.$row, $address->label_alamat);
+                $sheet->setCellValue('C'.$row, $fullAddress);
+                $sheet->setCellValue('D'.$row, $address->nomor_handphone ?? '-');
+                $sheet->setCellValue('E'.$row, $address->is_default ? 'Ya' : 'Tidak');
+                $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $row++;
+            }
+        } else {
+            $sheet->setCellValue('A'.$row, 'Tidak ada data alamat');
+            $sheet->mergeCells('A'.$row.':F'.$row);
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Create the Excel file
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'user_detail_'.$user->identifier.'_'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
+        $tempFile = storage_path('app/temp/'.$filename);
+        if (! file_exists(dirname($tempFile))) {
+            mkdir(dirname($tempFile), 0755, true);
+        }
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend();
+    }
+
+    /**
+     * Export single user detail to CSV
+     */
+    public function exportUserDetailCsv($id)
+    {
+        try {
+            $user = User::with(['bankSampah', 'addresses', 'points' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }, 'setorans' => function ($query) {
+                $query->with('bankSampah')->orderBy('created_at', 'desc');
+            }])->findOrFail($id);
+
+            return $this->generateUserDetailCsvFile($user);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in DashboardUserController@exportUserDetailCsv: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal export CSV: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate CSV file for single user detail
+     */
+    private function generateUserDetailCsvFile($user)
+    {
+        $filename = 'user_detail_'.$user->identifier.'_'.now()->format('Y-m-d_H-i-s').'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
+
+        $callback = function () use ($user) {
+            $file = fopen('php://output', 'w');
+
+            // Add BOM for UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Title
+            fputcsv($file, ['DETAIL USER - '.$user->name]);
+            fputcsv($file, ['Tanggal Export: '.now()->format('d F Y H:i:s')]);
+            fputcsv($file, []);
+
+            // User Information
+            fputcsv($file, ['INFORMASI USER']);
+            fputcsv($file, ['Identifier', $user->identifier]);
+            fputcsv($file, ['Nama', $user->name]);
+            fputcsv($file, ['Jenis Nasabah', $user->jenis_nasabah]);
+            fputcsv($file, ['No. Telepon', $user->phone ?? '-']);
+            fputcsv($file, ['Tanggal Registrasi', $user->created_at->format('d F Y H:i')]);
+            fputcsv($file, ['Bank Sampah', $user->bankSampah->nama_bank_sampah ?? '-']);
+            fputcsv($file, []);
+
+            // Statistics
+            fputcsv($file, ['STATISTIK']);
+            fputcsv($file, ['Total Setoran', 'Total Poin', 'Total XP', 'Total Sampah (kg)', 'Total Sampah (unit)']);
+            fputcsv($file, [
+                number_format($user->setor ?? 0),
+                number_format($user->poin ?? 0, 2, ',', '.'),
+                number_format($user->xp ?? 0),
+                number_format($user->sampah ?? 0, 1),
+                number_format($user->sampah_unit ?? 0),
+            ]);
+            fputcsv($file, []);
+
+            // Setorans
+            fputcsv($file, ['RIWAYAT SETORAN']);
+            if ($user->setorans && $user->setorans->count() > 0) {
+                fputcsv($file, ['No', 'Bank Sampah', 'Tanggal', 'Jumlah (Rp)', 'Status']);
+                foreach ($user->setorans as $index => $setoran) {
+                    fputcsv($file, [
+                        $index + 1,
+                        $setoran->bankSampah->nama_bank_sampah ?? '-',
+                        $setoran->created_at->format('d/m/Y H:i'),
+                        'Rp '.number_format($setoran->total_harga ?? 0, 0, ',', '.'),
+                        ucfirst($setoran->status),
+                    ]);
+                }
+            } else {
+                fputcsv($file, ['Tidak ada data setoran']);
+            }
+            fputcsv($file, []);
+
+            // Points History
+            fputcsv($file, ['RIWAYAT POIN']);
+            if ($user->points && $user->points->count() > 0) {
+                fputcsv($file, ['No', 'Keterangan', 'Tanggal', 'Jumlah', 'Tipe']);
+                foreach ($user->points as $index => $point) {
+                    $prefix = $point->tipe === 'setor' ? '+' : '-';
+                    fputcsv($file, [
+                        $index + 1,
+                        $point->keterangan ?? '-',
+                        $point->created_at->format('d/m/Y H:i'),
+                        $prefix.number_format($point->jumlah ?? 0, 2, ',', '.'),
+                        ucfirst($point->tipe),
+                    ]);
+                }
+            } else {
+                fputcsv($file, ['Tidak ada riwayat poin']);
+            }
+            fputcsv($file, []);
+
+            // Addresses
+            fputcsv($file, ['DAFTAR ALAMAT']);
+            if ($user->addresses && $user->addresses->count() > 0) {
+                fputcsv($file, ['No', 'Label', 'Alamat Lengkap', 'No. Telepon', 'Default']);
+                foreach ($user->addresses as $index => $address) {
+                    $fullAddress = $address->detail_lain.', '.$address->kecamatan.', '.
+                                  $address->kota_kabupaten.', '.$address->provinsi.' '.$address->kode_pos;
+                    fputcsv($file, [
+                        $index + 1,
+                        $address->label_alamat,
+                        $fullAddress,
+                        $address->nomor_handphone ?? '-',
+                        $address->is_default ? 'Ya' : 'Tidak',
+                    ]);
+                }
+            } else {
+                fputcsv($file, ['Tidak ada data alamat']);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export single user detail to PDF
+     */
+    public function exportUserDetailPdf($id)
+    {
+        try {
+            $user = User::with(['bankSampah', 'addresses', 'points' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }, 'setorans' => function ($query) {
+                $query->with('bankSampah')->orderBy('created_at', 'desc');
+            }])->findOrFail($id);
+
+            $pdf = Pdf::loadView('pdf.user-detail-report', [
+                'user' => $user,
+            ]);
+
+            $pdf->setPaper('A4', 'portrait');
+
+            $filename = 'user_detail_'.$user->identifier.'_'.now()->format('Y-m-d_H-i-s').'.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in DashboardUserController@exportUserDetailPdf: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal export PDF: '.$e->getMessage(),
+            ], 500);
+        }
     }
 }

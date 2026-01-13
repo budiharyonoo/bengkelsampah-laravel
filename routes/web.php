@@ -128,6 +128,9 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('user/export/excel', [DashboardUserController::class, 'exportExcel'])->name('dashboard.user.export.excel');
     Route::post('user/export/csv', [DashboardUserController::class, 'exportCsv'])->name('dashboard.user.export.csv');
     Route::post('user/export/pdf', [DashboardUserController::class, 'exportPdf'])->name('dashboard.user.export.pdf');
+    Route::post('user/{id}/export/excel', [DashboardUserController::class, 'exportUserDetailExcel'])->name('dashboard.user.export-detail.excel');
+    Route::post('user/{id}/export/csv', [DashboardUserController::class, 'exportUserDetailCsv'])->name('dashboard.user.export-detail.csv');
+    Route::post('user/{id}/export/pdf', [DashboardUserController::class, 'exportUserDetailPdf'])->name('dashboard.user.export-detail.pdf');
 
     // Poin routes (for redeem functionality)
     Route::get('/poin', [DashboardRedeemController::class, 'index'])->name('dashboard.poin');
