@@ -27,6 +27,7 @@ class Event extends Model
         'start_datetime',
         'end_datetime',
         'location',
+        'url',
         'max_participants',
         'status',
         'admin_name',

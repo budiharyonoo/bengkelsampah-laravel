@@ -439,6 +439,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">URL Event (Opsional)</label>
+                    <input type="url" class="form-input" name="url" placeholder="Masukkan URL event (contoh: https://example.com/event)">
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Maksimal Peserta (Opsional)</label>
                     <input type="number" class="form-input" name="max_participants" placeholder="Masukkan jumlah maksimal peserta" min="1">
                 </div>

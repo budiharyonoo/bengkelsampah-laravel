@@ -86,6 +86,7 @@ class EventController extends Controller
                 'start_datetime' => 'required|date|after:now',
                 'end_datetime' => 'required|date|after:start_datetime',
                 'location' => 'required|string|max:255',
+                'url' => 'nullable|url|max:500',
                 'max_participants' => 'nullable|integer|min:1',
                 'admin_name' => 'required|string|max:255',
                 'status' => 'required|in:active,completed,cancelled',
@@ -168,6 +169,7 @@ class EventController extends Controller
                 'start_datetime' => 'required|date',
                 'end_datetime' => 'required|date|after:start_datetime',
                 'location' => 'required|string|max:255',
+                'url' => 'nullable|url|max:500',
                 'max_participants' => 'nullable|integer|min:1',
                 'status' => 'required|in:active,completed,cancelled',
             ]);
@@ -555,8 +557,10 @@ class EventController extends Controller
             // Generate PDF using DomPDF
             $dompdf = new \Dompdf\Dompdf($options);
 
+            $period = $event->start_datetime->translatedFormat('d F Y H:i').' - '.$event->end_datetime->translatedFormat('d F Y H:i');
+
             // Get HTML content
-            $html = view('pdf.event-report', compact('event'))->render();
+            $html = view('pdf.event-detail-report', compact('event', 'period'))->render();
 
             // Log the HTML to debug
             \Log::debug('PDF HTML content length: '.strlen($html));

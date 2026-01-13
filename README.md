@@ -1,6 +1,17 @@
-
-
 # Bengkel Sampah
+
+## Todo List
+
+[x] (On Staging) Di dashboard ada filter bank sampah kan, nah minta ga dropdown gitu, tapi tipe search
+[x] (On Staging) Di transaksi juga dibuat sama
+[x] (On Staging) Di menu user perlu tambahain jenis nasabahnya di table, lalu di action read dan editnya juga (bisa edit jenis nasabah)
+[ ] Di transaksi struct PDF nya corrupt nampaknya, minta di fix sama dipastiin sizenya aman buat di thermal print
+[x] Minta ditambahkan export data user
+[ ] Dampak Lingkungan ganti dengan standar KLHK -> (Dokumennya dari user)
+[ ] Penambahan form url di event, api mobile juga minta ditambah return form url nya
+[ ] Laporan event sekarang gabisa di download PDF nya
+
+## Tech Stack
 
 [![Laravel](https://img.shields.io/badge/Laravel-10.x-red.svg)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.1+-blue.svg)](https://php.net)
@@ -103,7 +114,7 @@ The system enables users to:
 
 ### 🔔 Notification System
 - **Push Notifications**: Firebase Cloud Messaging integration
-- **Dual Zenziva Integration**: 
+- **Dual Zenziva Integration**:
   - **OTP Account**: For user verification (WhatsApp Official API)
   - **Setor Account**: For transaction notifications (WhatsApp Regular API)
 - **Real-time Updates**: Instant status change notifications
@@ -134,7 +145,7 @@ The system enables users to:
 
 ### External Services
 - **Push Notifications**: Firebase Cloud Messaging
-- **Dual Zenziva Integration**: 
+- **Dual Zenziva Integration**:
   - OTP Account (WhatsApp Official API)
   - Setor Account (WhatsApp Regular API)
 - **File Storage**: Local filesystem with upload management
@@ -495,7 +506,7 @@ bengkelsampah/
 
 ### Notification System
 - **Real-time Updates**: Firebase Cloud Messaging for instant notifications
-- **Dual WhatsApp Integration**: 
+- **Dual WhatsApp Integration**:
   - OTP notifications via WhatsApp Official API
   - Transaction notifications via WhatsApp Regular API
 - **Multi-channel**: Support for push, email, and WhatsApp notifications
