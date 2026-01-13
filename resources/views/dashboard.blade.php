@@ -21,10 +21,24 @@
                             </svg>
                         </button>
                         <div id="bankDropdown" class="filter-dropdown-content">
+                            <!-- Search input -->
+                            <div class="filter-search-wrapper">
+                                <input
+                                    type="text"
+                                    id="bankSearchInput"
+                                    class="filter-search-input"
+                                    placeholder="Cari bank sampah..."
+                                    onkeyup="filterBankOptions()"
+                                    onclick="event.stopPropagation()"
+                                >
+                            </div>
+
+                            <!-- Options -->
                             <div class="filter-option" onclick="selectFilter('bank_sampah_id', '', 'Pilih Bank Sampah')">
                                 Semua Bank Sampah</div>
                             @foreach ($bankSampahList ?? [] as $bank)
                                 <div class="filter-option"
+                                    data-bank-name="{{ strtolower($bank->nama_bank_sampah) }}"
                                     onclick="selectFilter('bank_sampah_id', '{{ $bank->id }}', '{{ $bank->nama_bank_sampah }}')">
                                     {{ $bank->nama_bank_sampah }}</div>
                             @endforeach
@@ -237,6 +251,39 @@
 
         .filter-option:hover {
             background: #E3F4F1;
+        }
+
+        /* Search input wrapper */
+        .filter-search-wrapper {
+            padding: 8px 12px;
+            border-bottom: 1px solid #E5E6E6;
+            background: #FAFAFA;
+        }
+
+        /* Search input field */
+        .filter-search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #E5E6E6;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #39746E;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-search-input:focus {
+            border-color: #0FB7A6;
+        }
+
+        .filter-search-input::placeholder {
+            color: #A8A8A8;
+        }
+
+        /* Hide filtered options */
+        .filter-option.hidden {
+            display: none;
         }
 
         .date-input {
@@ -712,6 +759,16 @@
         function toggleDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
             dropdown.classList.toggle('show');
+
+            // Clear search input and show all options when opening
+            if (dropdown.classList.contains('show') && dropdownId === 'bankDropdown') {
+                const searchInput = document.getElementById('bankSearchInput');
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.focus(); // Auto-focus for better UX
+                    filterBankOptions(); // Reset filter to show all options
+                }
+            }
         }
 
         function selectFilter(field, value, displayText) {
@@ -742,6 +799,34 @@
                 console.log('Submitting form...'); // Debug log
                 form.submit();
             }
+        }
+
+        /**
+         * Filter bank sampah options based on search input
+         */
+        function filterBankOptions() {
+            const searchInput = document.getElementById('bankSearchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const dropdown = document.getElementById('bankDropdown');
+            const options = dropdown.querySelectorAll('.filter-option');
+
+            options.forEach(option => {
+                // Skip "Semua Bank Sampah" option - always show it
+                if (option.textContent.trim() === 'Semua Bank Sampah') {
+                    option.classList.remove('hidden');
+                    return;
+                }
+
+                // Get bank name from data attribute (case-insensitive)
+                const bankName = option.getAttribute('data-bank-name') || option.textContent.toLowerCase();
+
+                // Show/hide based on search match
+                if (bankName.includes(searchTerm)) {
+                    option.classList.remove('hidden');
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
         }
 
         function showDateRangePicker() {
