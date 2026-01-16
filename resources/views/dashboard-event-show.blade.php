@@ -552,6 +552,17 @@
                                 <span class="info-value">{{ $event->location }}</span>
                             </div>
 
+                            @if($event->url)
+                            <div class="info-row">
+                                <span class="info-label">URL Event:</span>
+                                <span class="info-value">
+                                    <a href="{{ $event->url }}" target="_blank" style="color: #39746E; text-decoration: underline;">
+                                        {{ $event->url }}
+                                    </a>
+                                </span>
+                            </div>
+                            @endif
+
                             @if($event->max_participants)
                             <div class="info-row">
                                 <span class="info-label">Maksimal Peserta:</span>
@@ -652,7 +663,7 @@
                 <div class="card-body">
                     <!-- Alert Container -->
                     <div id="alertContainer"></div>
-                    
+
                     @if($event->hasResult())
                         <!-- Show Result -->
                         <div class="info-row">
@@ -675,7 +686,7 @@
                             <span class="info-label">Tanggal Laporan:</span>
                             <span class="info-value">{{ $event->result_submitted_at->format('d M Y H:i') }}</span>
                         </div>
-                        
+
                         @if($event->result_photos)
                         <div class="info-row">
                             <span class="info-label">Foto Kegiatan:</span>
@@ -747,7 +758,7 @@
                                 <input type="number" class="form-input" name="actual_participants" placeholder="0" min="0" value="{{ $event->actual_participants }}" required>
                             </div>
                         </div>
-                        
+
                         <!-- Current Photos Section -->
                         @if($event->result_photos && count($event->result_photos) > 0)
                         <div class="form-group">
@@ -764,7 +775,7 @@
                             </div>
                         </div>
                         @endif
-                        
+
                         <div class="form-group">
                             <label class="form-label">Foto Kegiatan Baru (Opsional, Maksimal 5 foto)</label>
                             <input type="file" class="form-input" name="result_photos[]" id="editResultPhotosInput" accept="image/*" multiple onchange="validatePhotoCount(this)">
@@ -792,7 +803,7 @@
             if (alertContainer) {
                 const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
                 alertContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
-                
+
                 // Auto hide after 5 seconds
                 setTimeout(() => {
                     alertContainer.innerHTML = '';
@@ -809,29 +820,29 @@
             if (resultForm) {
                 resultForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     console.log('Form submitted'); // Debug log
-                    
+
                     const formData = new FormData(this);
                     const submitBtn = this.querySelector('button[type="submit"]');
                     const originalText = submitBtn.textContent;
-                    
+
                     // Validate required fields
                     const resultDescription = formData.get('result_description');
                     const savedWasteAmount = formData.get('saved_waste_amount');
                     const actualParticipants = formData.get('actual_participants');
-                    
+
                     if (!resultDescription || !savedWasteAmount || !actualParticipants) {
                         showAlert('error', 'Mohon lengkapi semua field yang wajib diisi');
                         return;
                     }
-                    
+
                     submitBtn.textContent = 'Menyimpan...';
                     submitBtn.disabled = true;
-                    
+
                     // Add method field for Laravel
                     formData.append('_method', 'POST');
-                    
+
                     fetch('{{ route("dashboard.event.submit-result", $event->id) }}', {
                         method: 'POST',
                         body: formData,
@@ -871,7 +882,7 @@
             if (confirm('Apakah Anda yakin ingin mengubah status event ini menjadi completed?')) {
                 // Show loading
                 showLoading('Mengubah status event...');
-                
+
                 fetch('{{ route("dashboard.event.complete", $event->id) }}', {
                     method: 'POST',
                     headers: {
@@ -906,28 +917,28 @@
         if (editResultForm) {
             editResultForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 console.log('Edit form submitted'); // Debug log
-                
+
                 const formData = new FormData(this);
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
-                
+
                 // Validate required fields
                 const resultDescription = formData.get('result_description');
                 const savedWasteAmount = formData.get('saved_waste_amount');
                 const actualParticipants = formData.get('actual_participants');
-                
+
                 if (!resultDescription || !savedWasteAmount || !actualParticipants) {
                     showAlert('error', 'Mohon lengkapi semua field yang wajib diisi');
                     return;
                 }
-                
+
                 // Show loading on button and overlay
                 submitBtn.textContent = 'Mengupdate...';
                 submitBtn.disabled = true;
                 showLoading('Mengupdate hasil event...');
-                
+
                 fetch('{{ route("dashboard.event.update-result", $event->id) }}', {
                     method: 'POST',
                     body: formData,
@@ -941,7 +952,7 @@
                 })
                 .then(data => {
                     console.log('Server response:', data); // Debug log
-                    
+
                     if (data.success) {
                         showAlert('success', data.message);
                         setTimeout(() => {
@@ -983,14 +994,14 @@
         function validatePhotoCount(input) {
             const maxPhotos = 5;
             const files = input.files;
-            
+
             // For single selection validation (when user selects files in one go)
             if (files.length > maxPhotos) {
                 alert(`Maksimal ${maxPhotos} foto dapat diunggah dalam satu kali pilihan. Silakan pilih ${maxPhotos} foto atau kurang.`);
                 input.value = '';
                 return false;
             }
-            
+
             // For accumulated selection validation (check total with existing files)
             let currentTotal = 0;
             if (input.id === 'resultPhotosInput') {
@@ -998,13 +1009,13 @@
             } else if (input.id === 'editResultPhotosInput') {
                 currentTotal = editSelectedPhotos.length + files.length;
             }
-            
+
             if (currentTotal > maxPhotos) {
                 alert(`Total foto tidak boleh lebih dari ${maxPhotos}. Anda sudah memiliki ${currentTotal - files.length} foto dan mencoba menambahkan ${files.length} foto lagi.`);
                 input.value = '';
                 return false;
             }
-            
+
             return true;
         }
 
@@ -1015,24 +1026,24 @@
         function deletePhoto(photoIndex) {
             const photoItem = document.querySelector(`[data-photo-index="${photoIndex}"]`);
             const photoUrl = photoItem.querySelector('input[name="existing_photos[]"]').value;
-            
+
             if (confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
                 // Show loading
                 showLoading('Menghapus foto...');
-                
+
                 photoItem.classList.add('deleted');
                 deletedPhotos.push(photoIndex);
-                
+
                 // Disable the hidden input so it won't be submitted
                 photoItem.querySelector('input[name="existing_photos[]"]').disabled = true;
-                
+
                 // Add to deleted photos array for submission
                 const deletedInput = document.createElement('input');
                 deletedInput.type = 'hidden';
                 deletedInput.name = 'deleted_photos[]';
                 deletedInput.value = photoIndex;
                 document.getElementById('editResultForm').appendChild(deletedInput);
-                
+
                 // Hide loading after a short delay to show the visual feedback
                 setTimeout(() => {
                     hideLoading();
@@ -1054,18 +1065,18 @@
                     // Add new files to existing selection instead of replacing
                     const newFiles = Array.from(input.files);
                     selectedPhotos = selectedPhotos.concat(newFiles);
-                    
+
                     // Check total count after adding
                     if (selectedPhotos.length > 5) {
                         alert('Maksimal 5 foto dapat diunggah.');
                         selectedPhotos = selectedPhotos.slice(0, 5);
                     }
-                    
+
                     // Update input files to reflect the combined selection
                     const dataTransfer = new DataTransfer();
                     selectedPhotos.forEach(file => dataTransfer.items.add(file));
                     input.files = dataTransfer.files;
-                    
+
                     renderPhotoPreview();
                 }
             });
@@ -1081,18 +1092,18 @@
                     // Add new files to existing selection instead of replacing
                     const newFiles = Array.from(editInput.files);
                     editSelectedPhotos = editSelectedPhotos.concat(newFiles);
-                    
+
                     // Check total count after adding
                     if (editSelectedPhotos.length > 5) {
                         alert('Maksimal 5 foto dapat diunggah.');
                         editSelectedPhotos = editSelectedPhotos.slice(0, 5);
                     }
-                    
+
                     // Update input files to reflect the combined selection
                     const dataTransfer = new DataTransfer();
                     editSelectedPhotos.forEach(file => dataTransfer.items.add(file));
                     editInput.files = dataTransfer.files;
-                    
+
                     renderEditPhotoPreview();
                 }
             });
@@ -1115,7 +1126,7 @@
                 };
                 reader.readAsDataURL(file);
             });
-            
+
             // Update counter
             const counter = document.getElementById('photoCounter');
             if (counter) {
@@ -1140,7 +1151,7 @@
                 };
                 reader.readAsDataURL(file);
             });
-            
+
             // Update counter
             const counter = document.getElementById('editPhotoCounter');
             if (counter) {

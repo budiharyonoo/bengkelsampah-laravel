@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\OtpController;
 use App\Repositories\DashboardRepository;
 use App\Repositories\SetoranRepository;
 use App\Repositories\UserRepository;
+use App\Services\Dashboard\EnvironmentalImpactService;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -26,7 +27,8 @@ class DashboardService
     public function __construct(
         private readonly SetoranRepository $setoranRepository,
         private readonly UserRepository $userRepository,
-        private readonly DashboardRepository $dashboardRepository
+        private readonly DashboardRepository $dashboardRepository,
+        private readonly EnvironmentalImpactService $environmentalImpactService
     ) {}
 
     /**
@@ -85,7 +87,12 @@ class DashboardService
             ),
 
             // Waste totals by unit
-            'wasteTotals' => $this->setoranRepository->getWasteTotals($bankSampahId, $periodStart, $periodEnd),
+            'wasteTotals' => $wasteTotals = $this->setoranRepository->getWasteTotals($bankSampahId, $periodStart, $periodEnd),
+
+            // Environmental impact (CO2e calculation for small cities)
+            'environmentalImpact' => $this->environmentalImpactService->calculate(
+                (float) ($wasteTotals['kg'] ?? 0)
+            ),
 
             // Trend charts
             'trendData' => $this->setoranRepository->getDailyTrend($bankSampahId),

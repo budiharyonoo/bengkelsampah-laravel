@@ -105,6 +105,7 @@ class EventController extends Controller
                 'start_datetime' => $event->start_datetime,
                 'end_datetime' => $event->end_datetime,
                 'location' => $event->location,
+                'url' => $event->url,
                 'max_participants' => $event->max_participants,
                 'status' => $event->status,
                 'participants_count' => $event->participants_count,

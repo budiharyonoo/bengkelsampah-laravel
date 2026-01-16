@@ -132,10 +132,10 @@ class LoginController extends Controller
 
         // BYPASS untuk akun testing Google
         if (
-            $request->identifier === 'testing@bengkelsampah.com' &&
-            $request->password === 'BengkelSampah25'
+            $request->input('identifier') === 'testing@bengkelsampah.com' &&
+            $request->input('password') === 'BengkelSampah25'
         ) {
-            $user = User::where('identifier', $request->identifier)->first();
+            $user = User::where('identifier', $request->input('identifier'))->first();
             if (! $user) {
                 return R::error('Akun testing tidak ditemukan', 422);
             }
@@ -165,8 +165,8 @@ class LoginController extends Controller
         // }
 
         // Get user and verify password
-        $user = User::where('identifier', $request->identifier)->first();
-        if (! Hash::check($request->password, $user->password)) {
+        $user = User::where('identifier', $request->input('identifier'))->first();
+        if (! Hash::check($request->input('password'), $user->input('password'))) {
             return R::error('Kata sandi salah', 422);
         }
 

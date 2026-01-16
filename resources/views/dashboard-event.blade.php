@@ -1610,8 +1610,8 @@
                     <td class="location-cell">
                         <div class="event-location">${event.location}</div>
                     </td>
-                    <td class="title-cell">
-                        <div class="event-title">${event.url ?? ''}</div>
+                    <td class="location-cell">
+                        ${event.url ? `<a href="${event.url}" target="_blank" style="color: #39746E; text-decoration: underline; font-size: 12px;">${event.url.length > 30 ? event.url.substring(0, 30) + '...' : event.url}</a>` : ''}
                     </td>
                     <td class="time-cell">
                         <div class="event-time">${event.start_datetime}<br><span style="color: #64748b;">s/d ${event.end_datetime}</span></div>

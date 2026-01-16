@@ -191,6 +191,9 @@ class AdminController extends Controller
             'totalSampahKg' => $data['wasteTotals']['kg'] ?? 0,
             'totalSampahUnit' => $data['wasteTotals']['unit'] ?? 0,
 
+            // Environmental impact metrics
+            'environmentalImpact' => $data['environmentalImpact'] ?? [],
+
             // Trend chart data
             'trendDays' => $data['trendData']['labels'] ?? [],
             'trendValues' => $data['trendData']['values'] ?? [],

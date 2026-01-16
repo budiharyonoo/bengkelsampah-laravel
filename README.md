@@ -2,14 +2,14 @@
 
 ## Todo List
 
-[x] (On Staging) Di dashboard ada filter bank sampah kan, nah minta ga dropdown gitu, tapi tipe search
-[x] (On Staging) Di transaksi juga dibuat sama
-[x] (On Staging) Di menu user perlu tambahain jenis nasabahnya di table, lalu di action read dan editnya juga (bisa edit jenis nasabah)
+[x] Di dashboard ada filter bank sampah kan, nah minta ga dropdown gitu, tapi tipe search
+[x] Di transaksi juga dibuat sama
+[x] Di menu user perlu tambahain jenis nasabahnya di table, lalu di action read dan editnya juga (bisa edit jenis nasabah)
 [ ] Di transaksi struct PDF nya corrupt nampaknya, minta di fix sama dipastiin sizenya aman buat di thermal print
 [x] Minta ditambahkan export data user
 [ ] Dampak Lingkungan ganti dengan standar KLHK -> (Dokumennya dari user)
 [ ] Penambahan form url di event, api mobile juga minta ditambah return form url nya
-[ ] Laporan event sekarang gabisa di download PDF nya
+[x] Laporan event sekarang gabisa di download PDF nya
 
 ## Tech Stack
 

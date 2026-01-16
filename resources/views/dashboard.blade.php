@@ -604,153 +604,180 @@
             }
         }
 
-        .env-impact-card {
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            padding: 1.5rem 1.5rem 1.2rem 1.5rem;
-            min-width: 260px;
-            max-width: 340px;
+        /* tCO2e Hero Card */
+        .tco2e-hero-card {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            min-height: 200px;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            gap: 1.1rem;
+            justify-content: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .env-impact-header {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            margin-bottom: 0.5rem;
+        .tco2e-hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            pointer-events: none;
         }
 
-        .env-impact-icon {
-            background: #e8f5e3;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
+        .tco2e-header {
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .env-impact-icon i {
-            color: #22c55e;
-            font-size: 18px;
-        }
-
-        .env-impact-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #166534;
-            letter-spacing: -0.5px;
-        }
-
-        .env-impact-metrics {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.7rem;
-        }
-
-        .env-impact-metric {
+        .tco2e-icon {
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 0.98rem;
-            color: #374151;
-            font-weight: 500;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
         }
 
-        .env-impact-metric .metric-value {
-            font-size: 1.08rem;
-            font-weight: 700;
-            color: #22c55e;
+        .tco2e-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #065f46;
         }
 
-        @media (max-width: 900px) {
-            .env-impact-card {
-                min-width: 180px;
-                max-width: 100%;
-                padding: 1rem;
-            }
-
-            .env-impact-title {
-                font-size: 1rem;
-            }
-
-            .env-impact-metric {
-                font-size: 0.9rem;
-            }
-
-            .env-impact-metric .metric-value {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .env-impact-card {
-                padding: 0.7rem;
-            }
-
-            .env-impact-title {
-                font-size: 0.95rem;
-            }
-        }
-
-        .env-impact-info-trigger {
+        /* Circular Progress Ring */
+        .tco2e-ring-container {
             position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1rem;
         }
 
-        .env-impact-tooltip {
+        .tco2e-ring {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .tco2e-ring-bg {
+            fill: none;
+            stroke: #d1fae5;
+            stroke-width: 8;
+        }
+
+        .tco2e-ring-progress {
+            fill: none;
+            stroke: url(#tco2e-gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 377;
+            stroke-dashoffset: 377;
+            animation: tco2e-progress 1.5s ease-out forwards;
+        }
+
+        @keyframes tco2e-progress {
+            to {
+                stroke-dashoffset: 94;
+            }
+        }
+
+        /* Value Display */
+        .tco2e-value-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .tco2e-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #065f46;
+            line-height: 1;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .tco2e-unit {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #10b981;
+            margin-top: 0.25rem;
+        }
+
+        .tco2e-description {
+            font-size: 0.85rem;
+            color: #047857;
+            margin-top: 0.5rem;
+        }
+
+        /* Count-up Animation */
+        .tco2e-animated {
+            animation: tco2e-fadeIn 0.5s ease-out;
+        }
+
+        @keyframes tco2e-fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Tooltip */
+        .tco2e-info-trigger {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+        }
+
+        .tco2e-tooltip {
             display: none;
             position: absolute;
             right: 0;
-            left: auto;
-            top: 120%;
-            min-width: 320px;
-            max-width: 95vw;
-            background: #fff;
-            color: #374151;
-            border-radius: 10px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
-            padding: 0.7em 1.2em 0.7em 1.2em;
-            z-index: 99;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 0.82em;
-            line-height: 1.45;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.18s;
-            transform: none;
+            top: 100%;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            min-width: 280px;
+            z-index: 100;
+            text-align: left;
+            font-size: 0.82rem;
+            line-height: 1.5;
         }
 
-        .env-impact-info-trigger:hover .env-impact-tooltip,
-        .env-impact-info-trigger:focus .env-impact-tooltip {
+        .tco2e-info-trigger:hover .tco2e-tooltip,
+        .tco2e-info-trigger:focus .tco2e-tooltip {
             display: block;
-            pointer-events: auto;
-            opacity: 1;
         }
 
-        .env-impact-tooltip ul {
-            margin: 0.4em 0 0.15em 1.1em;
-            padding: 0;
-        }
-
-        .env-impact-tooltip li {
-            margin-bottom: 0.13em;
-            font-weight: 400;
-        }
-
+        /* Mobile Responsive */
         @media (max-width: 600px) {
-            .env-impact-tooltip {
-                min-width: 180px;
-                max-width: 98vw;
-                font-size: 0.78em;
-                right: 0;
-                left: auto;
-                transform: none;
+            .tco2e-hero-card {
+                padding: 1rem;
+                min-height: 180px;
+            }
+            .tco2e-ring-container {
+                width: 120px;
+                height: 120px;
+            }
+            .tco2e-value {
+                font-size: 1.6rem;
+            }
+            .tco2e-tooltip {
+                min-width: 220px;
+                right: -50px;
             }
         }
     </style>
@@ -986,17 +1013,8 @@
                     ? 100
                     : 0);
 
-        // Dampak lingkungan (EPA WARM/iWARM)
-        $co2Saved = $totalSampahKg * 1.5; // kg CO2e (konservatif rata-rata semua jenis)
-        $treesSaved = $co2Saved / 21; // 1 pohon dewasa serap 21 kg CO2/tahun
-        $carsRemoved = $co2Saved / 4600; // 1 mobil keluarkan 4600 kg CO2/tahun
-        $energySaved = $totalSampahKg * 2.5; // kWh, rata-rata konservatif (plastik/kertas/alumunium)
-        $landfillSaved = $totalSampahKg * 0.0015; // m³, 1 ton = 1.5 m³, 1 kg = 0.0015 m³
-        $householdEnergy = $energySaved / 2200; // 1 rumah tangga Indonesia rata-rata 2200 kWh/tahun
-        // Tambahan indikator baru:
-        $waterSaved = $totalSampahKg * 25; // liter, konservatif rata-rata kertas/plastik
-        $fossilEnergySaved = $totalSampahKg * 35; // MJ, konservatif rata-rata plastik/kertas
-        $fuelSaved = $fossilEnergySaved / 32; // liter bensin, 1 liter = 32 MJ
+        // Dampak lingkungan - hanya tCO₂e (Small City CO2e Model)
+        $co2SavedTon = $environmentalImpact['co2_saved_ton'] ?? 0;
     @endphp
     <div class="kpi-grid"
         style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
@@ -1158,86 +1176,66 @@
                 </div>
             </div>
         </div>
-        <div style="flex:1 1 260px;min-width:220px;max-width:340px;display:flex;flex-direction:column;">
-            <!-- Card Dampak Lingkungan -->
-            <div class="env-impact-card"
-                style="position:relative;flex:1 1 0;display:flex;flex-direction:column;justify-content:stretch;height:100%;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
-                <div class="env-impact-header">
-                    <div class="icon-container"
-                        style="width:32px;height:32px;background:#e8f5f3;border-radius:5px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fa-solid fa-leaf icon-fa" style="font-size:17px;color:#2dd4bf;"></i>
-                    </div>
-                    <div class="env-impact-title" style="display:flex;align-items:center;gap:6px;color:#1f2937;">
-                        Dampak Lingkungan
-                        <span class="env-impact-info-trigger" tabindex="0"
-                            style="display:inline-flex;align-items:center;position:relative;">
-                            <i class="fa-solid fa-circle-info" style="color:#2dd4bf;font-size:15px;cursor:pointer;"></i>
-                            <span class="env-impact-tooltip">
-                                <span style="font-weight:600;font-size:1em;">Cara Perhitungan:</span><br>
-                                <ul style='margin:0 0 0 1.1em;padding:0;font-size:inherit;color:#374151;'>
-                                    <li>CO₂ Dicegah: <span style='color:#166534;'>Total Sampah (kg) × 1,5</span> (kg CO₂e,
-                                        rata-rata konservatif EPA WARM/iWARM)</li>
-                                    <li>Setara Pohon: <span style='color:#166534;'>CO₂ Dicegah / 21</span> (1 pohon dewasa
-                                        serap 21 kg CO₂/tahun)</li>
-                                    <li>Setara Mobil: <span style='color:#166534;'>CO₂ Dicegah / 4.600</span> (1 mobil
-                                        keluarkan 4.600 kg CO₂/tahun)</li>
-                                    <li>Energi Dihemat: <span style='color:#166534;'>Total Sampah (kg) × 2,5</span> (kWh,
-                                        rata-rata konservatif EPA/iWARM)</li>
-                                    <li>Setara Rumah: <span style='color:#166534;'>Energi Dihemat / 2.200</span> (1 rumah
-                                        tangga Indonesia rata-rata 2.200 kWh/tahun)</li>
-                                    <li>Lahan TPA: <span style='color:#166534;'>Total Sampah (kg) × 0,0015</span> (m², 1
-                                        ton = 1,5 m³, tinggi landfill 1m)</li>
-                                    <!-- Tambahan indikator baru -->
-                                    <li>Air Dihemat: <span style='color:#166534;'>Total Sampah (kg) × 25</span> (liter,
-                                        konservatif kertas/plastik, EPA iWARM, Water Footprint)</li>
-                                    <li>Energi Fosil Dihemat: <span style='color:#166534;'>Total Sampah (kg) × 35</span>
-                                        (MJ, konservatif plastik/kertas, EPA WARM, PlasticsEurope)</li>
-                                    <li>Setara BBM Dihemat: <span style='color:#166534;'>Energi Fosil Dihemat / 32</span>
-                                        (liter bensin, 1 liter = 32 MJ, EPA iWARM)</li>
-                                </ul>
-                                <div style='margin-top:0.5em;font-size:0.85em;color:#6b7280;'>Sumber: <a
-                                        href='https://www.epa.gov/smm/iwarm-tool' target='_blank'
-                                        style='color:#0fb7a6;text-decoration:underline;'>EPA WARM/iWARM</a>, <a
-                                        href='https://waterfootprint.org' target='_blank'
-                                        style='color:#0fb7a6;text-decoration:underline;'>Water Footprint</a>, <a
-                                        href='https://www.plasticseurope.org' target='_blank'
-                                        style='color:#0fb7a6;text-decoration:underline;'>PlasticsEurope</a></div>
-                            </span>
-                        </span>
+        <!-- tCO₂e Hero Card -->
+        <div style="flex:1 1 280px;min-width:240px;max-width:360px;">
+            <div class="tco2e-hero-card">
+                <!-- Info Tooltip Trigger -->
+                <div class="tco2e-info-trigger" tabindex="0">
+                    <i class="fa-solid fa-circle-info" style="color:#10b981;font-size:16px;"></i>
+                    <div class="tco2e-tooltip">
+                        <strong style="color:#065f46;">Rumus Perhitungan CO₂e</strong>
+                        <p style="margin:0.5rem 0;color:#374151;">
+                            <strong>Small City Model:</strong><br>
+                            Total Sampah (kg) × 1,18305 / 1000 = tCO₂e
+                        </p>
+                        <p style="margin:0.5rem 0;color:#6b7280;font-size:0.78rem;">
+                            Multiplier 1,18305 = 1 + (EF_CH₄ × GWP_CH₄) + (EF_N₂O × GWP_N₂O)<br>
+                            = 1 + (0,0065 × 21) + (0,00015 × 310)
+                        </p>
+                        <p style="margin:0.5rem 0;color:#6b7280;font-size:0.78rem;">
+                            <strong>Konstanta:</strong><br>
+                            • GWP CH₄ = 21 (kota kecil)<br>
+                            • GWP N₂O = 310 (kota kecil)<br>
+                            • EF CH₄ = 0,0065<br>
+                            • EF N₂O = 0,00015
+                        </p>
+                        <p style="margin-top:0.75rem;color:#9ca3af;font-size:0.72rem;">
+                            Sumber: IPCC Guidelines for Small Cities
+                        </p>
                     </div>
                 </div>
-                <div class="env-impact-metrics" style="gap:0.45rem;">
-                    <div class="env-impact-metric" style="font-size:0.93rem;">CO₂ Dicegah <span class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($co2Saved, 1, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">kg</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Setara <span class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($treesSaved, 1, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">pohon</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Setara <span class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($carsRemoved, 2, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">mobil/tahun</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Energi Dihemat <span class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($energySaved, 0, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">kWh</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Setara <span class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($householdEnergy, 2, ',', '.') }}
-                            <span style="font-size:0.92em;color:#1f2937;">rumah/tahun</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Lahan TPA Dihemat <span
-                            class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($landfillSaved, 2, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">m²</span></span></div>
-                    <!-- Tambahan indikator baru -->
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Air Dihemat <span class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($waterSaved, 0, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">liter</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Energi Fosil Dihemat <span
-                            class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($fossilEnergySaved, 0, ',', '.') }}
-                            <span style="font-size:0.92em;color:#1f2937;">MJ</span></span></div>
-                    <div class="env-impact-metric" style="font-size:0.93rem;">Setara BBM Dihemat <span
-                            class="metric-value"
-                            style="font-size:0.89em;color:#2dd4bf;">{{ number_format($fuelSaved, 2, ',', '.') }} <span
-                                style="font-size:0.92em;color:#1f2937;">liter</span></span></div>
+
+                <!-- Header -->
+                <div class="tco2e-header">
+                    <div class="tco2e-icon">
+                        <i class="fa-solid fa-earth-americas"></i>
+                    </div>
+                    <span class="tco2e-title">Dampak Lingkungan</span>
+                </div>
+
+                <!-- Circular Progress Ring with Value -->
+                <div class="tco2e-ring-container">
+                    <svg class="tco2e-ring" viewBox="0 0 128 128">
+                        <defs>
+                            <linearGradient id="tco2e-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#10b981"/>
+                                <stop offset="100%" style="stop-color:#059669"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="tco2e-ring-bg" cx="64" cy="64" r="60"/>
+                        <circle class="tco2e-ring-progress" cx="64" cy="64" r="60"/>
+                    </svg>
+                    <div class="tco2e-value-container tco2e-animated">
+                        <div class="tco2e-value" data-target="{{ $co2SavedTon }}">
+                            {{ number_format($co2SavedTon, 2, ',', '.') }}
+                        </div>
+                        <div class="tco2e-unit">tCO₂e</div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="tco2e-description">
+                    Emisi karbon yang berhasil dicegah
                 </div>
             </div>
         </div>
@@ -1623,5 +1621,35 @@
                 }
             }
         });
+
+        // tCO2e Counter Animation
+        (function() {
+            const valueEl = document.querySelector('.tco2e-value');
+            if (!valueEl) return;
+
+            const target = parseFloat(valueEl.dataset.target) || 0;
+            const duration = 1500;
+            const startTime = performance.now();
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Easing function (ease-out cubic)
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = target * easeOut;
+
+                valueEl.textContent = current.toLocaleString('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        })();
     </script>
 @endsection
