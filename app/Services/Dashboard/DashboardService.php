@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Dashboard;
 
-use App\Http\Controllers\Api\OtpController;
 use App\Repositories\DashboardRepository;
+use App\Repositories\InventoryRepository;
 use App\Repositories\SetoranRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\WasteTransactionRepository;
+use Carbon\Carbon;
 use App\Services\Dashboard\EnvironmentalImpactService;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Service for dashboard business logic.
@@ -28,7 +29,9 @@ class DashboardService
         private readonly SetoranRepository $setoranRepository,
         private readonly UserRepository $userRepository,
         private readonly DashboardRepository $dashboardRepository,
-        private readonly EnvironmentalImpactService $environmentalImpactService
+        private readonly EnvironmentalImpactService $environmentalImpactService,
+        private readonly WasteTransactionRepository $wasteTransactionRepository,
+        private readonly InventoryRepository $inventoryRepository
     ) {}
 
     /**
@@ -202,6 +205,38 @@ class DashboardService
         $summary['total_sampah_unit'] = $currentWaste['unit'];
         $summary['total_sampah_kg_prev'] = $previousWaste['kg'];
         $summary['total_sampah_unit_prev'] = $previousWaste['unit'];
+
+        // Sales metrics (penjualan ke offtaker)
+        $salesMetrics = $this->wasteTransactionRepository->getSalesMetrics(
+            $bankSampahId,
+            Carbon::parse($currentStart),
+            Carbon::parse($currentEnd)
+        );
+        $summary['total_penjualan'] = $salesMetrics['total_value'];
+        $summary['jumlah_transaksi_jual'] = $salesMetrics['count'];
+        $summary['total_quantity_sold'] = $salesMetrics['total_quantity'];
+
+        // Previous period sales
+        $salesMetricsPrev = $this->wasteTransactionRepository->getSalesMetrics(
+            $bankSampahId,
+            Carbon::parse($previousStart),
+            Carbon::parse($previousEnd)
+        );
+        $summary['total_penjualan_prev'] = $salesMetricsPrev['total_value'];
+
+        // Profit metrics (Laba Kotor = Total Penjualan - harga_beli_total)
+        $profitMetrics = $this->wasteTransactionRepository->getProfitMetrics(
+            $bankSampahId,
+            Carbon::parse($currentStart),
+            Carbon::parse($currentEnd)
+        );
+        $summary['laba_kotor'] = $profitMetrics['laba_kotor'];
+
+        // Inventory status
+        $inventorySummary = $this->inventoryRepository->getInventorySummary($bankSampahId);
+        $summary['total_sampah_tersimpan'] = $inventorySummary['stored_kg'];
+        $summary['total_sampah_terjual'] = $inventorySummary['sold_kg'];
+        $summary['total_sampah_diolah'] = $inventorySummary['processed_kg'];
 
         return $summary;
     }

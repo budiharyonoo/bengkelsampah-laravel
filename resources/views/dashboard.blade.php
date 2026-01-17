@@ -414,7 +414,7 @@
             background: #2d5a55;
         }
 
-        /* KPI Total Pendapatan 100% sesuai referensi user */
+        /* KPI Total Pembelian 100% sesuai referensi user */
         .kpi-card-ref {
             background: white;
             border-radius: 10px;
@@ -689,7 +689,7 @@
 
         @keyframes tco2e-progress {
             to {
-                stroke-dashoffset: 94;
+                stroke-dashoffset: 0;
             }
         }
 
@@ -1015,10 +1015,25 @@
 
         // Dampak lingkungan - hanya tCO₂e (Small City CO2e Model)
         $co2SavedTon = $environmentalImpact['co2_saved_ton'] ?? 0;
+
+        // Sales metrics (Penjualan ke Offtaker)
+        $totalPenjualan = $dashboardSummary['total_penjualan'] ?? 0;
+        $totalPenjualanPrev = $dashboardSummary['total_penjualan_prev'] ?? 0;
+        $penjualanDelta = $totalPenjualan - $totalPenjualanPrev;
+        $penjualanPercent =
+            $totalPenjualanPrev > 0 ? ($penjualanDelta / $totalPenjualanPrev) * 100 : ($totalPenjualan > 0 ? 100 : 0);
+
+        // Profit metrics (Laba Kotor = Total Penjualan - Harga Beli Total)
+        $labaKotor = $dashboardSummary['laba_kotor'] ?? 0;
+
+        // Inventory status
+        $totalSampahTersimpan = $dashboardSummary['total_sampah_tersimpan'] ?? 0;
+        $totalSampahTerjual = $dashboardSummary['total_sampah_terjual'] ?? 0;
+        $totalSampahDiolah = $dashboardSummary['total_sampah_diolah'] ?? 0;
     @endphp
     <div class="kpi-grid"
         style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
-        <!-- Total Pendapatan -->
+        <!-- Total Pembelian -->
         <div class="kpi-card-ref">
             <div class="percentage-badge @if ($pembelianDelta < 0) down @endif">
                 @if ($pembelianDelta < 0)
@@ -1032,7 +1047,7 @@
                 <div class="icon-container">
                     <i class="fa-solid fa-dollar-sign icon-fa"></i>
                 </div>
-                <h1 class="title">Total Pendapatan</h1>
+                <h1 class="title">Total Pembelian</h1>
             </div>
             <div class="main-amount">Rp{{ number_format($totalPembelian, 0, ',', '.') }}</div>
             <div class="increase-amount @if ($pembelianDelta < 0) down @endif"><span
@@ -1142,6 +1157,68 @@
             <div class="main-amount">{{ number_format($totalSampahUnit, 0, ',', '.') }} Unit</div>
             <div class="increase-amount @if ($sampahUnitDelta < 0) down @endif"><span
                     class="plus-sign">{{ $sampahUnitDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($sampahUnitDelta), 0, ',', '.') }}
+            </div>
+        </div>
+        <!-- Total Penjualan -->
+        <div class="kpi-card-ref">
+            <div class="percentage-badge @if ($penjualanDelta < 0) down @endif">
+                @if ($penjualanDelta < 0)
+                    <span class="arrow-down"></span>
+                @else
+                    <span class="arrow-up"></span>
+                @endif
+                {{ number_format(abs($penjualanPercent), 1) }}%
+            </div>
+            <div class="header-row">
+                <div class="icon-container">
+                    <i class="fa-solid fa-money-bill-trend-up icon-fa"></i>
+                </div>
+                <h1 class="title">Total Penjualan</h1>
+            </div>
+            <div class="main-amount">Rp{{ number_format($totalPenjualan, 0, ',', '.') }}</div>
+            <div class="increase-amount @if ($penjualanDelta < 0) down @endif"><span
+                    class="plus-sign">{{ $penjualanDelta >= 0 ? '+' : '-' }}</span>Rp{{ number_format(abs($penjualanDelta), 0, ',', '.') }}
+            </div>
+        </div>
+        <!-- Laba Kotor -->
+        <div class="kpi-card-ref">
+            <div class="percentage-badge @if ($labaKotor < 0) down @endif">
+                @if ($labaKotor < 0)
+                    <span class="arrow-down"></span>
+                @else
+                    <span class="arrow-up"></span>
+                @endif
+                @if ($totalPenjualan > 0)
+                    {{ number_format(abs($labaKotor / $totalPenjualan * 100), 1) }}%
+                @else
+                    0.0%
+                @endif
+            </div>
+            <div class="header-row">
+                <div class="icon-container">
+                    <i class="fa-solid fa-chart-line icon-fa"></i>
+                </div>
+                <h1 class="title">Laba Kotor</h1>
+            </div>
+            <div class="main-amount">Rp{{ number_format($labaKotor, 0, ',', '.') }}</div>
+            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
+                Margin: @if ($totalPenjualan > 0){{ number_format($labaKotor / $totalPenjualan * 100, 1) }}%@else 0%@endif
+            </div>
+        </div>
+        <!-- Sampah Tersimpan -->
+        <div class="kpi-card-ref">
+            <div class="percentage-badge" style="background-color: #e3f8fc; color: #0891b2;">
+                <i class="fa-solid fa-warehouse" style="font-size: 10px;"></i>
+            </div>
+            <div class="header-row">
+                <div class="icon-container" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">
+                    <i class="fa-solid fa-box icon-fa"></i>
+                </div>
+                <h1 class="title">Sampah Tersimpan</h1>
+            </div>
+            <div class="main-amount">{{ number_format($totalSampahTersimpan, 2, ',', '.') }} Kg</div>
+            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
+                Stok tersedia
             </div>
         </div>
     </div>

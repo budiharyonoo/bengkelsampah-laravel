@@ -47,7 +47,7 @@ class AdminController extends Controller
 
         // Determine bank sampah filter based on admin role
         $bankSampahId = $isCabang
-            ? $admin->id_bank_sampah
+            ? (int) $admin->id_bank_sampah
             : $request->getBankSampahId();
 
         // Get all dashboard data from service

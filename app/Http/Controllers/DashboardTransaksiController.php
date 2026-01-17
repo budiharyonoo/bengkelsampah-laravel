@@ -6,6 +6,7 @@ use App\Models\BankSampah;
 use App\Models\Point;
 use App\Models\Setoran;
 use App\Models\User;
+use App\Services\Inventory\InventoryService;
 use App\Services\NotificationService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -137,6 +138,9 @@ class DashboardTransaksiController extends Controller
 
                 // Calculate and add points + XP
                 $this->addPointsAndXP($transaction, $request->aktual_total);
+
+                // Add waste to inventory tracking when setoran is completed
+                app(InventoryService::class)->addFromSetoran($transaction);
             }
 
             $transaction->save();

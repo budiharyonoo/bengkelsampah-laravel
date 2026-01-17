@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('app_versions')) {
+            return;
+        }
         Schema::create('app_versions', function (Blueprint $table) {
             $table->id();
             $table->string('platform'); // android, ios

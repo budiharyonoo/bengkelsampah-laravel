@@ -96,6 +96,85 @@
             background-color: var(--sidebar-active);
             color: #fff;
         }
+        /* Parent menu styling */
+        .nav-link-parent {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            color: var(--sidebar-link);
+            font-size: 14px;
+            font-family: 'Urbanist', sans-serif;
+            font-weight: 600;
+            gap: 16px;
+            border-radius: 25px;
+            margin: 0 12px;
+            transition: all 0.3s ease;
+        }
+        .nav-link-parent:hover {
+            background-color: var(--sidebar-hover);
+            color: var(--sidebar-dark);
+        }
+        .nav-item-parent.open .nav-link-parent {
+            color: var(--sidebar-dark);
+        }
+        /* Arrow icon */
+        .nav-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        .nav-item-parent.open .nav-arrow {
+            transform: rotate(180deg);
+        }
+        /* Submenu container */
+        .nav-submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0 12px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .nav-submenu.show {
+            max-height: 500px;
+        }
+        /* Submenu items */
+        .nav-subitem {
+            margin-bottom: 2px;
+        }
+        .nav-sublink {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px 10px 52px;
+            color: var(--sidebar-link);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+        .nav-sublink:hover {
+            background-color: var(--sidebar-hover);
+            color: var(--sidebar-dark);
+            text-decoration: none;
+        }
+        .nav-sublink.active {
+            background-color: var(--sidebar-active);
+            color: #fff;
+        }
+        /* Collapsed sidebar - hide submenus */
+        .sidebar.collapsed .nav-submenu {
+            display: none;
+        }
+        .sidebar.collapsed .nav-arrow {
+            display: none;
+        }
+        .sidebar.collapsed .nav-link-parent {
+            justify-content: center;
+            padding: 14px;
+        }
         .nav-icon {
             width: 22px;
             height: 22px;

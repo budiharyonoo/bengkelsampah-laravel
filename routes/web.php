@@ -11,7 +11,11 @@ use App\Http\Controllers\DashboardUserController;
 use App\Http\Controllers\DeleteAccountController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\OfftakerController;
 use App\Http\Controllers\SampahController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\WasteInventoryController;
+use App\Http\Controllers\WasteTransactionController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -179,6 +183,51 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('event/export/excel', [EventController::class, 'exportExcel'])->name('dashboard.event.export.excel');
     Route::post('event/export/csv', [EventController::class, 'exportCsv'])->name('dashboard.event.export.csv');
     Route::post('event/export/pdf', [EventController::class, 'exportPdf'])->name('dashboard.event.export.pdf');
+
+    // Offtaker routes
+    Route::resource('offtakers', OfftakerController::class)->names([
+        'index' => 'offtakers.index',
+        'create' => 'offtakers.create',
+        'store' => 'offtakers.store',
+        'show' => 'offtakers.show',
+        'edit' => 'offtakers.edit',
+        'update' => 'offtakers.update',
+        'destroy' => 'offtakers.destroy',
+    ]);
+    Route::patch('offtakers/{offtaker}/toggle-status', [OfftakerController::class, 'toggleStatus'])->name('offtakers.toggle-status');
+
+    // Waste Transactions routes
+    Route::prefix('waste-transactions')->group(function () {
+        Route::get('/', [WasteTransactionController::class, 'index'])->name('waste-transactions.index');
+        Route::get('/sales', [WasteTransactionController::class, 'salesIndex'])->name('waste-transactions.sales.index');
+        Route::get('/sales/create', [WasteTransactionController::class, 'createSale'])->name('waste-transactions.sales.create');
+        Route::post('/sales', [WasteTransactionController::class, 'storeSale'])->name('waste-transactions.sales.store');
+        Route::get('/processing', [WasteTransactionController::class, 'processingIndex'])->name('waste-transactions.processing.index');
+        Route::get('/processing/create', [WasteTransactionController::class, 'createProcessing'])->name('waste-transactions.processing.create');
+        Route::post('/processing', [WasteTransactionController::class, 'storeProcessing'])->name('waste-transactions.processing.store');
+        Route::get('/get-inventory', [WasteTransactionController::class, 'getInventory'])->name('waste-transactions.get-inventory');
+        Route::post('/export/excel', [WasteTransactionController::class, 'exportExcel'])->name('waste-transactions.export.excel');
+        Route::post('/export/pdf', [WasteTransactionController::class, 'exportPdf'])->name('waste-transactions.export.pdf');
+        Route::post('/export/csv', [WasteTransactionController::class, 'exportCsv'])->name('waste-transactions.export.csv');
+        Route::get('/{wasteTransaction}', [WasteTransactionController::class, 'show'])->name('waste-transactions.show');
+    });
+
+    // Waste Inventory routes
+    Route::get('waste-inventory', [WasteInventoryController::class, 'index'])->name('waste-inventory.index');
+    Route::get('waste-inventory/{bankSampah}', [WasteInventoryController::class, 'show'])->name('waste-inventory.show');
+
+    // Laporan (Reports) routes
+    Route::prefix('reports')->group(function () {
+        Route::get('/laba-rugi', [ReportController::class, 'labaRugi'])->name('reports.laba-rugi');
+        Route::get('/penjualan', [ReportController::class, 'penjualan'])->name('reports.penjualan');
+        Route::get('/pengolahan', [ReportController::class, 'pengolahan'])->name('reports.pengolahan');
+        Route::post('/laba-rugi/export/excel', [ReportController::class, 'exportLabaRugiExcel'])->name('reports.laba-rugi.export.excel');
+        Route::post('/laba-rugi/export/pdf', [ReportController::class, 'exportLabaRugiPdf'])->name('reports.laba-rugi.export.pdf');
+        Route::post('/penjualan/export/excel', [ReportController::class, 'exportPenjualanExcel'])->name('reports.penjualan.export.excel');
+        Route::post('/penjualan/export/pdf', [ReportController::class, 'exportPenjualanPdf'])->name('reports.penjualan.export.pdf');
+        Route::post('/pengolahan/export/excel', [ReportController::class, 'exportPengolahanExcel'])->name('reports.pengolahan.export.excel');
+        Route::post('/pengolahan/export/pdf', [ReportController::class, 'exportPengolahanPdf'])->name('reports.pengolahan.export.pdf');
+    });
 
     // Admin routes
     Route::post('/admin', [AdminController::class, 'store'])->name('dashboard.admin.store');
