@@ -604,6 +604,165 @@
             }
         }
 
+        /* Financial Metrics Enhanced Styling */
+        .financial-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .financial-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .financial-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .financial-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .financial-title-group {
+            flex: 1;
+        }
+
+        .financial-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .financial-description {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin: 0.25rem 0 0 0;
+        }
+
+        .financial-amount {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .financial-amount.negative-amount {
+            color: #dc2626;
+        }
+
+        .financial-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .financial-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .financial-change.positive {
+            color: #059669;
+        }
+
+        .financial-change.negative {
+            color: #dc2626;
+        }
+
+        .financial-change i {
+            font-size: 0.75rem;
+        }
+
+        .financial-percentage {
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        .financial-percentage.positive {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .financial-percentage.negative {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .financial-metric {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .metric-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: #065f46;
+            font-weight: 700;
+        }
+
+        .financial-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        .financial-status.profitable {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .financial-status.loss {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .financial-status i {
+            font-size: 0.5rem;
+        }
+
+        /* Responsive for financial metrics */
+        @media (max-width: 1024px) {
+            .financial-metrics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+        }
+
         /* tCO2e Hero Card */
         .tco2e-hero-card {
             background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
@@ -1031,27 +1190,23 @@
         $totalSampahTerjual = $dashboardSummary['total_sampah_terjual'] ?? 0;
         $totalSampahDiolah = $dashboardSummary['total_sampah_diolah'] ?? 0;
     @endphp
+    <!-- Row 1: Operational Metrics -->
     <div class="kpi-grid"
-        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
-        <!-- Total Pembelian -->
+        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem;">
+        <!-- Sampah Tersimpan -->
         <div class="kpi-card-ref">
-            <div class="percentage-badge @if ($pembelianDelta < 0) down @endif">
-                @if ($pembelianDelta < 0)
-                    <span class="arrow-down"></span>
-                @else
-                    <span class="arrow-up"></span>
-                @endif
-                {{ number_format(abs($pembelianPercent), 1) }}%
+            <div class="percentage-badge" style="background-color: #e3f8fc; color: #0891b2;">
+                <i class="fa-solid fa-warehouse" style="font-size: 10px;"></i>
             </div>
             <div class="header-row">
-                <div class="icon-container">
-                    <i class="fa-solid fa-dollar-sign icon-fa"></i>
+                <div class="icon-container" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">
+                    <i class="fa-solid fa-box icon-fa"></i>
                 </div>
-                <h1 class="title">Total Pembelian</h1>
+                <h1 class="title">Sampah Tersimpan</h1>
             </div>
-            <div class="main-amount">Rp{{ number_format($totalPembelian, 0, ',', '.') }}</div>
-            <div class="increase-amount @if ($pembelianDelta < 0) down @endif"><span
-                    class="plus-sign">{{ $pembelianDelta >= 0 ? '+' : '-' }}</span>Rp{{ number_format(abs($pembelianDelta), 0, ',', '.') }}
+            <div class="main-amount">{{ number_format($totalSampahTersimpan, 2, ',', '.') }} Kg</div>
+            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
+                Stok tersedia
             </div>
         </div>
         <!-- Total Poin -->
@@ -1159,66 +1314,90 @@
                     class="plus-sign">{{ $sampahUnitDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($sampahUnitDelta), 0, ',', '.') }}
             </div>
         </div>
-        <!-- Total Penjualan -->
-        <div class="kpi-card-ref">
-            <div class="percentage-badge @if ($penjualanDelta < 0) down @endif">
-                @if ($penjualanDelta < 0)
-                    <span class="arrow-down"></span>
-                @else
-                    <span class="arrow-up"></span>
-                @endif
-                {{ number_format(abs($penjualanPercent), 1) }}%
-            </div>
-            <div class="header-row">
-                <div class="icon-container">
-                    <i class="fa-solid fa-money-bill-trend-up icon-fa"></i>
+    </div>
+
+    <!-- Row 2: Financial Metrics -->
+    <div style="margin-top:1.7rem;margin-bottom:2rem;">
+        <h3 style="font-size:1.1rem;font-weight:700;color:#1f2937;margin-bottom:1rem;">
+            <i class="fa-solid fa-chart-line"></i> Ringkasan Finansial
+        </h3>
+        <div class="financial-metrics-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+            <!-- Total Pembelian -->
+            <div class="financial-card">
+                <div class="financial-card-header">
+                    <div class="financial-icon" style="background: linear-gradient(135deg, #0fb7a6, #0da594);">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <div class="financial-title-group">
+                        <h4 class="financial-label">Total Pembelian</h4>
+                        <p class="financial-description">Pembelian sampah dari nasabah</p>
+                    </div>
                 </div>
-                <h1 class="title">Total Penjualan</h1>
-            </div>
-            <div class="main-amount">Rp{{ number_format($totalPenjualan, 0, ',', '.') }}</div>
-            <div class="increase-amount @if ($penjualanDelta < 0) down @endif"><span
-                    class="plus-sign">{{ $penjualanDelta >= 0 ? '+' : '-' }}</span>Rp{{ number_format(abs($penjualanDelta), 0, ',', '.') }}
-            </div>
-        </div>
-        <!-- Laba Kotor -->
-        <div class="kpi-card-ref">
-            <div class="percentage-badge @if ($labaKotor < 0) down @endif">
-                @if ($labaKotor < 0)
-                    <span class="arrow-down"></span>
-                @else
-                    <span class="arrow-up"></span>
-                @endif
-                @if ($totalPenjualan > 0)
-                    {{ number_format(abs($labaKotor / $totalPenjualan * 100), 1) }}%
-                @else
-                    0.0%
-                @endif
-            </div>
-            <div class="header-row">
-                <div class="icon-container">
-                    <i class="fa-solid fa-chart-line icon-fa"></i>
+                <div class="financial-amount">Rp{{ number_format($totalPembelian, 0, ',', '.') }}</div>
+                <div class="financial-footer">
+                    <div class="financial-change @if($pembelianDelta >= 0) positive @else negative @endif">
+                        <i class="fa-solid fa-arrow-{{ $pembelianDelta >= 0 ? 'up' : 'down' }}"></i>
+                        <span>{{ $pembelianDelta >= 0 ? '+' : '' }}Rp{{ number_format(abs($pembelianDelta), 0, ',', '.') }}</span>
+                    </div>
+                    <div class="financial-percentage @if($pembelianDelta >= 0) positive @else negative @endif">
+                        {{ number_format(abs($pembelianPercent), 1) }}%
+                    </div>
                 </div>
-                <h1 class="title">Laba Kotor</h1>
             </div>
-            <div class="main-amount">Rp{{ number_format($labaKotor, 0, ',', '.') }}</div>
-            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
-                Margin: @if ($totalPenjualan > 0){{ number_format($labaKotor / $totalPenjualan * 100, 1) }}%@else 0%@endif
-            </div>
-        </div>
-        <!-- Sampah Tersimpan -->
-        <div class="kpi-card-ref">
-            <div class="percentage-badge" style="background-color: #e3f8fc; color: #0891b2;">
-                <i class="fa-solid fa-warehouse" style="font-size: 10px;"></i>
-            </div>
-            <div class="header-row">
-                <div class="icon-container" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">
-                    <i class="fa-solid fa-box icon-fa"></i>
+
+            <!-- Total Penjualan -->
+            <div class="financial-card">
+                <div class="financial-card-header">
+                    <div class="financial-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    <div class="financial-title-group">
+                        <h4 class="financial-label">Total Penjualan</h4>
+                        <p class="financial-description">Penjualan ke offtaker</p>
+                    </div>
                 </div>
-                <h1 class="title">Sampah Tersimpan</h1>
+                <div class="financial-amount">Rp{{ number_format($totalPenjualan, 0, ',', '.') }}</div>
+                <div class="financial-footer">
+                    <div class="financial-change @if($penjualanDelta >= 0) positive @else negative @endif">
+                        <i class="fa-solid fa-arrow-{{ $penjualanDelta >= 0 ? 'up' : 'down' }}"></i>
+                        <span>{{ $penjualanDelta >= 0 ? '+' : '' }}Rp{{ number_format(abs($penjualanDelta), 0, ',', '.') }}</span>
+                    </div>
+                    <div class="financial-percentage @if($penjualanDelta >= 0) positive @else negative @endif">
+                        {{ number_format(abs($penjualanPercent), 1) }}%
+                    </div>
+                </div>
             </div>
-            <div class="main-amount">{{ number_format($totalSampahTersimpan, 2, ',', '.') }} Kg</div>
-            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
-                Stok tersedia
+
+            <!-- Laba Kotor -->
+            <div class="financial-card">
+                <div class="financial-card-header">
+                    <div class="financial-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="fa-solid fa-money-bill-trend-up"></i>
+                    </div>
+                    <div class="financial-title-group">
+                        <h4 class="financial-label">Laba Kotor</h4>
+                        <p class="financial-description">Penjualan - Pembelian</p>
+                    </div>
+                </div>
+                <div class="financial-amount @if($labaKotor < 0) negative-amount @endif">
+                    Rp{{ number_format($labaKotor, 0, ',', '.') }}
+                </div>
+                <div class="financial-footer">
+                    <div class="financial-metric">
+                        <span class="metric-label">Margin:</span>
+                        <span class="metric-value">
+                            @if($totalPenjualan > 0)
+                                {{ number_format($labaKotor / $totalPenjualan * 100, 1) }}%
+                            @else
+                                0%
+                            @endif
+                        </span>
+                    </div>
+                    <div class="financial-status @if($labaKotor >= 0) profitable @else loss @endif">
+                        <i class="fa-solid fa-circle"></i>
+                        {{ $labaKotor >= 0 ? 'Untung' : 'Rugi' }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

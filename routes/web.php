@@ -19,11 +19,6 @@ use App\Http\Controllers\WasteTransactionController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/optimize', function () {
-    Artisan::call('optimize');
-    return 'php artisan optimize!';
-});
-
 Route::get('/', function () {
     return view('welcome');
 });
