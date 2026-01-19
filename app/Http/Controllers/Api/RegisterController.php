@@ -119,8 +119,13 @@ class RegisterController extends Controller
             // 'otp' => 'required|string|size:6'
         ]);
 
+        $message = '';
+        $validationErrors = $validator->errors()->messages();
+        foreach ($validationErrors as $key => $value) {
+            $message = $value[0];
+        }
         if ($validator->fails()) {
-            return R::error('Validasi gagal', 422, $validator->errors());
+            return R::error($message, 422, $validator->errors());
         }
 
         // Verify OTP

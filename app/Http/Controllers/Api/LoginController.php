@@ -126,8 +126,13 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
+        $message = '';
+        $validationErrors = $validator->errors()->messages();
+        foreach ($validationErrors as $key => $value) {
+            $message = $value[0];
+        }
         if ($validator->fails()) {
-            return R::error('Validasi gagal', 422, $validator->errors());
+            return R::error($message, 422, $validator->errors());
         }
 
         // BYPASS untuk akun testing Google
