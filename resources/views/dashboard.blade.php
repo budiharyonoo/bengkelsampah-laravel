@@ -770,7 +770,7 @@
             padding: 1.5rem;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             min-height: 200px;
             display: flex;

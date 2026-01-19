@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bank_sampah', function (Blueprint $table) {
-            if (!Schema::hasColumn('bank_sampah', 'latitude')) {
+            if (! Schema::hasColumn('bank_sampah', 'latitude')) {
                 $table->decimal('latitude', 10, 8)->nullable()->after('gmaps_link');
             }
-            if (!Schema::hasColumn('bank_sampah', 'longitude')) {
+            if (! Schema::hasColumn('bank_sampah', 'longitude')) {
                 $table->decimal('longitude', 11, 8)->nullable()->after('latitude');
             }
         });

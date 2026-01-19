@@ -713,6 +713,32 @@
                 <div class="controls">
                     <div></div>
                     <div class="action-buttons">
+                        <div class="export-dropdown">
+                            <button class="export-button" id="exportButton" type="button">
+                                <span>Export</span>
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                            <div class="export-dropdown-content" id="exportDropdown">
+                                <div class="export-option"
+                                    onclick="document.getElementById('exportCsvModal').style.display='flex'">
+                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="CSV">
+                                    <span>Export CSV</span>
+                                </div>
+                                <div class="export-option"
+                                    onclick="document.getElementById('exportExcelModal').style.display='flex'">
+                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Excel">
+                                    <span>Export Excel</span>
+                                </div>
+                                <div class="export-option"
+                                    onclick="document.getElementById('exportPdfModal').style.display='flex'">
+                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="PDF">
+                                    <span>Export PDF</span>
+                                </div>
+                            </div>
+                        </div>
                         @if (isset($createRoute) && isset($createLabel))
                             <a href="{{ route($createRoute) }}" class="btn-add">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -741,33 +767,6 @@
                                 Tambah Pengolahan
                             </a>
                         @endif
-
-                        <div class="export-dropdown">
-                            <button class="export-button" id="exportButton" type="button">
-                                <span>Export</span>
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </button>
-                            <div class="export-dropdown-content" id="exportDropdown">
-                                <div class="export-option"
-                                    onclick="document.getElementById('exportCsvModal').style.display='flex'">
-                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="CSV">
-                                    <span>Export CSV</span>
-                                </div>
-                                <div class="export-option"
-                                    onclick="document.getElementById('exportExcelModal').style.display='flex'">
-                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Excel">
-                                    <span>Export Excel</span>
-                                </div>
-                                <div class="export-option"
-                                    onclick="document.getElementById('exportPdfModal').style.display='flex'">
-                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="PDF">
-                                    <span>Export PDF</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -840,6 +839,33 @@
                             <input type="hidden" name="offtaker_id" value="{{ request('offtaker_id', '') }}">
                         </div>
 
+                        <div class="filter-dropdown">
+                            <button type="button" class="filter-button" onclick="toggleDropdown('typeDropdown')">
+                                @php
+                                    $typeLabel = 'Semua Tipe';
+                                    if (request('type') === 'sale') {
+                                        $typeLabel = 'Penjualan';
+                                    } elseif (request('type') === 'processing') {
+                                        $typeLabel = 'Pengolahan';
+                                    }
+                                @endphp
+                                {{ $typeLabel }}
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                            <div id="typeDropdown" class="filter-dropdown-content">
+                                <div class="filter-option" onclick="selectFilter('type', '', 'Semua Tipe')">
+                                    Semua Tipe</div>
+                                <div class="filter-option" onclick="selectFilter('type', 'sale', 'Penjualan')">
+                                    Penjualan</div>
+                                <div class="filter-option" onclick="selectFilter('type', 'processing', 'Pengolahan')">
+                                    Pengolahan</div>
+                            </div>
+                            <input type="hidden" name="type" value="{{ request('type', '') }}">
+                        </div>
+
                         <input type="date" name="start_date" class="date-input" placeholder="Tanggal Mulai"
                             value="{{ request('start_date') }}">
                         <span style="margin: 0 4px; color: #6B7271;">s/d</span>
@@ -858,20 +884,16 @@
                             <thead>
                                 <tr>
                                     <th>Kode</th>
-                                    @if (!isset($transactionType))
+                                    @if (!isset($transactionType) || $transactionType === 'all')
                                         <th>Tipe</th>
                                     @endif
                                     <th>Bank Sampah</th>
                                     <th>Offtaker</th>
                                     <th>Tanggal</th>
                                     <th>Qty (kg)</th>
-                                    @if (!isset($transactionType) || $transactionType === 'sale')
-                                        <th>Nilai</th>
-                                        <th>Laba</th>
-                                    @endif
-                                    @if (isset($transactionType) && $transactionType === 'processing')
-                                        <th>Metode Pengolahan</th>
-                                    @endif
+                                    <th>Nilai</th>
+                                    <th>Laba</th>
+                                    <th>Metode Pengolahan</th>
                                     <th class="action-cell">Aksi</th>
                                 </tr>
                             </thead>
@@ -879,7 +901,7 @@
                                 @foreach ($transactions as $transaction)
                                     <tr>
                                         <td><strong>{{ $transaction->kode_transaksi }}</strong></td>
-                                        @if (!isset($transactionType))
+                                        @if (!isset($transactionType) || $transactionType === 'all')
                                             <td>
                                                 @if ($transaction->type === 'sale')
                                                     <span class="badge badge-sale">Penjualan</span>
@@ -906,28 +928,16 @@
                                         </td>
                                         <td>{{ $transaction->tanggal_transaksi->format('d/m/Y') }}</td>
                                         <td>{{ number_format($transaction->total_quantity, 2, ',', '.') }}</td>
-                                        @if (!isset($transactionType) || $transactionType === 'sale')
-                                            <td>
-                                                @if ($transaction->type === 'sale')
-                                                    Rp {{ number_format($transaction->total_value, 0, ',', '.') }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($transaction->type === 'sale')
-                                                    @php $profit = $transaction->total_value - $transaction->harga_beli_total; @endphp
-                                                    <span class="{{ $profit >= 0 ? 'text-success' : 'text-danger' }}">
-                                                        Rp {{ number_format($profit, 0, ',', '.') }}
-                                                    </span>
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                        @endif
-                                        @if (isset($transactionType) && $transactionType === 'processing')
-                                            <td>{{ $transaction->metode_pengolahan ?? '-' }}</td>
-                                        @endif
+                                        <td>
+                                            Rp {{ number_format($transaction->total_value, 0, ',', '.') }}
+                                        </td>
+                                        <td>
+                                            @php $profit = $transaction->total_value - $transaction->harga_beli_total; @endphp
+                                            <span class="{{ $profit >= 0 ? 'text-success' : 'text-danger' }}">
+                                                Rp {{ number_format($profit, 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $transaction->metode_pengolahan ?? '-' }}</td>
                                         <td class="action-cell">
                                             <a href="{{ route('waste-transactions.show', $transaction) }}"
                                                 class="btn-view">Lihat</a>
@@ -1005,6 +1015,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Tipe Transaksi</label>
+                        <select name="type" class="form-control">
+                            <option value="">Semua Tipe</option>
+                            <option value="sale">Penjualan</option>
+                            <option value="processing">Pengolahan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Periode</label>
                         <select name="time_filter" class="form-control" onchange="toggleDateInputs(this, 'excel')">
                             <option value="">Semua Periode</option>
@@ -1065,6 +1083,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Tipe Transaksi</label>
+                        <select name="type" class="form-control">
+                            <option value="">Semua Tipe</option>
+                            <option value="sale">Penjualan</option>
+                            <option value="processing">Pengolahan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Periode</label>
                         <select name="time_filter" class="form-control" onchange="toggleDateInputs(this, 'pdf')">
                             <option value="">Semua Periode</option>
@@ -1121,6 +1147,14 @@
                             @foreach ($offtakerList as $of)
                                 <option value="{{ $of->id }}">{{ $of->nama }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tipe Transaksi</label>
+                        <select name="type" class="form-control">
+                            <option value="">Semua Tipe</option>
+                            <option value="sale">Penjualan</option>
+                            <option value="processing">Pengolahan</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1262,9 +1296,9 @@
             document.addEventListener('click', function(event) {
                 if (!event.target.closest('.filter-dropdown') && !event.target.closest('.export-dropdown')) {
                     document.querySelectorAll('.filter-dropdown-content, .export-dropdown-content').forEach(
-                    dropdown => {
-                        dropdown.classList.remove('show');
-                    });
+                        dropdown => {
+                            dropdown.classList.remove('show');
+                        });
                 }
             });
 
@@ -1290,16 +1324,17 @@
 
                 const bankSampahId = modal.querySelector('select[name="bank_sampah_id"]').value;
                 const offtakerId = modal.querySelector('select[name="offtaker_id"]').value;
+                const type = modal.querySelector('select[name="type"]').value;
                 const timeFilter = modal.querySelector('select[name="time_filter"]').value;
                 const startDate = modal.querySelector('input[name="start_date"]').value;
                 const endDate = modal.querySelector('input[name="end_date"]').value;
 
                 if (bankSampahId) formData.append('bank_sampah_id', bankSampahId);
                 if (offtakerId) formData.append('offtaker_id', offtakerId);
+                if (type) formData.append('type', type);
                 if (timeFilter) formData.append('time_filter', timeFilter);
                 if (startDate) formData.append('start_date', startDate);
                 if (endDate) formData.append('end_date', endDate);
-                if (transactionType) formData.append('type', transactionType);
 
                 closeExportModal('exportExcelModal');
                 showLoading('Mengexport Excel...');
@@ -1341,16 +1376,17 @@
 
                 const bankSampahId = modal.querySelector('select[name="bank_sampah_id"]').value;
                 const offtakerId = modal.querySelector('select[name="offtaker_id"]').value;
+                const type = modal.querySelector('select[name="type"]').value;
                 const timeFilter = modal.querySelector('select[name="time_filter"]').value;
                 const startDate = modal.querySelector('input[name="start_date"]').value;
                 const endDate = modal.querySelector('input[name="end_date"]').value;
 
                 if (bankSampahId) formData.append('bank_sampah_id', bankSampahId);
                 if (offtakerId) formData.append('offtaker_id', offtakerId);
+                if (type) formData.append('type', type);
                 if (timeFilter) formData.append('time_filter', timeFilter);
                 if (startDate) formData.append('start_date', startDate);
                 if (endDate) formData.append('end_date', endDate);
-                if (transactionType) formData.append('type', transactionType);
 
                 closeExportModal('exportPdfModal');
                 showLoading('Mengexport PDF...');
@@ -1392,16 +1428,17 @@
 
                 const bankSampahId = modal.querySelector('select[name="bank_sampah_id"]').value;
                 const offtakerId = modal.querySelector('select[name="offtaker_id"]').value;
+                const type = modal.querySelector('select[name="type"]').value;
                 const timeFilter = modal.querySelector('select[name="time_filter"]').value;
                 const startDate = modal.querySelector('input[name="start_date"]').value;
                 const endDate = modal.querySelector('input[name="end_date"]').value;
 
                 if (bankSampahId) formData.append('bank_sampah_id', bankSampahId);
                 if (offtakerId) formData.append('offtaker_id', offtakerId);
+                if (type) formData.append('type', type);
                 if (timeFilter) formData.append('time_filter', timeFilter);
                 if (startDate) formData.append('start_date', startDate);
                 if (endDate) formData.append('end_date', endDate);
-                if (transactionType) formData.append('type', transactionType);
 
                 closeExportModal('exportCsvModal');
                 showLoading('Mengexport CSV...');

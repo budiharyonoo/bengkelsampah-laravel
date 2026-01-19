@@ -113,24 +113,28 @@ final class PeriodHelper
                 'previous' => $date->copy()->subDay()->translatedFormat('d F Y'),
             ],
             self::PERIOD_MINGGUAN => [
-                'current' => $date->copy()->startOfWeek()->translatedFormat('d F Y').' - '.
-                    $date->copy()->endOfWeek()->translatedFormat('d F Y'),
-                'previous' => $date->copy()->subWeek()->startOfWeek()->translatedFormat('d F Y').' - '.
-                    $date->copy()->subWeek()->endOfWeek()->translatedFormat('d F Y'),
+                'current' => $date->copy()->subWeek()->translatedFormat('d F Y').' - '.
+                    $date->translatedFormat('d F Y'),
+                'previous' => $date->copy()->subWeeks(2)->translatedFormat('d F Y').' - '.
+                    $date->copy()->subWeek()->translatedFormat('d F Y'),
             ],
             self::PERIOD_BULANAN => [
-                'current' => $date->translatedFormat('F Y'),
-                'previous' => $date->copy()->subMonth()->translatedFormat('F Y'),
+                'current' => $date->copy()->subMonth()->translatedFormat('d F Y').' - '.
+                    $date->translatedFormat('d F Y'),
+                'previous' => $date->copy()->subMonths(2)->translatedFormat('d F Y').' - '.
+                    $date->copy()->subMonth()->translatedFormat('d F Y'),
             ],
             self::PERIOD_ENAM_BULANAN => [
-                'current' => $date->copy()->subMonths(5)->translatedFormat('F').' - '.
-                    $date->translatedFormat('F Y'),
-                'previous' => $date->copy()->subMonths(11)->translatedFormat('F').' - '.
-                    $date->copy()->subMonths(6)->translatedFormat('F Y'),
+                'current' => $date->copy()->subMonths(6)->translatedFormat('d F').' - '.
+                    $date->translatedFormat('d F Y'),
+                'previous' => $date->copy()->subMonths(12)->translatedFormat('d F').' - '.
+                    $date->copy()->subMonths(6)->translatedFormat('d F Y'),
             ],
             self::PERIOD_TAHUNAN => [
-                'current' => $date->translatedFormat('Y'),
-                'previous' => $date->copy()->subYear()->translatedFormat('Y'),
+                'current' => $date->copy()->subYear()->translatedFormat('d F Y').' - '.
+                    $date->translatedFormat('d F Y'),
+                'previous' => $date->copy()->subYears(2)->translatedFormat('d F Y').' - '.
+                    $date->copy()->subYear()->translatedFormat('d F Y'),
             ],
             self::PERIOD_RANGE => self::getRangeLegends($startDate, $endDate),
             default => ['current' => '', 'previous' => ''],
@@ -169,9 +173,17 @@ final class PeriodHelper
      */
     private static function getWeeklyRange(Carbon $baseDate, bool $previous): array
     {
-        $date = $previous ? $baseDate->copy()->subWeek() : $baseDate->copy();
+        if ($previous) {
+            return [
+                $baseDate->copy()->subWeeks(2)->startOfDay(),
+                $baseDate->copy()->subWeek()->endOfDay(),
+            ];
+        }
 
-        return [$date->startOfWeek(), $date->copy()->endOfWeek()];
+        return [
+            $baseDate->copy()->subWeek()->startOfDay(),
+            $baseDate->copy()->endOfDay(),
+        ];
     }
 
     /**
@@ -179,9 +191,17 @@ final class PeriodHelper
      */
     private static function getMonthlyRange(Carbon $baseDate, bool $previous): array
     {
-        $date = $previous ? $baseDate->copy()->subMonth() : $baseDate->copy();
+        if ($previous) {
+            return [
+                $baseDate->copy()->subMonths(2)->startOfDay(),
+                $baseDate->copy()->subMonth()->endOfDay(),
+            ];
+        }
 
-        return [$date->startOfMonth(), $date->copy()->endOfMonth()];
+        return [
+            $baseDate->copy()->subMonth()->startOfDay(),
+            $baseDate->copy()->endOfDay(),
+        ];
     }
 
     /**
@@ -191,14 +211,14 @@ final class PeriodHelper
     {
         if ($previous) {
             return [
-                $baseDate->copy()->subMonths(12)->startOfMonth(),
-                $baseDate->copy()->subMonths(6)->endOfMonth(),
+                $baseDate->copy()->subMonths(12)->startOfDay(),
+                $baseDate->copy()->subMonths(6)->endOfDay(),
             ];
         }
 
         return [
-            $baseDate->copy()->subMonths(6)->startOfMonth(),
-            $baseDate->copy()->endOfMonth(),
+            $baseDate->copy()->subMonths(6)->startOfDay(),
+            $baseDate->copy()->endOfDay(),
         ];
     }
 
@@ -207,9 +227,17 @@ final class PeriodHelper
      */
     private static function getYearlyRange(Carbon $baseDate, bool $previous): array
     {
-        $date = $previous ? $baseDate->copy()->subYear() : $baseDate->copy();
+        if ($previous) {
+            return [
+                $baseDate->copy()->subYears(2)->startOfDay(),
+                $baseDate->copy()->subYear()->endOfDay(),
+            ];
+        }
 
-        return [$date->startOfYear(), $date->copy()->endOfYear()];
+        return [
+            $baseDate->copy()->subYear()->startOfDay(),
+            $baseDate->copy()->endOfDay(),
+        ];
     }
 
     /**

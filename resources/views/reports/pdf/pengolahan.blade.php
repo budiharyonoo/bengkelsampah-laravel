@@ -97,56 +97,66 @@
             <div class="label">Total Input (Kg)</div>
             <div class="value">{{ number_format($processingMetrics['total_quantity'] ?? 0, 2, ',', '.') }}</div>
         </div>
-        <div class="summary-item">
-            <div class="label">Total Output (Kg)</div>
-            <div class="value">{{ number_format($processingMetrics['output_quantity'] ?? 0, 2, ',', '.') }}</div>
-        </div>
     </div>
+
+    <h3 style="font-size: 14px; margin-top: 20px; margin-bottom: 10px;">Ringkasan Pengolahan per Offtaker</h3>
 
     <table class="data-table">
         <thead>
             <tr>
                 <th>No</th>
-                <th>Metode Pengolahan</th>
+                <th>Offtaker</th>
                 <th class="text-right">Transaksi</th>
-                <th class="text-right">Input (Kg)</th>
-                <th class="text-right">Output (Kg)</th>
-                <th class="text-right">Efisiensi</th>
+                <th class="text-right">Total Qty (Kg)</th>
             </tr>
         </thead>
         <tbody>
-            @php $totalInput = 0; $totalOutput = 0; @endphp
-            @foreach($processingByMethod as $index => $item)
+            @php $totalQty = 0; @endphp
+            @foreach($processingByOfftaker as $index => $item)
                 @php
-                    $totalInput += $item['total_quantity'] ?? 0;
-                    $totalOutput += $item['output_quantity'] ?? 0;
-                    $efficiency = ($item['total_quantity'] ?? 0) > 0 ? (($item['output_quantity'] ?? 0) / ($item['total_quantity'] ?? 1)) * 100 : 0;
-                    $methodLabel = match($item['method'] ?? '') {
-                        'kompos' => 'Kompos',
-                        'daur_ulang' => 'Daur Ulang',
-                        'rdf' => 'RDF',
-                        default => ucfirst($item['method'] ?? 'Lainnya')
-                    };
+                    $totalQty += $item['total_quantity'] ?? 0;
                 @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $methodLabel }}</td>
+                    <td>{{ $item['name'] ?? '-' }}</td>
                     <td class="text-right">{{ $item['count'] ?? 0 }}</td>
                     <td class="text-right">{{ number_format($item['total_quantity'] ?? 0, 2, ',', '.') }}</td>
-                    <td class="text-right">{{ number_format($item['output_quantity'] ?? 0, 2, ',', '.') }}</td>
-                    <td class="text-right">{{ number_format($efficiency, 1) }}%</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
-            @php $totalEfficiency = $totalInput > 0 ? ($totalOutput / $totalInput) * 100 : 0; @endphp
             <tr class="total-row">
                 <td colspan="3">Total</td>
-                <td class="text-right">{{ number_format($totalInput, 2, ',', '.') }}</td>
-                <td class="text-right">{{ number_format($totalOutput, 2, ',', '.') }}</td>
-                <td class="text-right">{{ number_format($totalEfficiency, 1) }}%</td>
+                <td class="text-right">{{ number_format($totalQty, 2, ',', '.') }}</td>
             </tr>
         </tfoot>
+    </table>
+
+    <h3 style="font-size: 14px; margin-top: 20px; margin-bottom: 10px;">Transaksi Terbaru</h3>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Kode</th>
+                <th>Tanggal</th>
+                <th>Offtaker</th>
+                <th>Bank Sampah</th>
+                <th>Metode</th>
+                <th class="text-right">Qty (Kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($recentTransactions as $trx)
+                <tr>
+                    <td>{{ $trx->kode_transaksi }}</td>
+                    <td>{{ $trx->tanggal_transaksi ? \Carbon\Carbon::parse($trx->tanggal_transaksi)->format('d M Y') : '-' }}</td>
+                    <td>{{ $trx->offtaker->nama ?? '-' }}</td>
+                    <td>{{ $trx->bankSampah->nama_bank_sampah ?? '-' }}</td>
+                    <td>{{ ucfirst($trx->metode_pengolahan ?? '-') }}</td>
+                    <td class="text-right">{{ number_format($trx->total_quantity, 2, ',', '.') }}</td>
+                </tr>
+            @endforeach
+        </tbody>
     </table>
 
     <div class="footer">

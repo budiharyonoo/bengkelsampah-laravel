@@ -12,11 +12,10 @@ use App\Http\Controllers\DeleteAccountController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\OfftakerController;
-use App\Http\Controllers\SampahController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SampahController;
 use App\Http\Controllers\WasteInventoryController;
 use App\Http\Controllers\WasteTransactionController;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -197,10 +196,12 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         Route::get('/sales', [WasteTransactionController::class, 'salesIndex'])->name('waste-transactions.sales.index');
         Route::get('/sales/create', [WasteTransactionController::class, 'createSale'])->name('waste-transactions.sales.create');
         Route::post('/sales', [WasteTransactionController::class, 'storeSale'])->name('waste-transactions.sales.store');
-        Route::get('/processing', [WasteTransactionController::class, 'processingIndex'])->name('waste-transactions.processing.index');
-        Route::get('/processing/create', [WasteTransactionController::class, 'createProcessing'])->name('waste-transactions.processing.create');
-        Route::post('/processing', [WasteTransactionController::class, 'storeProcessing'])->name('waste-transactions.processing.store');
+        // Processing routes now redirect to sales routes (merged functionality)
+        Route::get('/processing', fn () => redirect()->route('waste-transactions.sales.index'))->name('waste-transactions.processing.index');
+        Route::get('/processing/create', fn () => redirect()->route('waste-transactions.sales.create'))->name('waste-transactions.processing.create');
+        Route::post('/processing', [WasteTransactionController::class, 'storeSale'])->name('waste-transactions.processing.store');
         Route::get('/get-inventory', [WasteTransactionController::class, 'getInventory'])->name('waste-transactions.get-inventory');
+        Route::get('/get-offtakers-by-type', [WasteTransactionController::class, 'getOfftakersByType'])->name('waste-transactions.get-offtakers-by-type');
         Route::post('/export/excel', [WasteTransactionController::class, 'exportExcel'])->name('waste-transactions.export.excel');
         Route::post('/export/pdf', [WasteTransactionController::class, 'exportPdf'])->name('waste-transactions.export.pdf');
         Route::post('/export/csv', [WasteTransactionController::class, 'exportCsv'])->name('waste-transactions.export.csv');
@@ -218,10 +219,13 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         Route::get('/pengolahan', [ReportController::class, 'pengolahan'])->name('reports.pengolahan');
         Route::post('/laba-rugi/export/excel', [ReportController::class, 'exportLabaRugiExcel'])->name('reports.laba-rugi.export.excel');
         Route::post('/laba-rugi/export/pdf', [ReportController::class, 'exportLabaRugiPdf'])->name('reports.laba-rugi.export.pdf');
+        Route::post('/laba-rugi/export/csv', [ReportController::class, 'exportLabaRugiCsv'])->name('reports.laba-rugi.export.csv');
         Route::post('/penjualan/export/excel', [ReportController::class, 'exportPenjualanExcel'])->name('reports.penjualan.export.excel');
         Route::post('/penjualan/export/pdf', [ReportController::class, 'exportPenjualanPdf'])->name('reports.penjualan.export.pdf');
+        Route::post('/penjualan/export/csv', [ReportController::class, 'exportPenjualanCsv'])->name('reports.penjualan.export.csv');
         Route::post('/pengolahan/export/excel', [ReportController::class, 'exportPengolahanExcel'])->name('reports.pengolahan.export.excel');
         Route::post('/pengolahan/export/pdf', [ReportController::class, 'exportPengolahanPdf'])->name('reports.pengolahan.export.pdf');
+        Route::post('/pengolahan/export/csv', [ReportController::class, 'exportPengolahanCsv'])->name('reports.pengolahan.export.csv');
     });
 
     // Admin routes
@@ -240,7 +244,7 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
         $admin = auth('admin')->user();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:admins,email,' . $admin->id,
+            'email' => 'required|email|max:255|unique:admins,email,'.$admin->id,
             'password' => 'nullable|string|min:6',
         ]);
         $admin->name = $validated['name'];

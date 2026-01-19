@@ -61,17 +61,11 @@
             'children' => [
                 [
                     'route' => 'waste-transactions.sales.index',
-                    'label' => 'Penjualan Sampah',
+                    'label' => 'Penjualan & Pengolahan',
                     'subroutes' => [
                         'waste-transactions.sales.index',
                         'waste-transactions.show',
                         'waste-transactions.sales.create',
-                    ],
-                ],
-                [
-                    'route' => 'waste-transactions.processing.index',
-                    'label' => 'Pengolahan Sampah',
-                    'subroutes' => [
                         'waste-transactions.processing.index',
                         'waste-transactions.processing.create',
                     ],
@@ -88,8 +82,8 @@
             'icon' => 'icon/ic_poin.svg',
             'children' => [
                 ['route' => 'reports.laba-rugi', 'label' => 'Laba Rugi', 'subroutes' => ['reports.laba-rugi']],
-                ['route' => 'reports.penjualan', 'label' => 'Penjualan', 'subroutes' => ['reports.penjualan']],
-                ['route' => 'reports.pengolahan', 'label' => 'Pengolahan', 'subroutes' => ['reports.pengolahan']],
+                ['route' => 'reports.penjualan', 'label' => 'Penjualan & Pengolahan', 'subroutes' => ['reports.penjualan']],
+                // Pengolahan merged into Penjualan
             ],
         ],
         [

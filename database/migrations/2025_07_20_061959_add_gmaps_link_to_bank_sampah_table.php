@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('bank_sampah', 'gmaps_link')) {
+        if (! Schema::hasColumn('bank_sampah', 'gmaps_link')) {
             Schema::table('bank_sampah', function (Blueprint $table) {
                 $table->string('gmaps_link')->nullable()->after('foto');
             });

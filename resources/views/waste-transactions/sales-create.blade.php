@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Penjualan - Admin Panel</title>
+    <title>Tambah Transaksi - Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -855,7 +855,7 @@
         <div class="header-left">
             <h1>Transaksi Sampah</h1>
             <span class="header-separator">/</span>
-            <span class="header-subtitle">Penjualan Baru</span>
+            <span class="header-subtitle">Transaksi Baru</span>
         </div>
     </div>
 
@@ -868,13 +868,35 @@
                 @endif
 
                 <div class="form-header">
-                    <h2 class="form-title">Informasi Penjualan</h2>
+                    <h2 class="form-title">Informasi Transaksi</h2>
                     <div class="form-actions">
                         <a href="{{ route('waste-transactions.index') }}" class="btn-cancel">Batal</a>
-                        <button type="submit" class="btn-save" id="submit-btn">Simpan Penjualan</button>
+                        <button type="submit" class="btn-save" id="submit-btn">Simpan Transaksi</button>
                     </div>
                 </div>
 
+                <!-- Transaction Type FIRST -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tipe Transaksi <span>*</span></label>
+                        <select name="type" id="transaction_type" class="form-select" required onchange="onTransactionTypeChange()">
+                            <option value="sale" {{ old('type', 'sale') === 'sale' ? 'selected' : '' }}>Penjualan</option>
+                            <option value="processing" {{ old('type') === 'processing' ? 'selected' : '' }}>Pengolahan</option>
+                        </select>
+                        @error('type')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="form-group" id="metode-pengolahan-group" style="display: none;">
+                        <label class="form-label">Metode Daur Ulang <span>*</span></label>
+                        <input type="text" name="metode_pengolahan" id="metode_pengolahan" class="form-input" value="{{ old('metode_pengolahan') }}" placeholder="Contoh: Daur Ulang, Kompos, dll">
+                        @error('metode_pengolahan')
+                            <div class="form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Bank Sampah and Offtaker -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Bank Sampah <span>*</span></label>
@@ -955,7 +977,7 @@
                     </div>
                 </div>
 
-                <h3 class="section-title">Item Penjualan</h3>
+                <h3 class="section-title">Item Transaksi</h3>
 
                 <div class="items-section">
                     <div class="items-header">
@@ -1008,8 +1030,8 @@
                     <span class="summary-value" id="total-harga-beli">Rp 0</span>
                 </div>
                 <div class="summary-row summary-total">
-                    <span class="summary-label">Total Penjualan</span>
-                    <span class="summary-value" id="total-penjualan">Rp 0</span>
+                    <span class="summary-label">Total Transaksi</span>
+                    <span class="summary-value" id="total-transaksi">Rp 0</span>
                 </div>
                 <div class="profit-display">
                     <div class="profit-label">Estimasi Laba</div>
@@ -1345,12 +1367,98 @@
             // Update summary
             document.getElementById('total-qty').textContent = totalQty.toFixed(2) + ' kg';
             document.getElementById('total-harga-beli').textContent = 'Rp ' + totalHargaBeli.toLocaleString('id-ID');
-            document.getElementById('total-penjualan').textContent = 'Rp ' + totalPenjualan.toLocaleString('id-ID');
+            document.getElementById('total-transaksi').textContent = 'Rp ' + totalPenjualan.toLocaleString('id-ID');
             document.getElementById('profit-value').textContent = 'Rp ' + profit.toLocaleString('id-ID');
+        }
+
+        function toggleMetodePengolahan() {
+            const typeSelect = document.getElementById('transaction_type');
+            const metodeGroup = document.getElementById('metode-pengolahan-group');
+            const metodeInput = document.getElementById('metode_pengolahan');
+            const isProcessing = typeSelect.value === 'processing';
+
+            // Only toggle metode pengolahan field - everything else stays the same
+            if (isProcessing) {
+                metodeGroup.style.display = 'block';
+                metodeInput.required = true;
+            } else {
+                metodeGroup.style.display = 'none';
+                metodeInput.required = false;
+                metodeInput.value = '';
+            }
+        }
+
+        function onTransactionTypeChange() {
+            // Toggle metode pengolahan visibility
+            toggleMetodePengolahan();
+
+            // Load offtakers based on transaction type
+            const type = document.getElementById('transaction_type').value;
+            loadOfftakersByType(type);
+        }
+
+        function loadOfftakersByType(type) {
+            fetch(`{{ url('dashboard/waste-transactions/get-offtakers-by-type') }}?type=${type}`, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateOfftakerOptions(data);
+            })
+            .catch(error => {
+                console.error('Error loading offtakers:', error);
+            });
+        }
+
+        function updateOfftakerOptions(offtakers) {
+            const wrapper = document.getElementById('offtaker-select');
+            const optionsContainer = wrapper.querySelector('.custom-select-options');
+            const currentValue = document.getElementById('offtaker_id').value;
+
+            // Clear existing options
+            optionsContainer.innerHTML = '';
+
+            // Add new options
+            offtakers.forEach(offtaker => {
+                const option = document.createElement('div');
+                option.className = 'custom-select-option';
+                option.dataset.value = offtaker.id;
+                option.dataset.text = offtaker.nama;
+                option.textContent = offtaker.nama;
+                option.onclick = function() {
+                    selectOption('offtaker-select', offtaker.id, offtaker.nama);
+                };
+
+                // Restore selection if it exists in new list
+                if (offtaker.id == currentValue) {
+                    option.classList.add('selected');
+                }
+
+                optionsContainer.appendChild(option);
+            });
+
+            // Reset selection if current value not in new list
+            const hasCurrentValue = offtakers.some(of => of.id == currentValue);
+            if (!hasCurrentValue && currentValue) {
+                document.getElementById('offtaker_id').value = '';
+                const selectedText = wrapper.querySelector('.selected-text');
+                selectedText.textContent = 'Pilih Pembeli';
+                selectedText.classList.add('placeholder');
+            }
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Metode Pengolahan visibility
+            toggleMetodePengolahan();
+
+            // Load offtakers based on initial transaction type
+            const initialType = document.getElementById('transaction_type').value;
+            loadOfftakersByType(initialType);
+
             // Initialize Bank Sampah select if value exists
             const bankSampahValue = document.getElementById('bank_sampah_id').value;
             if (bankSampahValue) {
@@ -1363,14 +1471,16 @@
                 toggleAddItemButtons(false);
             }
 
-            // Initialize Offtaker select if value exists
-            const offtakerValue = document.getElementById('offtaker_id').value;
-            if (offtakerValue) {
-                const offtakerOption = document.querySelector('#offtaker-select .custom-select-option[data-value="' + offtakerValue + '"]');
-                if (offtakerOption) {
-                    selectOption('offtaker-select', offtakerValue, offtakerOption.dataset.text);
+            // Initialize Offtaker select if value exists (after offtakers are loaded)
+            setTimeout(function() {
+                const offtakerValue = document.getElementById('offtaker_id').value;
+                if (offtakerValue) {
+                    const offtakerOption = document.querySelector('#offtaker-select .custom-select-option[data-value="' + offtakerValue + '"]');
+                    if (offtakerOption) {
+                        selectOption('offtaker-select', offtakerValue, offtakerOption.dataset.text);
+                    }
                 }
-            }
+            }, 500);
 
             // Update initial count
             calculateSummary();

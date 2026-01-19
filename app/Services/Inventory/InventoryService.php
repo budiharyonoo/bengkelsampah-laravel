@@ -179,7 +179,7 @@ class InventoryService
                 ->first();
 
             if ($inventory) {
-                $inventory->reduceStock((float)$quantity);
+                $inventory->reduceStock((float) $quantity);
             }
         });
 

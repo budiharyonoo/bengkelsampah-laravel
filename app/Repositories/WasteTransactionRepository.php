@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Models\Sampah;
 use App\Models\WasteTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -34,17 +35,17 @@ class WasteTransactionRepository
     }
 
     /**
-     * Get sales metrics for dashboard.
+     * Get sales and processing metrics (combined revenue).
      *
      * @return array{count: int, total_value: float, total_quantity: float, total_profit: float}
      */
     public function getSalesMetrics(?int $bankSampahId, Carbon $startDate, Carbon $endDate): array
     {
-        $cacheKey = $this->buildCacheKey('sales_metrics', $bankSampahId, $startDate, $endDate);
+        $cacheKey = $this->buildCacheKey('sales_and_processing_metrics', $bankSampahId, $startDate, $endDate);
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($bankSampahId, $startDate, $endDate) {
             $result = WasteTransaction::query()
-                ->sales()
+                ->salesAndProcessing()
                 ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
                 ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
                 ->selectRaw('
@@ -87,37 +88,6 @@ class WasteTransactionRepository
     }
 
     /**
-     * Get profit metrics for dashboard.
-     *
-     * @return array{total_penjualan: float, total_pembelian: float, laba_kotor: float}
-     */
-    public function getProfitMetrics(?int $bankSampahId, Carbon $startDate, Carbon $endDate): array
-    {
-        $cacheKey = $this->buildCacheKey('profit_metrics', $bankSampahId, $startDate, $endDate);
-
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($bankSampahId, $startDate, $endDate) {
-            $result = WasteTransaction::query()
-                ->sales()
-                ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
-                ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
-                ->selectRaw('
-                    COALESCE(SUM(total_value), 0) as total_penjualan,
-                    COALESCE(SUM(harga_beli_total), 0) as total_pembelian
-                ')
-                ->first();
-
-            $totalPenjualan = (float) ($result->total_penjualan ?? 0);
-            $totalPembelian = (float) ($result->total_pembelian ?? 0);
-
-            return [
-                'total_penjualan' => $totalPenjualan,
-                'total_pembelian' => $totalPembelian,
-                'laba_kotor' => $totalPenjualan - $totalPembelian,
-            ];
-        });
-    }
-
-    /**
      * Get processing metrics for dashboard.
      *
      * @return array{count: int, total_quantity: float, total_cost: float}
@@ -148,34 +118,47 @@ class WasteTransactionRepository
 
     /**
      * Get sales grouped by offtaker.
+     *
+     * @return Collection<int, array{name: string, count: int, total_quantity: float, total_value: float, profit: float}>
      */
     public function getSalesByOfftaker(?int $bankSampahId, Carbon $startDate, Carbon $endDate): Collection
     {
         return WasteTransaction::query()
-            ->sales()
+            ->salesAndProcessing()
             ->with('offtaker:id,kode_offtaker,nama')
             ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
             ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
             ->select([
                 'offtaker_id',
-                DB::raw('COUNT(*) as transaction_count'),
+                DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_quantity) as total_quantity'),
                 DB::raw('SUM(total_value) as total_value'),
-                DB::raw('SUM(total_value - harga_beli_total) as total_profit'),
+                DB::raw('SUM(total_value - harga_beli_total) as profit'),
             ])
             ->groupBy('offtaker_id')
             ->orderByDesc('total_value')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->offtaker->nama ?? 'Unknown Offtaker',
+                    'count' => (int) $item->count,
+                    'total_quantity' => (float) $item->total_quantity,
+                    'total_value' => (float) $item->total_value,
+                    'profit' => (float) $item->profit,
+                ];
+            });
     }
 
     /**
      * Get sales grouped by waste type.
+     *
+     * @return Collection<int, array{name: string, count: int, total_quantity: float, total_value: float, profit: float}>
      */
     public function getSalesByWasteType(?int $bankSampahId, Carbon $startDate, Carbon $endDate): Collection
     {
         // This requires parsing items_json, so we'll do it in PHP
         $transactions = WasteTransaction::query()
-            ->sales()
+            ->salesAndProcessing()
             ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
             ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
             ->get(['items_json']);
@@ -189,23 +172,45 @@ class WasteTransactionRepository
                 if (! isset($wasteTypeTotals[$sampahId])) {
                     $wasteTypeTotals[$sampahId] = [
                         'sampah_id' => $sampahId,
-                        'quantity' => 0,
-                        'value' => 0,
+                        'count' => 0,
+                        'total_quantity' => 0,
+                        'total_value' => 0,
                         'profit' => 0,
                     ];
                 }
 
-                $wasteTypeTotals[$sampahId]['quantity'] += $item['quantity'] ?? 0;
-                $wasteTypeTotals[$sampahId]['value'] += $item['total'] ?? 0;
+                $wasteTypeTotals[$sampahId]['count']++;
+                $wasteTypeTotals[$sampahId]['total_quantity'] += $item['quantity'] ?? 0;
+                $wasteTypeTotals[$sampahId]['total_value'] += $item['total'] ?? 0;
                 $wasteTypeTotals[$sampahId]['profit'] += $item['profit'] ?? 0;
             }
         }
 
-        return collect($wasteTypeTotals)->sortByDesc('value')->values();
+        // Fetch waste names
+        $sampahIds = array_keys($wasteTypeTotals);
+        $sampahNames = Sampah::whereIn('id', $sampahIds)
+            ->pluck('nama', 'id')
+            ->toArray();
+
+        // Map to final structure with names
+        return collect($wasteTypeTotals)
+            ->map(function ($item) use ($sampahNames) {
+                return [
+                    'name' => $sampahNames[$item['sampah_id']] ?? 'Unknown Waste',
+                    'count' => (int) $item['count'],
+                    'total_quantity' => (float) $item['total_quantity'],
+                    'total_value' => (float) $item['total_value'],
+                    'profit' => (float) $item['profit'],
+                ];
+            })
+            ->sortByDesc('total_value')
+            ->values();
     }
 
     /**
      * Get processing grouped by method.
+     *
+     * @return Collection<int, array{method: string, count: int, total_quantity: float}>
      */
     public function getProcessingByMethod(?int $bankSampahId, Carbon $startDate, Carbon $endDate): Collection
     {
@@ -214,12 +219,115 @@ class WasteTransactionRepository
             ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
             ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
             ->select([
-                'metode_pengolahan',
-                DB::raw('COUNT(*) as transaction_count'),
+                DB::raw('metode_pengolahan as method'),
+                DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total_quantity) as total_quantity'),
             ])
             ->groupBy('metode_pengolahan')
             ->orderByDesc('total_quantity')
+            ->get();
+    }
+
+    /**
+     * Get processing grouped by offtaker.
+     *
+     * @return Collection<int, array{name: string, count: int, total_quantity: float}>
+     */
+    public function getProcessingByOfftaker(?int $bankSampahId, Carbon $startDate, Carbon $endDate): Collection
+    {
+        return WasteTransaction::query()
+            ->processing()
+            ->with('offtaker:id,kode_offtaker,nama')
+            ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
+            ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
+            ->select([
+                'offtaker_id',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(total_quantity) as total_quantity'),
+            ])
+            ->groupBy('offtaker_id')
+            ->orderByDesc('total_quantity')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->offtaker->nama ?? 'Unknown Offtaker',
+                    'count' => (int) $item->count,
+                    'total_quantity' => (float) $item->total_quantity,
+                ];
+            });
+    }
+
+    /**
+     * Get processing grouped by waste type.
+     *
+     * @return Collection<int, array{name: string, count: int, total_quantity: float}>
+     */
+    public function getProcessingByWasteType(?int $bankSampahId, Carbon $startDate, Carbon $endDate): Collection
+    {
+        // This requires parsing items_json, so we'll do it in PHP
+        $transactions = WasteTransaction::query()
+            ->processing()
+            ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
+            ->whereBetween('tanggal_transaksi', [$startDate->toDateString(), $endDate->toDateString()])
+            ->get(['items_json']);
+
+        $wasteTypeTotals = [];
+
+        foreach ($transactions as $transaction) {
+            foreach ($transaction->items_json as $item) {
+                $sampahId = $item['sampah_id'];
+
+                if (! isset($wasteTypeTotals[$sampahId])) {
+                    $wasteTypeTotals[$sampahId] = [
+                        'sampah_id' => $sampahId,
+                        'count' => 0,
+                        'total_quantity' => 0,
+                    ];
+                }
+
+                $wasteTypeTotals[$sampahId]['count']++;
+                $wasteTypeTotals[$sampahId]['total_quantity'] += $item['quantity'] ?? 0;
+            }
+        }
+
+        // Fetch waste names
+        $sampahIds = array_keys($wasteTypeTotals);
+        $sampahNames = Sampah::whereIn('id', $sampahIds)
+            ->pluck('nama', 'id')
+            ->toArray();
+
+        // Map to final structure with names
+        return collect($wasteTypeTotals)
+            ->map(function ($item) use ($sampahNames) {
+                return [
+                    'name' => $sampahNames[$item['sampah_id']] ?? 'Unknown Waste',
+                    'count' => (int) $item['count'],
+                    'total_quantity' => (float) $item['total_quantity'],
+                ];
+            })
+            ->sortByDesc('total_quantity')
+            ->values();
+    }
+
+    /**
+     * Get recent processing transactions with optional date filtering.
+     */
+    public function getRecentProcessingTransactions(
+        ?int $bankSampahId,
+        ?Carbon $startDate = null,
+        ?Carbon $endDate = null,
+        int $limit = 10
+    ): Collection {
+        return WasteTransaction::query()
+            ->processing()
+            ->with(['bankSampah:id,nama_bank_sampah', 'offtaker:id,nama,kode_offtaker'])
+            ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
+            ->when($startDate && $endDate, fn ($q) => $q->whereBetween('tanggal_transaksi', [
+                $startDate->toDateString(),
+                $endDate->toDateString(),
+            ]))
+            ->orderByDesc('created_at')
+            ->limit($limit)
             ->get();
     }
 
@@ -233,6 +341,7 @@ class WasteTransactionRepository
         int $limit = 10
     ): Collection {
         return WasteTransaction::query()
+            ->salesAndProcessing() // Get both sales and processing transactions
             ->with(['bankSampah:id,nama_bank_sampah', 'offtaker:id,nama,kode_offtaker'])
             ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
             ->when($startDate && $endDate, fn ($q) => $q->whereBetween('tanggal_transaksi', [
@@ -242,6 +351,27 @@ class WasteTransactionRepository
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Get recent transactions with pagination.
+     */
+    public function getRecentTransactionsPaginated(
+        ?int $bankSampahId,
+        ?Carbon $startDate = null,
+        ?Carbon $endDate = null,
+        int $perPage = 10
+    ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
+        return WasteTransaction::query()
+            ->salesAndProcessing() // Get both sales and processing transactions
+            ->with(['bankSampah:id,nama_bank_sampah', 'offtaker:id,nama,kode_offtaker'])
+            ->when($bankSampahId, fn ($q) => $q->where('bank_sampah_id', $bankSampahId))
+            ->when($startDate && $endDate, fn ($q) => $q->whereBetween('tanggal_transaksi', [
+                $startDate->toDateString(),
+                $endDate->toDateString(),
+            ]))
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
     }
 
     /**

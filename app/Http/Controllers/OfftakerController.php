@@ -36,8 +36,15 @@ class OfftakerController extends Controller
 
         $offtakers = $query->withCount('wasteTransactions')
             ->orderBy('nama')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
+
+        // Return JSON for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'offtakers' => $offtakers,
+            ]);
+        }
 
         return view('offtakers.index', compact('offtakers'));
     }

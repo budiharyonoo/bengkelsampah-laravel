@@ -14,7 +14,7 @@ class EnvironmentalImpactServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new EnvironmentalImpactService();
+        $this->service = new EnvironmentalImpactService;
     }
 
     public function test_calculates_co2e_kg_correctly(): void

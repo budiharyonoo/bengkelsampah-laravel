@@ -145,6 +145,14 @@ class WasteTransaction extends Model
     }
 
     /**
+     * Scope to filter sales and processing combined.
+     */
+    public function scopeSalesAndProcessing($query)
+    {
+        return $query->whereIn('type', [self::TYPE_SALE, self::TYPE_PROCESSING]);
+    }
+
+    /**
      * Get the type text attribute.
      */
     public function getTypeTextAttribute(): string

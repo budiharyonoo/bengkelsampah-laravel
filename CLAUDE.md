@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Always use these MCP tools:
 - **serena**: Semantic code search and editing across codebase
-- **context7**: Up-to-date documentation for third-party libraries
+- **context7**: ALWAYS use proactively for library/API documentation, setup steps, and code generation - never wait for explicit requests
 - **laravel-boost**: Laravel-specific tools and documentation
 
 ### When to use each tool:
@@ -14,11 +14,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Finding code by intent: "where do we handle authentication?"
   - Locating related functions across different files
   - Understanding code relationships and structure
+- **Important**: use serena proactively without waiting for user to ask
 
 - Use **context7** when:
-  - Need latest library documentation (Laravel, packages)
-  - Implementing new third-party integrations
-  - Verifying API methods and syntax
+  - Need latest library documentation (Laravel, packages) - USE AUTOMATICALLY
+  - Implementing new third-party integrations - USE AUTOMATICALLY
+  - Verifying API methods and syntax - USE AUTOMATICALLY
+  - Learning how to use any library feature or API - USE AUTOMATICALLY
+  - **Important**: Query context7 proactively without waiting for user to ask
 
 - Use **laravel-boost** when:
   - Querying Eloquent models and database schemas
@@ -26,6 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Running artisan commands or tinker
   - Checking application routes and configurations
   - Analyzing error logs
+  - **Important**: use laravel-boost proactively without waiting for user to ask
 
 ## Project Overview
 
@@ -156,6 +160,11 @@ The application implements the Repository Pattern for data access layer separati
 - `SetoranRepository.php` - Transaction queries with dashboard optimizations
 - `UserRepository.php` - User queries with 10-minute caching
 - `DashboardRepository.php` - Aggregated dashboard metrics
+- `WasteTransactionRepository.php` - Sales/transaction aggregations for reporting
+  - `getSalesByOfftaker()` - Groups sales by offtaker with totals
+  - `getSalesByWasteType()` - Groups sales by waste type with totals
+  - `getRecentTransactions()` - Fetches recent transactions with filters
+- `InventoryRepository.php` - Inventory and stock management queries
 
 **Common Patterns**:
 - Use eager loading to prevent N+1 queries
@@ -373,11 +382,78 @@ Points and XP are calculated automatically on completion based on transaction ty
 
 ### Export Functionality
 
-The admin dashboard supports comprehensive exports:
+The admin dashboard supports comprehensive exports with a consistent pattern across all reports:
+
+**Export Formats**:
 - **PDF Reports**: DomPDF-based with custom templates
-- **Excel Export**: PhpSpreadsheet with formatting
-- **CSV Export**: Simple data dumps for analysis
+- **Excel Export**: PhpSpreadsheet with formatting and styling
+- **CSV Export**: UTF-8 BOM encoded for Excel compatibility
 - **Receipt Generation**: Transaction receipts for completed deposits
+
+**Export UI Pattern**:
+All report pages use a consistent export dropdown button with the following structure:
+```blade
+<div class="export-dropdown">
+    <button class="export-button" id="exportButton">
+        <span>Export</span>
+        <img src="{{ asset('icon/ic_trailing.svg') }}" alt="Export" width="16" height="16">
+    </button>
+    <div class="export-dropdown-content" id="exportDropdown">
+        <div class="export-option" onclick="exportData('excel')">
+            <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Excel">
+            <span>Export Excel</span>
+        </div>
+        <div class="export-option" onclick="exportData('pdf')">
+            <img src="{{ asset('icon/ic_laporan.svg') }}" alt="PDF">
+            <span>Export PDF</span>
+        </div>
+        <div class="export-option" onclick="exportData('csv')">
+            <img src="{{ asset('icon/ic_laporan.svg') }}" alt="CSV">
+            <span>Export CSV</span>
+        </div>
+    </div>
+</div>
+```
+
+**Export Controller Pattern**:
+Export methods should:
+1. Retrieve filter parameters using `getPeriodParams()` helper
+2. Fetch comprehensive data (both primary and secondary breakdowns when applicable)
+3. Include bank sampah filter information in exports
+4. Provide totals and subtotals for all numeric columns
+5. Use proper formatting (number formats, dates, currencies)
+
+**Example - Comprehensive Export Pattern** (Laporan Penjualan):
+```php
+public function exportPenjualanExcel(Request $request)
+{
+    $params = $this->getPeriodParams($request);
+
+    // Get both data perspectives for comprehensive reporting
+    $dataByOfftaker = $this->transactionRepository->getSalesByOfftaker(...);
+    $dataByWasteType = $this->transactionRepository->getSalesByWasteType(...);
+
+    // Get filter information for context
+    $bankSampahName = 'Semua Bank Sampah';
+    if ($params['bankSampahId']) {
+        $bankSampah = BankSampah::find($params['bankSampahId']);
+        $bankSampahName = $bankSampah ? $bankSampah->nama_bank_sampah : 'Unknown';
+    }
+
+    // Include both sections in export for complete insights
+    // Section 1: Primary breakdown (e.g., by offtaker)
+    // Section 2: Secondary breakdown (e.g., by waste type)
+    // Both sections include totals
+}
+```
+
+**Export Best Practices**:
+- Always show applied filters (period, bank sampah, etc.) in export headers
+- Provide multiple data perspectives when insightful (e.g., by offtaker AND by waste type)
+- Include grand totals for all numeric columns
+- Use consistent styling across Excel, PDF, and CSV formats
+- CSV exports should include UTF-8 BOM for Excel compatibility: `fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));`
+- Hidden forms submit export requests via POST to prevent URL parameter limits
 
 ## Configuration Requirements
 

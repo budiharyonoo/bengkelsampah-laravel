@@ -116,8 +116,8 @@
         }
 
         th {
-            background: linear-gradient(135deg, #39746E 0%, #2c5530 100%);
-            color: white;
+            background-color: #39746E !important;
+            color: #ffffff !important;
             padding: 10px 6px;
             text-align: left;
             font-weight: bold;
@@ -125,6 +125,8 @@
             font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         td {
@@ -244,11 +246,11 @@
         }
 
         th {
-            background: #39746E;
-            color: white;
+            background-color: #39746E !important;
+            color: #ffffff !important;
             font-weight: bold;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     </style>
 </head>
@@ -391,16 +393,17 @@
                 <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th width="12%">Kode Trx / Tanggal</th>
-                        <th width="15%">Bank Sampah</th>
-                        <th width="{{ $isProcessing ? '35%' : '30%' }}">Item Sampah</th>
-                        <th width="12%">Total Qty (kg)</th>
+                        <th width="11%">Kode Trx / Tanggal</th>
+                        <th width="8%">Tipe</th>
+                        <th width="13%">Bank Sampah</th>
+                        <th width="{{ $isProcessing ? '30%' : '28%' }}">Item Sampah</th>
+                        <th width="10%">Total Qty (kg)</th>
                         @if($isProcessing)
-                        <th width="15%">Metode Daur Ulang</th>
+                        <th width="13%">Metode Daur Ulang</th>
                         @else
-                        <th width="15%">Total Harga (Rp)</th>
+                        <th width="13%">Total Harga (Rp)</th>
                         @endif
-                        <th width="11%">Catatan</th>
+                        <th width="10%">Catatan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -442,6 +445,11 @@
                                 <div style="font-size: 8px; color: #666;">
                                     {{ $transaction->tanggal_transaksi->format('d/m/Y') }}
                                 </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="type-badge {{ $transaction->type === 'sale' ? 'type-sale' : 'type-processing' }}">
+                                    {{ $transaction->type === 'sale' ? 'Penjualan' : 'Pengolahan' }}
+                                </span>
                             </td>
                             <td>
                                 <div class="font-bold" style="font-size: 9px;">

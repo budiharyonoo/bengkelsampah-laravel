@@ -69,7 +69,7 @@ class WasteTransactionController extends Controller
 
         $transactions = $query->orderByDesc('tanggal_transaksi')
             ->orderByDesc('created_at')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         $bankSampahList = BankSampah::select('id', 'nama_bank_sampah')->get();
@@ -79,7 +79,7 @@ class WasteTransactionController extends Controller
     }
 
     /**
-     * Display a listing of sales (type = sale).
+     * Display a listing of sales and processing transactions (merged view).
      */
     public function salesIndex(Request $request)
     {
@@ -93,8 +93,12 @@ class WasteTransactionController extends Controller
         }
 
         $query = WasteTransaction::query()
-            ->with(['bankSampah:id,nama_bank_sampah,kode_bank_sampah', 'offtaker:id,nama,kode_offtaker'])
-            ->where('type', WasteTransaction::TYPE_SALE);
+            ->with(['bankSampah:id,nama_bank_sampah,kode_bank_sampah', 'offtaker:id,nama,kode_offtaker']);
+
+        // Filter by type if specified
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
 
         if ($bankSampahId) {
             $query->where('bank_sampah_id', $bankSampahId);
@@ -118,16 +122,16 @@ class WasteTransactionController extends Controller
 
         $transactions = $query->orderByDesc('tanggal_transaksi')
             ->orderByDesc('created_at')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         $bankSampahList = BankSampah::select('id', 'nama_bank_sampah')->get();
         $offtakerList = Offtaker::active()->buyers()->select('id', 'nama', 'kode_offtaker')->get();
 
-        $pageTitle = 'Penjualan Sampah';
-        $transactionType = 'sale';
+        $pageTitle = 'Penjualan & Pengolahan';
+        $transactionType = 'all'; // Changed from 'sale' to 'all'
         $createRoute = 'waste-transactions.sales.create';
-        $createLabel = 'Tambah Penjualan Sampah';
+        $createLabel = 'Tambah Transaksi Sampah';
         $indexRoute = 'waste-transactions.sales.index';
 
         return view('waste-transactions.index', compact(
@@ -182,7 +186,7 @@ class WasteTransactionController extends Controller
 
         $transactions = $query->orderByDesc('tanggal_transaksi')
             ->orderByDesc('created_at')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         $bankSampahList = BankSampah::select('id', 'nama_bank_sampah')->get();
@@ -215,7 +219,8 @@ class WasteTransactionController extends Controller
         $bankSampahId = $admin->id_bank_sampah ?? $request->bank_sampah_id;
 
         $bankSampahList = BankSampah::select('id', 'nama_bank_sampah', 'kode_bank_sampah')->get();
-        $offtakerList = Offtaker::active()->buyers()->select('id', 'nama', 'kode_offtaker')->get();
+        // Load processors by default (for 'sale' type) - will be dynamically filtered by JS
+        $offtakerList = Offtaker::active()->processors()->select('id', 'nama', 'kode_offtaker')->get();
         $sampahList = Sampah::select('id', 'nama', 'satuan', 'gambar')->get();
 
         // Get available inventory if bank sampah is selected
@@ -234,13 +239,37 @@ class WasteTransactionController extends Controller
     }
 
     /**
-     * Store a newly created sale.
+     * Get offtakers filtered by transaction type.
+     */
+    public function getOfftakersByType(Request $request)
+    {
+        $type = $request->get('type', 'sale');
+
+        $query = Offtaker::active()->select('id', 'nama', 'kode_offtaker', 'tipe');
+
+        if ($type === 'processing') {
+            // For processing: show buyers and both
+            $query->processors();
+        } else {
+            // For sale: show processors and both
+            $query->buyers();
+        }
+
+        $offtakers = $query->get();
+
+        return response()->json($offtakers);
+    }
+
+    /**
+     * Store a newly created sale or processing transaction.
      */
     public function storeSale(Request $request)
     {
         $validated = $request->validate([
             'bank_sampah_id' => 'required|int|exists:bank_sampah,id',
             'offtaker_id' => 'required|int|exists:offtakers,id',
+            'type' => 'required|in:sale,processing',
+            'metode_pengolahan' => 'required_if:type,processing|nullable|string|max:255',
             'items' => 'required|array|min:1',
             'items.*.sampah_id' => 'required|int|exists:sampah,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
@@ -261,16 +290,17 @@ class WasteTransactionController extends Controller
             $validated['bank_sampah_id'] = (int) $validated['bank_sampah_id'];
             $validated['offtaker_id'] = (int) $validated['offtaker_id'];
 
-            $transaction = $this->transactionService->createSale($validated, $admin);
+            $transaction = $this->transactionService->createTransaction($validated, $admin);
+
+            $typeLabel = $validated['type'] === 'sale' ? 'Penjualan' : 'Pengolahan';
 
             return redirect()
                 ->route('waste-transactions.show', $transaction)
-                ->with('success', "Penjualan berhasil dicatat dengan kode {$transaction->kode_transaksi}");
-
+                ->with('success', "{$typeLabel} berhasil dicatat dengan kode {$transaction->kode_transaksi}");
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Gagal mencatat penjualan: '.$e->getMessage());
+                ->with('error', 'Gagal mencatat transaksi: ' . $e->getMessage());
         }
     }
 
@@ -329,11 +359,10 @@ class WasteTransactionController extends Controller
             return redirect()
                 ->route('waste-transactions.show', $transaction)
                 ->with('success', "Pengolahan berhasil dicatat dengan kode {$transaction->kode_transaksi}");
-
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Gagal mencatat pengolahan: '.$e->getMessage());
+                ->with('error', 'Gagal mencatat pengolahan: ' . $e->getMessage());
         }
     }
 
@@ -405,20 +434,23 @@ class WasteTransactionController extends Controller
         $typeLabel = $type === 'sale' ? 'Penjualan' : ($type === 'processing' ? 'Pengolahan' : 'Transaksi');
         $isProcessing = $type === 'processing';
 
-        // Set headers - different for processing vs sale
+        // Set headers - always include Tipe column
         if ($isProcessing) {
-            $headers = ['No', 'Kode Trx / Tanggal', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Metode Daur Ulang', 'Catatan'];
+            $headers = ['No', 'Kode Trx / Tanggal', 'Tipe', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Metode Daur Ulang', 'Catatan'];
+        } elseif ($type === 'sale') {
+            $headers = ['No', 'Kode Trx / Tanggal', 'Tipe', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Total Harga (Rp)', 'Catatan'];
         } else {
-            $headers = ['No', 'Kode Trx / Tanggal', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Total Harga (Rp)', 'Catatan'];
+            // When exporting all types, include both columns
+            $headers = ['No', 'Kode Trx / Tanggal', 'Tipe', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Total Harga (Rp)', 'Metode Daur Ulang', 'Catatan'];
         }
 
         $col = 'A';
         foreach ($headers as $header) {
-            $sheet->setCellValue($col.'1', $header);
-            $sheet->getStyle($col.'1')->getFont()->setBold(true);
-            $sheet->getStyle($col.'1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-            $sheet->getStyle($col.'1')->getFill()->getStartColor()->setARGB('FF39746E');
-            $sheet->getStyle($col.'1')->getFont()->getColor()->setARGB('FFFFFFFF');
+            $sheet->setCellValue($col . '1', $header);
+            $sheet->getStyle($col . '1')->getFont()->setBold(true);
+            $sheet->getStyle($col . '1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+            $sheet->getStyle($col . '1')->getFill()->getStartColor()->setARGB('FF39746E');
+            $sheet->getStyle($col . '1')->getFont()->getColor()->setARGB('FFFFFFFF');
             $col++;
         }
 
@@ -430,17 +462,21 @@ class WasteTransactionController extends Controller
             $col = 'A';
 
             // No
-            $sheet->setCellValue($col++.$row, $no++);
+            $sheet->setCellValue($col++ . $row, $no++);
 
             // Kode Trx / Tanggal
-            $kodeTrxDate = $transaction->kode_transaksi."\n".
-                           $transaction->tanggal_transaksi->format('d/m/Y');
-            $sheet->setCellValue($col++.$row, $kodeTrxDate);
-            $sheet->getStyle(($col - 1).$row)->getAlignment()->setWrapText(true);
+            $kodeTrxDate = $transaction->kode_transaksi . "\n" .
+                $transaction->tanggal_transaksi->format('d/m/Y');
+            $sheet->setCellValue($col++ . $row, $kodeTrxDate);
+            $sheet->getStyle(($col - 1) . $row)->getAlignment()->setWrapText(true);
+
+            // Tipe
+            $tipeLabel = $transaction->type === 'sale' ? 'Penjualan' : 'Pengolahan';
+            $sheet->setCellValue($col++ . $row, $tipeLabel);
 
             // Bank Sampah - show actual bank name
             $bankSampahName = $transaction->bankSampah->nama_bank_sampah ?? '-';
-            $sheet->setCellValue($col++.$row, $bankSampahName);
+            $sheet->setCellValue($col++ . $row, $bankSampahName);
 
             // Item Sampah - merge all items with line breaks
             $itemsText = [];
@@ -460,46 +496,53 @@ class WasteTransactionController extends Controller
 
                     if ($isProcessing) {
                         // For processing: only show name and quantity, no price
-                        $itemsText[] = $sampahName.' ('.number_format($quantity, 2, ',', '.').' kg)';
+                        $itemsText[] = $sampahName . ' (' . number_format($quantity, 2, ',', '.') . ' kg)';
                     } else {
                         // For sale: show name, quantity, and price
                         $harga = $item['harga_jual'] ?? 0;
                         $totalHarga += $harga;
-                        $itemsText[] = $sampahName.' ('.number_format($quantity, 2, ',', '.').' kg @ Rp '.number_format($harga, 0, ',', '.').')';
+                        $itemsText[] = $sampahName . ' (' . number_format($quantity, 2, ',', '.') . ' kg @ Rp ' . number_format($harga, 0, ',', '.') . ')';
                     }
                 }
             }
 
             $itemsSampahText = ! empty($itemsText) ? implode("\n", $itemsText) : '-';
-            $sheet->setCellValue($col++.$row, $itemsSampahText);
-            $sheet->getStyle(($col - 1).$row)->getAlignment()->setWrapText(true);
+            $sheet->setCellValue($col++ . $row, $itemsSampahText);
+            $sheet->getStyle(($col - 1) . $row)->getAlignment()->setWrapText(true);
 
             // Total Quantity
-            $sheet->setCellValue($col++.$row, $totalQuantity);
+            $sheet->setCellValue($col++ . $row, $totalQuantity);
 
-            // Total Harga / Metode Daur Ulang
+            // Total Harga / Metode Daur Ulang based on type filter
             if ($isProcessing) {
+                // Processing only export
                 $metodeDaurUlang = $transaction->metode_pengolahan ?? '-';
-                $sheet->setCellValue($col++.$row, $metodeDaurUlang);
+                $sheet->setCellValue($col++ . $row, $metodeDaurUlang);
+            } elseif ($type === 'sale') {
+                // Sale only export
+                $sheet->setCellValue($col++ . $row, $totalHarga);
             } else {
-                $sheet->setCellValue($col++.$row, $totalHarga);
+                // All types export - show both columns
+                $sheet->setCellValue($col++ . $row, $totalHarga);
+                $metodeDaurUlang = $transaction->metode_pengolahan ?? '-';
+                $sheet->setCellValue($col++ . $row, $metodeDaurUlang);
             }
 
             // Catatan
             $notes = $transaction->notes ?? '-';
-            $sheet->setCellValue($col++.$row, $notes);
+            $sheet->setCellValue($col++ . $row, $notes);
 
             $row++;
         }
 
         // Auto-size columns
-        foreach (range('A', 'G') as $column) {
+        foreach (range('A', 'I') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 
-        $filename = 'laporan_'.strtolower($typeLabel).'_sampah_'.date('Y-m-d').'.xlsx';
+        $filename = 'laporan_' . strtolower($typeLabel) . '_sampah_' . date('Y-m-d') . '.xlsx';
 
         return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
@@ -526,7 +569,7 @@ class WasteTransactionController extends Controller
 
         $pdf->setPaper('A4', 'landscape');
 
-        $filename = 'laporan_'.strtolower(str_replace(' ', '_', $typeLabel)).'_'.date('Y-m-d').'.pdf';
+        $filename = 'laporan_' . strtolower(str_replace(' ', '_', $typeLabel)) . '_' . date('Y-m-d') . '.pdf';
 
         return $pdf->download($filename);
     }
@@ -542,7 +585,7 @@ class WasteTransactionController extends Controller
         $typeLabel = $type === 'sale' ? 'penjualan' : ($type === 'processing' ? 'pengolahan' : 'transaksi');
         $isProcessing = $type === 'processing';
 
-        $filename = 'laporan_'.strtolower($typeLabel).'_sampah_'.date('Y-m-d').'.csv';
+        $filename = 'laporan_' . strtolower($typeLabel) . '_sampah_' . date('Y-m-d') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -556,13 +599,16 @@ class WasteTransactionController extends Controller
             $handle = fopen('php://output', 'w');
 
             // Add BOM for UTF-8
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            // Write headers - different for processing vs sale
+            // Write headers - always include Tipe column
             if ($isProcessing) {
-                fputcsv($handle, ['No', 'Kode Trx / Tanggal', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Metode Daur Ulang', 'Catatan']);
+                fputcsv($handle, ['No', 'Kode Trx / Tanggal', 'Tipe', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Metode Daur Ulang', 'Catatan']);
+            } elseif ($type === 'sale') {
+                fputcsv($handle, ['No', 'Kode Trx / Tanggal', 'Tipe', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Total Harga (Rp)', 'Catatan']);
             } else {
-                fputcsv($handle, ['No', 'Kode Trx / Tanggal', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Total Harga (Rp)', 'Catatan']);
+                // When exporting all types, include both columns
+                fputcsv($handle, ['No', 'Kode Trx / Tanggal', 'Tipe', 'Bank Sampah', 'Item Sampah', 'Total Qty (kg)', 'Total Harga (Rp)', 'Metode Daur Ulang', 'Catatan']);
             }
 
             // Write data - one row per transaction
@@ -570,7 +616,10 @@ class WasteTransactionController extends Controller
             foreach ($transactions as $transaction) {
                 $sampahModels = $transaction->sampahModels ?? collect();
 
-                $kodeTrxDate = $transaction->kode_transaksi.' / '.$transaction->tanggal_transaksi->format('d/m/Y');
+                $kodeTrxDate = $transaction->kode_transaksi . ' / ' . $transaction->tanggal_transaksi->format('d/m/Y');
+
+                // Tipe
+                $tipeLabel = $transaction->type === 'sale' ? 'Penjualan' : 'Pengolahan';
 
                 // Bank Sampah - show actual bank name
                 $bankSampahName = $transaction->bankSampah->nama_bank_sampah ?? '-';
@@ -593,12 +642,12 @@ class WasteTransactionController extends Controller
 
                         if ($isProcessing) {
                             // For processing: only show name and quantity, no price
-                            $itemsText[] = $sampahName.' ('.number_format($quantity, 2, ',', '.').' kg)';
+                            $itemsText[] = $sampahName . ' (' . number_format($quantity, 2, ',', '.') . ' kg)';
                         } else {
                             // For sale: show name, quantity, and price
                             $harga = $item['harga_jual'] ?? 0;
                             $totalHarga += $harga;
-                            $itemsText[] = $sampahName.' ('.number_format($quantity, 2, ',', '.').' kg @ Rp '.number_format($harga, 0, ',', '.').')';
+                            $itemsText[] = $sampahName . ' (' . number_format($quantity, 2, ',', '.') . ' kg @ Rp ' . number_format($harga, 0, ',', '.') . ')';
                         }
                     }
                 }
@@ -607,26 +656,44 @@ class WasteTransactionController extends Controller
 
                 $notes = $transaction->notes ?? '-';
 
-                // Different last column for processing vs sale
+                // Different columns based on type filter
                 if ($isProcessing) {
+                    // Processing only export
                     $metodeDaurUlang = $transaction->metode_pengolahan ?? '-';
                     fputcsv($handle, [
                         $no++,
                         $kodeTrxDate,
+                        $tipeLabel,
                         $bankSampahName,
                         $itemsSampahText,
                         $totalQuantity,
                         $metodeDaurUlang,
                         $notes,
                     ]);
-                } else {
+                } elseif ($type === 'sale') {
+                    // Sale only export
                     fputcsv($handle, [
                         $no++,
                         $kodeTrxDate,
+                        $tipeLabel,
                         $bankSampahName,
                         $itemsSampahText,
                         $totalQuantity,
                         $totalHarga,
+                        $notes,
+                    ]);
+                } else {
+                    // All types export - include both columns
+                    $metodeDaurUlang = $transaction->metode_pengolahan ?? '-';
+                    fputcsv($handle, [
+                        $no++,
+                        $kodeTrxDate,
+                        $tipeLabel,
+                        $bankSampahName,
+                        $itemsSampahText,
+                        $totalQuantity,
+                        $totalHarga,
+                        $metodeDaurUlang,
                         $notes,
                     ]);
                 }
