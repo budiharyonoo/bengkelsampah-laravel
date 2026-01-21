@@ -154,29 +154,15 @@ class LoginController extends Controller
             ]);
         }
 
-        // Verify OTP first
-        // $otp = Otp::where('identifier', $request->identifier)
-        //           ->where('type', 'login')
-        //           ->where('code', $request->otp)
-        //           ->first();
-
-        // if (!$otp) {
-        //     return R::error('Kode OTP tidak valid', 422);
-        // }
-
-        // Check if OTP is expired
-        // if (Carbon::parse($otp->expires_at)->isPast()) {
-        //     return R::error('Kode OTP telah kedaluwarsa', 422);
-        // }
-
         // Get user and verify password
         $user = User::where('identifier', $request->input('identifier'))->first();
-        if (! Hash::check($request->input('password'), $user->input('password'))) {
-            return R::error('Kata sandi salah', 422);
+        if (!$user) {
+            return R::error('User / Password tidak ditemukan', 422);
         }
 
-        // Delete used OTP
-        // $otp->delete();
+        if (! Hash::check($request->input('password'), $user->password)) {
+            return R::error('Kata sandi salah', 422);
+        }
 
         // Generate token with 1 year expiration
         $expiresAt = now()->addYear();
