@@ -57,10 +57,16 @@ class SetoranController extends Controller
             'tipe_layanan' => 'required|in:jemput,tempat,keduanya',
         ]);
 
+        $message = '';
+        $validationErrors = $validator->errors()->messages();
+        foreach ($validationErrors as $key => $value) {
+            $message = $value[0];
+        }
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Validasi gagal',
+                'message' => $message,
                 'errors' => $validator->errors(),
             ], 400);
         }
