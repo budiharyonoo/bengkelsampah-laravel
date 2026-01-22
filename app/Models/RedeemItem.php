@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $created_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem query()
@@ -22,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem wherePointsRequired($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class RedeemItem extends Model
@@ -36,8 +41,8 @@ class RedeemItem extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function scopeActive()
+    public function scopeActive(Builder $query): Builder
     {
-        return $this->where('is_active', '=', true);
+        return $query->where('is_active', '=', true);
     }
 }

@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Test notification route
     Route::post('/test-notification', [NotificationController::class, 'testNotification']);
 
-    // Redeem Item route
+    // Redeem Item routes
     Route::get('/redeem-items', [RedeemItemController::class, 'index']);
+    Route::post('/redeems', [RedeemItemController::class, 'store']);
 });
