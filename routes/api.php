@@ -74,5 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Redeem Item routes
     Route::get('/redeem-items', [RedeemItemController::class, 'index']);
+    Route::get('/redeems', [RedeemItemController::class, 'history']);
     Route::post('/redeems', [RedeemItemController::class, 'store']);
+    Route::post('/redeems/{id}/cancel', [RedeemItemController::class, 'cancel']);
 });

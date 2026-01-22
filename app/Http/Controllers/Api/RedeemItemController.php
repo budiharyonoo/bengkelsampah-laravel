@@ -112,4 +112,82 @@ class RedeemItemController extends Controller
             return R::error($e->getMessage(), 400);
         }
     }
+
+    /**
+     * Display the authenticated user's redeem history.
+     */
+    public function history(): JsonResponse
+    {
+        $user = auth()->user();
+
+        $redeems = UserRedeem::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($redeem) {
+                return [
+                    'redeem_id' => $redeem->id,
+                    'redeem_item_id' => $redeem->redeem_item_id,
+                    'redeem_item_name' => $redeem->redeem_item_name,
+                    'redeem_item_description' => $redeem->redeem_item_description,
+                    'point_used' => (int) $redeem->point_used,
+                    'status' => $redeem->status,
+                    'created_at' => $redeem->created_at->format('Y-m-d H:i:s'),
+                    'info_json' => $redeem->info_json,
+                    'reward_proof_url' => $redeem->reward_proof_url,
+                ];
+            });
+
+        return R::success('Riwayat penukaran berhasil diambil', $redeems);
+    }
+
+    /**
+     * Cancel a redeem request.
+     *
+     * Users can only cancel their own redeem requests that are in 'waiting' status.
+     */
+    public function cancel(int $id): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+
+            $redeem = UserRedeem::find($id);
+
+            // Check if redeem exists
+            if (! $redeem) {
+                return R::error('Permintaan penukaran tidak ditemukan.', 404);
+            }
+
+            // Check if redeem belongs to the authenticated user
+            if ($redeem->user_id !== $user->id) {
+                return R::error('Anda tidak memiliki akses untuk membatalkan permintaan penukaran ini.', 403);
+            }
+
+            // Check if redeem can be cancelled (only waiting status)
+            if ($redeem->status !== 'waiting') {
+                return R::error(
+                    sprintf(
+                        'Permintaan penukaran dengan status "%s" tidak dapat dibatalkan.',
+                        $redeem->status
+                    ),
+                    400
+                );
+            }
+
+            // Update redeem status to cancelled
+            $redeem->update([
+                'status' => 'cancelled',
+                'status_changed_by' => $user->id,
+                'status_changed_by_name' => $user->name,
+                'status_changed_at' => now(),
+            ]);
+
+            return R::success('Permintaan penukaran berhasil dibatalkan.', [
+                'redeem_id' => $redeem->id,
+                'status' => $redeem->status,
+                'cancelled_at' => $redeem->status_changed_at->format('Y-m-d H:i:s'),
+            ]);
+        } catch (Exception $e) {
+            return R::error($e->getMessage() ?: 'Terjadi kesalahan saat membatalkan permintaan penukaran.', 500);
+        }
+    }
 }
