@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\PilahkuCheckController;
 use App\Http\Controllers\Api\PointController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\RedeemItemController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SetoranController;
 use Illuminate\Http\Request;
@@ -70,4 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Test notification route
     Route::post('/test-notification', [NotificationController::class, 'testNotification']);
+
+    // Redeem Item route
+    Route::get('/redeem-items', [RedeemItemController::class, 'index']);
 });
