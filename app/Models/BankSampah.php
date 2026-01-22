@@ -9,11 +9,35 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\Admin|null $admin
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Setoran> $setorans
  * @property-read int|null $setorans_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah query()
- *
+ * @property int $id
+ * @property string $kode_bank_sampah
+ * @property string $nama_bank_sampah
+ * @property string $alamat_bank_sampah
+ * @property string $nama_penanggung_jawab
+ * @property string $kontak_penanggung_jawab
+ * @property string|null $foto
+ * @property string|null $gmaps_link
+ * @property string|null $latitude
+ * @property string|null $longitude
+ * @property string $tipe_layanan
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereAlamatBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereFoto($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereGmapsLink($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereKodeBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereKontakPenanggungJawab($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereNamaBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereNamaPenanggungJawab($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereTipeLayanan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class BankSampah extends Model

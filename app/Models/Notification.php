@@ -10,14 +10,32 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $is_read
  * @property-read mixed $message
  * @property-read \App\Models\User|null $user
- *
  * @method static \Illuminate\Database\Eloquent\Builder|Notification newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Notification newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Notification ofType($type)
  * @method static \Illuminate\Database\Eloquent\Builder|Notification query()
  * @method static \Illuminate\Database\Eloquent\Builder|Notification read()
  * @method static \Illuminate\Database\Eloquent\Builder|Notification unread()
- *
+ * @property int $id
+ * @property int $user_id
+ * @property string $title
+ * @property string $body
+ * @property string|null $image
+ * @property array|null $data
+ * @property string $type
+ * @property \Illuminate\Support\Carbon|null $read_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereImage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereIsRead($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereReadAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Notification whereUserId($value)
  * @mixin \Eloquent
  */
 class Notification extends Model

@@ -16,6 +16,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Carbon\Carbon $updated_at
  * @property-read \App\Models\BankSampah $bankSampah
  * @property-read \App\Models\Sampah $sampah
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory query()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereBankSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereUnit($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteInventory whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class WasteInventory extends Model
 {

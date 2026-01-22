@@ -20,6 +20,29 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WasteTransaction> $wasteTransactions
+ * @property-read string $tipe_text
+ * @property-read int|null $waste_transactions_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker active()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker buyers()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker processors()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereAlamat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereKodeOfftaker($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereKontakPic($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereNama($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereNamaPic($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereTipe($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Offtaker withoutTrashed()
+ * @mixin \Eloquent
  */
 class Offtaker extends Model
 {

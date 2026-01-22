@@ -30,6 +30,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \App\Models\Offtaker $offtaker
  * @property-read \App\Models\Admin $admin
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WasteTracking> $trackings
+ * @property-read string $type_text
+ * @property-read int|null $trackings_count
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction processing()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction query()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction sales()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction salesAndProcessing()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereAdminId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereAdminName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereBankSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereHargaBeliTotal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereHasilPengolahan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereItemsJson($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereKodeTransaksi($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereMetodePengolahan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereOfftakerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereStruk($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereTanggalTransaksi($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereTotalQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereTotalValue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTransaction whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class WasteTransaction extends Model
 {

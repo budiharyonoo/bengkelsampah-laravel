@@ -7,11 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property-read \App\Models\Event|null $event
- *
  * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant query()
- *
+ * @property int $id
+ * @property int $event_id
+ * @property int $user_id
+ * @property string|null $user_name
+ * @property string|null $user_identifier
+ * @property \Illuminate\Support\Carbon $join_datetime
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereEventId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereJoinDatetime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereUserIdentifier($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|EventParticipant whereUserName($value)
  * @mixin \Eloquent
  */
 class EventParticipant extends Model

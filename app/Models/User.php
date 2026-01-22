@@ -21,12 +21,36 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read int|null $setorans_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User query()
- *
+ * @property int $id
+ * @property string $name
+ * @property string $identifier
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $poin
+ * @property int $setor
+ * @property string $sampah
+ * @property string|null $fcm_token
+ * @property string $xp
+ * @property-read \App\Models\BankSampah|null $bankSampah
+ * @property-read mixed $jenis_nasabah
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereFcmToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereIdentifier($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePoin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereSetor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUserType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereXp($value)
  * @mixin \Eloquent
  */
 class User extends Authenticatable

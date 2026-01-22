@@ -9,7 +9,26 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion query()
- *
+ * @property int $id
+ * @property string $platform
+ * @property string $version
+ * @property int $version_code
+ * @property bool $is_required
+ * @property string|null $update_message
+ * @property string|null $store_url
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereIsRequired($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion wherePlatform($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereStoreUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereUpdateMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereVersionCode($value)
  * @mixin \Eloquent
  */
 class AppVersion extends Model

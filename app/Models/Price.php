@@ -8,11 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property-read \App\Models\BankSampah|null $bankSampah
  * @property-read \App\Models\Sampah|null $sampah
- *
  * @method static \Illuminate\Database\Eloquent\Builder|Price newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Price newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Price query()
- *
+ * @property int $id
+ * @property int $sampah_id
+ * @property int $bank_sampah_id
+ * @property string $harga
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Price whereBankSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Price whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Price whereHarga($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Price whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Price whereSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Price whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class Price extends Model

@@ -24,6 +24,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\BankSampah $bankSampah
  * @property-read \App\Models\Sampah $sampah
  * @property-read \App\Models\WasteTransaction|null $wasteTransaction
+ * @property-read string $status_text
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking processed()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking sold()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking stored()
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereBankSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereHargaBeli($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereProcessedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereSetoranId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereSoldAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereUnit($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|WasteTracking whereWasteTransactionId($value)
+ * @mixin \Eloquent
  */
 class WasteTracking extends Model
 {
