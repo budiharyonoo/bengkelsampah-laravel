@@ -8,10 +8,12 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardRedeemController;
 use App\Http\Controllers\DashboardTransaksiController;
 use App\Http\Controllers\DashboardUserController;
+use App\Http\Controllers\DashboardUserRedeemController;
 use App\Http\Controllers\DeleteAccountController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\OfftakerController;
+use App\Http\Controllers\RedeemItemController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SampahController;
 use App\Http\Controllers\WasteInventoryController;
@@ -85,6 +87,20 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('category/export/csv', [CategoryController::class, 'exportCsv'])->name('dashboard.category.export.csv');
     Route::post('category/export/pdf', [CategoryController::class, 'exportPdf'])->name('dashboard.category.export.pdf');
 
+    // Redeem Item routes (Master Data)
+    Route::resource('redeem-item', RedeemItemController::class)->names([
+        'index' => 'dashboard.redeem-item.index',
+        'create' => 'dashboard.redeem-item.create',
+        'store' => 'dashboard.redeem-item.store',
+        'edit' => 'dashboard.redeem-item.edit',
+        'update' => 'dashboard.redeem-item.update',
+        'destroy' => 'dashboard.redeem-item.destroy',
+    ]);
+    Route::delete('redeem-item/{id}/bulk', [RedeemItemController::class, 'bulkDestroy'])->name('dashboard.redeem-item.bulk-destroy');
+    Route::post('redeem-item/export/excel', [RedeemItemController::class, 'exportExcel'])->name('dashboard.redeem-item.export.excel');
+    Route::post('redeem-item/export/csv', [RedeemItemController::class, 'exportCsv'])->name('dashboard.redeem-item.export.csv');
+    Route::post('redeem-item/export/pdf', [RedeemItemController::class, 'exportPdf'])->name('dashboard.redeem-item.export.pdf');
+
     // Kategori routes (using sidebar kategori)
     Route::resource('kategori', KategoriController::class)->names([
         'index' => 'dashboard.kategori',
@@ -129,6 +145,14 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('user/{id}/export/excel', [DashboardUserController::class, 'exportUserDetailExcel'])->name('dashboard.user.export-detail.excel');
     Route::post('user/{id}/export/csv', [DashboardUserController::class, 'exportUserDetailCsv'])->name('dashboard.user.export-detail.csv');
     Route::post('user/{id}/export/pdf', [DashboardUserController::class, 'exportUserDetailPdf'])->name('dashboard.user.export-detail.pdf');
+
+    // User Redeem Request routes (for managing user redemption requests)
+    Route::get('user-redeem', [DashboardUserRedeemController::class, 'index'])->name('dashboard.user-redeem.index');
+    Route::get('user-redeem/{id}/edit', [DashboardUserRedeemController::class, 'edit'])->name('dashboard.user-redeem.edit');
+    Route::put('user-redeem/{id}', [DashboardUserRedeemController::class, 'update'])->name('dashboard.user-redeem.update');
+    Route::post('user-redeem/export/excel', [DashboardUserRedeemController::class, 'exportExcel'])->name('dashboard.user-redeem.export.excel');
+    Route::post('user-redeem/export/csv', [DashboardUserRedeemController::class, 'exportCsv'])->name('dashboard.user-redeem.export.csv');
+    Route::post('user-redeem/export/pdf', [DashboardUserRedeemController::class, 'exportPdf'])->name('dashboard.user-redeem.export.pdf');
 
     // Poin routes (for redeem functionality)
     Route::get('/poin', [DashboardRedeemController::class, 'index'])->name('dashboard.poin');

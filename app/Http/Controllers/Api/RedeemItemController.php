@@ -158,7 +158,7 @@ class RedeemItemController extends Controller
             }
 
             // Check if redeem belongs to the authenticated user
-            if ($redeem->user_id !== $user->id) {
+            if ($redeem->user_id != $user->id) {
                 return R::error('Anda tidak memiliki akses untuk membatalkan permintaan penukaran ini.', 403);
             }
 

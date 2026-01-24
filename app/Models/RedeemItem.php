@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -15,12 +16,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $created_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem withoutTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RedeemItem whereName($value)
@@ -31,6 +37,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class RedeemItem extends Model
 {
+    use SoftDeletes;
+
     protected $guarded = [
         'id',
     ];
@@ -39,6 +47,7 @@ class RedeemItem extends Model
         'points_required' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     public function scopeActive(Builder $query): Builder

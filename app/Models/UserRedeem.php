@@ -62,7 +62,7 @@ class UserRedeem extends Model
     ];
 
     protected $casts = [
-        'point_used' => 'decimal:2',
+        'point_used' => 'integer',
         'status_changed_at' => 'datetime',
         'info_json' => 'array',
         'created_at' => 'datetime',

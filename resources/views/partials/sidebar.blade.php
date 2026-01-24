@@ -44,6 +44,17 @@
                 ],
                 !$isCabang
                     ? [
+                        'route' => 'dashboard.redeem-item.index',
+                        'label' => 'Item Redeem',
+                        'subroutes' => [
+                            'dashboard.redeem-item.index',
+                            'dashboard.redeem-item.create',
+                            'dashboard.redeem-item.edit',
+                        ],
+                    ]
+                    : null,
+                !$isCabang
+                    ? [
                         'route' => 'offtakers.index',
                         'label' => 'Offtaker',
                         'subroutes' => ['offtakers.index', 'offtakers.create', 'offtakers.edit', 'offtakers.show'],
@@ -109,11 +120,17 @@
                 'dashboard.event.edit',
             ],
         ],
+        // [
+        //     'route' => 'dashboard.poin',
+        //     'icon' => 'icon/ic_poin.svg',
+        //     'label' => 'Poin',
+        //     'subroutes' => ['dashboard.poin', 'dashboard.poin.create'],
+        // ],
         [
-            'route' => 'dashboard.poin',
+            'route' => 'dashboard.user-redeem.index',
             'icon' => 'icon/ic_poin.svg',
-            'label' => 'Poin',
-            'subroutes' => ['dashboard.poin', 'dashboard.poin.create'],
+            'label' => 'User Redeem',
+            'subroutes' => ['dashboard.user-redeem.index', 'dashboard.user-redeem.edit'],
         ],
         [
             'route' => 'dashboard.artikel',

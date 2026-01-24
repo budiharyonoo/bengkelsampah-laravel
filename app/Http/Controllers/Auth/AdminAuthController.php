@@ -24,7 +24,6 @@ class AdminAuthController extends Controller
         ]);
 
         $admin = Admin::where('email', $request->email)->first();
-
         if (! $admin || ! Hash::check($request->password, $admin->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
