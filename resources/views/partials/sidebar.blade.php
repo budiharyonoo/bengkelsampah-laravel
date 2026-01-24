@@ -145,6 +145,22 @@
         ],
     ];
 
+    // Conditional menu for Blast Notification (admin OR cabang with bank_sampah_id = 13)
+    $blastNotificationMenu = [];
+    if (!$isCabang || ($admin->role === 'cabang' && $admin->id_bank_sampah == 13)) {
+        $blastNotificationMenu = [
+            [
+                'route' => 'dashboard.blast-notification.index',
+                'icon' => 'icon/ic_notification.svg',
+                'label' => 'Blast Notification',
+                'subroutes' => [
+                    'dashboard.blast-notification.index',
+                    'dashboard.blast-notification.create',
+                ],
+            ],
+        ];
+    }
+
     // Helper function to check if any child is active (closure to avoid redeclare error)
     $isParentActive = function ($children, $current) {
         foreach ($children as $child) {
@@ -255,6 +271,17 @@
                 @endif
             @endforeach
         @endif
+
+        {{-- Conditional Blast Notification menu (admin or cabang with bank_sampah_id = 13) --}}
+        @foreach ($blastNotificationMenu as $item)
+            <li class="nav-item">
+                <a href="{{ route($item['route']) }}"
+                    class="nav-link{{ (isset($item['subroutes']) && in_array($current, $item['subroutes'])) || $current === $item['route'] ? ' active' : '' }}">
+                    <span class="nav-icon"><img src="/{{ $item['icon'] }}" alt="{{ $item['label'] }}"></span>
+                    <span class="nav-text">{{ $item['label'] }}</span>
+                </a>
+            </li>
+        @endforeach
     </ul>
 </nav>
 
