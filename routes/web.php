@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\BankSampahController;
+use App\Http\Controllers\BlastNotificationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardRedeemController;
 use App\Http\Controllers\DashboardTransaksiController;
@@ -100,6 +101,11 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('redeem-item/export/excel', [RedeemItemController::class, 'exportExcel'])->name('dashboard.redeem-item.export.excel');
     Route::post('redeem-item/export/csv', [RedeemItemController::class, 'exportCsv'])->name('dashboard.redeem-item.export.csv');
     Route::post('redeem-item/export/pdf', [RedeemItemController::class, 'exportPdf'])->name('dashboard.redeem-item.export.pdf');
+
+    // Blast Notification routes
+    Route::get('blast-notification', [BlastNotificationController::class, 'index'])->name('dashboard.blast-notification.index');
+    Route::get('blast-notification/create', [BlastNotificationController::class, 'create'])->name('dashboard.blast-notification.create');
+    Route::post('blast-notification', [BlastNotificationController::class, 'store'])->name('dashboard.blast-notification.store');
 
     // Kategori routes (using sidebar kategori)
     Route::resource('kategori', KategoriController::class)->names([
