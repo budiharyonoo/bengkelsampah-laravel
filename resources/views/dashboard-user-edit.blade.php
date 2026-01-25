@@ -44,6 +44,31 @@
         @media (max-width: 900px) { .main-container { flex-direction: column; } }
         @media (max-width: 600px) { .form-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const poinInput = document.getElementById('poin');
+            const xpInput = document.getElementById('xp');
+
+            // Function to parse formatted number (1.234,56 -> 1234.56)
+            function parseFormattedNumber(value) {
+                if (!value) return 0;
+                // Remove thousands separator (.) and replace comma with dot
+                return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+            }
+
+            // Function to format number as integer with thousands separator (1234 -> 1.234)
+            function formatInteger(value) {
+                return Math.floor(value).toLocaleString('id-ID');
+            }
+
+            // Auto-calculate XP when Poin changes
+            poinInput.addEventListener('input', function() {
+                const poinValue = parseFormattedNumber(this.value);
+                const xpValue = poinValue / 1000;
+                xpInput.value = formatInteger(xpValue);
+            });
+        });
+    </script>
 </head>
 <body>
     <header class="header">
