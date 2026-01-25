@@ -212,7 +212,10 @@ class NotificationService
      */
     public function getUserNotifications($userId, $limit = 20, $offset = 0)
     {
-        $notifications = NotificationModel::where('user_id', $userId)
+        $notifications = NotificationModel::where(function ($query) use ($userId) {
+            $query->where('user_id', $userId)
+                ->orWhereNull('user_id');
+        })
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->offset($offset)
