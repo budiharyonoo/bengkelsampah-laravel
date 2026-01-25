@@ -181,7 +181,11 @@ class BankSampahController extends Controller
             $query->where('bank_sampah_id', $bankSampahId);
         })->sum('jumlah_point');
 
-        $uniqueUsers = \App\Models\Setoran::where('bank_sampah_id', $bankSampahId)
+        // Registered customers from this bank sampah (based on users table)
+        $registeredCustomers = \App\Models\User::query()->whereUserType($bankSampahId)->count();
+
+        // Unique customers who have setoran transactions in this bank sampah
+        $uniqueTransactionUsers = \App\Models\Setoran::where('bank_sampah_id', $bankSampahId)
             ->distinct('user_id')
             ->count('user_id');
 
@@ -194,7 +198,8 @@ class BankSampahController extends Controller
             'cancelled_setoran' => $cancelledSetoran,
             'total_revenue' => $totalRevenue,
             'total_points' => $totalPoints,
-            'unique_users' => $uniqueUsers,
+            'registered_customers' => $registeredCustomers,
+            'unique_transaction_users' => $uniqueTransactionUsers,
             'avg_setoran_value' => $avgSetoranValue,
             'completion_rate' => $totalSetoran > 0 ? ($completedSetoran / $totalSetoran) * 100 : 0,
         ];
