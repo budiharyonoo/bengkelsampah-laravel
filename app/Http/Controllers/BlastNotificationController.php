@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BlastNotification\StoreBlastNotificationRequest;
 use App\Models\BlastNotification;
+use App\Models\Notification;
 use App\Services\FirebaseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -133,8 +135,20 @@ class BlastNotificationController extends Controller
 
         // Log to database
         try {
+            DB::beginTransaction();
+
             BlastNotification::create($logData);
+
+            Notification::create([
+                'title' => $validated['title'],
+                'body' => $validated['body'],
+                'is_read' => 1
+            ]);
+
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
+
             Log::error('Failed to log blast notification', [
                 'error' => $e->getMessage(),
                 'log_data' => $logData,
@@ -144,7 +158,7 @@ class BlastNotificationController extends Controller
         if ($fcmResult['success']) {
             return response()->json([
                 'success' => true,
-                'message' => 'Blast notification berhasil dikirim ke topic: '.$topic,
+                'message' => 'Blast notification berhasil dikirim ke topic: ' . $topic,
                 'data' => [
                     'topic' => $topic,
                     'fcm_name' => $fcmResult['name'] ?? null,
@@ -153,7 +167,7 @@ class BlastNotificationController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengirim blast notification: '.($fcmResult['error'] ?? 'Unknown error'),
+                'message' => 'Gagal mengirim blast notification: ' . ($fcmResult['error'] ?? 'Unknown error'),
                 'error' => $fcmResult['error'] ?? 'Unknown error',
             ], 500);
         }
