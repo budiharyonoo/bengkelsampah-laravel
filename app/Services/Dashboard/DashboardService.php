@@ -164,7 +164,7 @@ class DashboardService
         [$currentStart, $currentEnd] = PeriodHelper::getPeriodRange($periode, $startDate, $endDate, false);
         [$previousStart, $previousEnd] = PeriodHelper::getPeriodRange($periode, $startDate, $endDate, true);
 
-        // User counts
+        // User counts (users with transactions in the period)
         $summary['user'] = $this->userRepository->countUsersWithTransactions(
             $bankSampahId,
             $currentStart,
@@ -175,6 +175,10 @@ class DashboardService
             $previousStart,
             $previousEnd
         );
+
+        // Registered users via bank sampah (user_type >= 1)
+        $summary['registered_bank_users'] = $this->userRepository->countRegisteredBankUsers($bankSampahId);
+        $summary['registered_bank_users_prev'] = $this->userRepository->countRegisteredBankUsers($bankSampahId);
 
         // Transaction stats for current period
         $currentStats = $this->setoranRepository->getCompletedTransactionStats(
