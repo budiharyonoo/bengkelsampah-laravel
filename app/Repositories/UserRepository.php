@@ -143,4 +143,24 @@ class UserRepository
                 ->count();
         });
     }
+
+    /**
+     * Count users registered via bank sampah (user_type >= 1).
+     *
+     * @param  int|null  $bankSampahId  Filter by specific bank sampah
+     */
+    public function countRegisteredBankUsers(?int $bankSampahId): int
+    {
+        $cacheKey = "registered_bank_users:{$bankSampahId}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($bankSampahId) {
+            $query = User::query()->where('user_type', '>=', 1);
+
+            if ($bankSampahId) {
+                $query->where('user_type', $bankSampahId);
+            }
+
+            return $query->count();
+        });
+    }
 }
