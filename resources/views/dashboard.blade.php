@@ -1189,47 +1189,19 @@
         $totalSampahTersimpan = $dashboardSummary['total_sampah_tersimpan'] ?? 0;
         $totalSampahTerjual = $dashboardSummary['total_sampah_terjual'] ?? 0;
         $totalSampahDiolah = $dashboardSummary['total_sampah_diolah'] ?? 0;
+
+        // Customer Terdaftar Bank Sampah metrics
+        $totalRegisteredBankUsers = $dashboardSummary['registered_bank_users'] ?? 0;
+        $totalRegisteredBankUsersPrev = $dashboardSummary['registered_bank_users_prev'] ?? 0;
+        $registeredBankUsersDelta = $totalRegisteredBankUsers - $totalRegisteredBankUsersPrev;
+        $registeredBankUsersPercent =
+            $totalRegisteredBankUsersPrev > 0
+                ? ($registeredBankUsersDelta / $totalRegisteredBankUsersPrev) * 100
+                : ($totalRegisteredBankUsers > 0 ? 100 : 0);
     @endphp
-    <!-- Row 1: Operational Metrics -->
+    <!-- Row 1: Core Business Metrics -->
     <div class="kpi-grid"
-        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem;">
-        <!-- Sampah Tersimpan -->
-        <div class="kpi-card-ref">
-            <div class="percentage-badge" style="background-color: #e3f8fc; color: #0891b2;">
-                <i class="fa-solid fa-warehouse" style="font-size: 10px;"></i>
-            </div>
-            <div class="header-row">
-                <div class="icon-container" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">
-                    <i class="fa-solid fa-box icon-fa"></i>
-                </div>
-                <h1 class="title">Sampah Tersimpan</h1>
-            </div>
-            <div class="main-amount">{{ number_format($totalSampahTersimpan, 2, ',', '.') }} Kg</div>
-            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
-                Stok tersedia
-            </div>
-        </div>
-        <!-- Total Poin -->
-        <div class="kpi-card-ref">
-            <div class="percentage-badge @if ($poinDelta < 0) down @endif">
-                @if ($poinDelta < 0)
-                    <span class="arrow-down"></span>
-                @else
-                    <span class="arrow-up"></span>
-                @endif
-                {{ number_format(abs($poinPercent), 1) }}%
-            </div>
-            <div class="header-row">
-                <div class="icon-container">
-                    <i class="fa-solid fa-coins icon-fa"></i>
-                </div>
-                <h1 class="title">Total Poin</h1>
-            </div>
-            <div class="main-amount">{{ number_format($totalPoin) }}</div>
-            <div class="increase-amount @if ($poinDelta < 0) down @endif"><span
-                    class="plus-sign">{{ $poinDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($poinDelta), 0, ',', '.') }}
-            </div>
-        </div>
+        style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem;">
         <!-- Total Setor -->
         <div class="kpi-card-ref">
             <div class="percentage-badge @if ($setorDelta < 0) down @endif">
@@ -1272,6 +1244,53 @@
                     class="plus-sign">{{ $customerDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($customerDelta), 0, ',', '.') }}
             </div>
         </div>
+        <!-- Customer Terdaftar Bank Sampah (NEW) -->
+        <div class="kpi-card-ref">
+            <div class="percentage-badge @if ($registeredBankUsersDelta < 0) down @endif">
+                @if ($registeredBankUsersDelta < 0)
+                    <span class="arrow-down"></span>
+                @else
+                    <span class="arrow-up"></span>
+                @endif
+                {{ number_format(abs($registeredBankUsersPercent), 1) }}%
+            </div>
+            <div class="header-row">
+                <div class="icon-container">
+                    <i class="fa-solid fa-user-check icon-fa"></i>
+                </div>
+                <h1 class="title">Customer Terdaftar Bank Sampah</h1>
+            </div>
+            <div class="main-amount">{{ number_format($totalRegisteredBankUsers) }}</div>
+            <div class="increase-amount @if ($registeredBankUsersDelta < 0) down @endif"><span
+                    class="plus-sign">{{ $registeredBankUsersDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($registeredBankUsersDelta), 0, ',', '.') }}
+            </div>
+        </div>
+        <!-- Total Poin -->
+        <div class="kpi-card-ref">
+            <div class="percentage-badge @if ($poinDelta < 0) down @endif">
+                @if ($poinDelta < 0)
+                    <span class="arrow-down"></span>
+                @else
+                    <span class="arrow-up"></span>
+                @endif
+                {{ number_format(abs($poinPercent), 1) }}%
+            </div>
+            <div class="header-row">
+                <div class="icon-container">
+                    <i class="fa-solid fa-coins icon-fa"></i>
+                </div>
+                <h1 class="title">Total Poin</h1>
+            </div>
+            <div class="main-amount">{{ number_format($totalPoin) }}</div>
+            <div class="increase-amount @if ($poinDelta < 0) down @endif"><span
+                    class="plus-sign">{{ $poinDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($poinDelta), 0, ',', '.') }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Waste & Inventory Metrics -->
+    <div class="kpi-grid"
+        style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem;">
         <!-- Total Sampah (Kg) -->
         <div class="kpi-card-ref">
             <div class="percentage-badge @if ($sampahKgDelta < 0) down @endif">
@@ -1314,9 +1333,25 @@
                     class="plus-sign">{{ $sampahUnitDelta >= 0 ? '+' : '-' }}</span>{{ number_format(abs($sampahUnitDelta), 0, ',', '.') }}
             </div>
         </div>
+        <!-- Sampah Tersimpan -->
+        <div class="kpi-card-ref">
+            <div class="percentage-badge" style="background-color: #e3f8fc; color: #0891b2;">
+                <i class="fa-solid fa-warehouse" style="font-size: 10px;"></i>
+            </div>
+            <div class="header-row">
+                <div class="icon-container" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">
+                    <i class="fa-solid fa-box icon-fa"></i>
+                </div>
+                <h1 class="title">Sampah Tersimpan</h1>
+            </div>
+            <div class="main-amount">{{ number_format($totalSampahTersimpan, 2, ',', '.') }} Kg</div>
+            <div class="increase-amount" style="font-size: 0.7rem; color: #888;">
+                Stok tersedia
+            </div>
+        </div>
     </div>
 
-    <!-- Row 2: Financial Metrics -->
+    <!-- Row 3: Financial Metrics -->
     <div style="margin-top:1.7rem;margin-bottom:2rem;">
         <h3 style="font-size:1.1rem;font-weight:700;color:#1f2937;margin-bottom:1rem;">
             <i class="fa-solid fa-chart-line"></i> Ringkasan Finansial
