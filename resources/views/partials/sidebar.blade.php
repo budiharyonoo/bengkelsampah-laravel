@@ -143,6 +143,12 @@
                 'dashboard.artikel.show',
             ],
         ],
+        [
+            'route' => 'admin.xp-reset.index',
+            'icon' => 'icon/ic_xp_reset.svg',
+            'label' => 'Reset User XP',
+            'subroutes' => ['admin.xp-reset.index', 'admin.xp-reset.history'],
+        ],
     ];
 
     // Conditional menu for Blast Notification (admin OR cabang with bank_sampah_id = 13)
