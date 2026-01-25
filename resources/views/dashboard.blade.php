@@ -421,7 +421,7 @@
             padding: 15px 15px 15px 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
             width: 100%;
-            max-width: 340px;
+            /* max-width: 340px; */
             position: relative;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -533,6 +533,7 @@
         @media (max-width: 900px) {
             .kpi-card-ref {
                 max-width: 100%;
+                grid-column: span 1 !important;
             }
 
             .kpi-grid {
@@ -545,6 +546,7 @@
                 padding: 10px;
                 border-radius: 7px;
                 min-height: 70px;
+                grid-column: span 1 !important;
             }
 
             .kpi-card-ref .header-row {
