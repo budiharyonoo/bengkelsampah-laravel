@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\XPResetController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\Auth\AdminAuthController;
@@ -106,6 +107,11 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::get('blast-notification', [BlastNotificationController::class, 'index'])->name('dashboard.blast-notification.index');
     Route::get('blast-notification/create', [BlastNotificationController::class, 'create'])->name('dashboard.blast-notification.create');
     Route::post('blast-notification', [BlastNotificationController::class, 'store'])->name('dashboard.blast-notification.store');
+
+    // XP Reset routes
+    Route::get('xp-reset', [XPResetController::class, 'index'])->name('admin.xp-reset.index');
+    Route::post('xp-reset/execute', [XPResetController::class, 'executeReset'])->name('admin.xp-reset.execute');
+    Route::get('xp-reset/history', [XPResetController::class, 'history'])->name('admin.xp-reset.history');
 
     // Kategori routes (using sidebar kategori)
     Route::resource('kategori', KategoriController::class)->names([
