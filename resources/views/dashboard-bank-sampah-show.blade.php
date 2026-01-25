@@ -599,8 +599,13 @@
                     <div class="stat-desc">Avg: Rp {{ number_format($stats['avg_setoran_value']) }}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-title">Pengguna Unik</div>
-                    <div class="stat-value">{{ number_format($stats['unique_users']) }}</div>
+                    <div class="stat-title">User Terdaftar</div>
+                    <div class="stat-value">{{ number_format($stats['registered_customers']) }}</div>
+                    <div class="stat-desc">Registered users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">User Transaksi</div>
+                    <div class="stat-value">{{ number_format($stats['unique_transaction_users']) }}</div>
                     <div class="stat-desc">Active customers</div>
                 </div>
                 <div class="stat-card">
@@ -821,7 +826,7 @@
             document.getElementById('adminPasswordNote').textContent = isEdit ? '(Kosongkan jika tidak ingin mengubah password)' : '';
             document.getElementById('adminModalTitle').textContent = isEdit ? 'Edit Admin' : 'Tambah Admin';
             document.getElementById('adminModalSubtitle').textContent = isEdit ? 'Edit data admin' : 'Masukkan data admin baru';
-            
+
             if (isEdit && admin) {
                 document.getElementById('admin_id').value = admin.id;
                 document.getElementById('admin_name').value = admin.name;
@@ -851,7 +856,7 @@
             showLoading('Menghapus admin...');
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
+
             fetch(`/dashboard/admin/${adminId}`, {
                 method: 'DELETE',
                 headers: {
@@ -893,12 +898,12 @@
             if (adminForm) {
                 adminForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const adminId = document.getElementById('admin_id').value;
                     const name = document.getElementById('admin_name').value;
                     const username = document.getElementById('admin_email').value;
                     const password = document.getElementById('admin_password').value;
-                    
+
                     // Validate required fields
                     if (!name.trim()) {
                         alert('Nama admin harus diisi');
@@ -912,29 +917,29 @@
                         alert('Password harus diisi untuk admin baru');
                         return;
                     }
-                    
+
                     // Combine username with domain
                     const email = username + '@bengkelsampah.com';
-                    
+
                     // Show loading
                     showLoading('Menyimpan admin...');
-                    
+
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     const isEdit = adminId !== '';
-                    
+
                     const url = isEdit ? `/dashboard/admin/${adminId}` : '/dashboard/admin';
                     const method = isEdit ? 'PUT' : 'POST';
-                    
+
                     const formData = {
                         name: name,
                         email: email,
                         id_bank_sampah: {{ $bankSampah->id }}
                     };
-                    
+
                     if (password.trim()) {
                         formData.password = password;
                     }
-                    
+
                     fetch(url, {
                         method: method,
                         headers: {
@@ -980,13 +985,13 @@
                     const adminId = this.getAttribute('data-admin-id');
                     const adminName = this.closest('.admin-item').querySelector('.admin-name').textContent;
                     const adminEmail = this.closest('.admin-item').querySelector('.admin-email').textContent;
-                    
+
                     const admin = {
                         id: adminId,
                         name: adminName,
                         email: adminEmail
                     };
-                    
+
                     openAdminModal(true, admin);
                 });
             });
@@ -996,7 +1001,7 @@
                 btn.addEventListener('click', function() {
                     const adminId = this.getAttribute('data-admin-id');
                     const adminName = this.closest('.admin-item').querySelector('.admin-name').textContent;
-                    
+
                     openDeleteAdminModal(adminId, adminName);
                 });
             });
@@ -1004,4 +1009,4 @@
     </script>
 </body>
 </html>
-@endsection 
+@endsection
