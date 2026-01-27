@@ -900,30 +900,46 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Bank Sampah <span>*</span></label>
-                        <input type="hidden" name="bank_sampah_id" id="bank_sampah_id" value="{{ old('bank_sampah_id', $bankSampahId) }}" required>
-                        <div class="custom-select-wrapper" id="bank-sampah-select">
-                            <div class="custom-select-trigger" onclick="toggleDropdown('bank-sampah-select')">
-                                <span class="selected-text placeholder">Pilih Bank Sampah</span>
-                                <span class="arrow">
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                        <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </span>
+                        @php
+                            $isCabang = Auth::guard('admin')->check() && Auth::guard('admin')->user()->role == 'cabang';
+                            $cabangBankSampahId = $isCabang ? Auth::guard('admin')->user()->id_bank_sampah : null;
+                        @endphp
+                        <input type="hidden" name="bank_sampah_id" id="bank_sampah_id" value="{{ old('bank_sampah_id', $isCabang ? $cabangBankSampahId : $bankSampahId) }}" required>
+
+                        @if($isCabang)
+                            {{-- Readonly display for cabang role --}}
+                            @php
+                                $selectedBankSampah = $bankSampahList->firstWhere('id', $cabangBankSampahId);
+                            @endphp
+                            <div class="form-input" style="background-color: #f3f4f6; cursor: not-allowed;">
+                                {{ $selectedBankSampah ? $selectedBankSampah->nama_bank_sampah : 'Bank Sampah Tidak Ditemukan' }}
                             </div>
-                            <div class="custom-select-dropdown">
-                                <div class="custom-select-search">
-                                    <input type="text" placeholder="Cari bank sampah..." onkeyup="filterOptions('bank-sampah-select', this.value)">
+                        @else
+                            {{-- Editable dropdown for non-cabang roles --}}
+                            <div class="custom-select-wrapper" id="bank-sampah-select">
+                                <div class="custom-select-trigger" onclick="toggleDropdown('bank-sampah-select')">
+                                    <span class="selected-text placeholder">Pilih Bank Sampah</span>
+                                    <span class="arrow">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                            <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
                                 </div>
-                                <div class="custom-select-options">
-                                    @foreach($bankSampahList as $bs)
-                                        <div class="custom-select-option" data-value="{{ $bs->id }}" data-text="{{ $bs->nama_bank_sampah }}" onclick="selectOption('bank-sampah-select', '{{ $bs->id }}', '{{ $bs->nama_bank_sampah }}')">
-                                            {{ $bs->nama_bank_sampah }}
-                                        </div>
-                                    @endforeach
+                                <div class="custom-select-dropdown">
+                                    <div class="custom-select-search">
+                                        <input type="text" placeholder="Cari bank sampah..." onkeyup="filterOptions('bank-sampah-select', this.value)">
+                                    </div>
+                                    <div class="custom-select-options">
+                                        @foreach($bankSampahList as $bs)
+                                            <div class="custom-select-option" data-value="{{ $bs->id }}" data-text="{{ $bs->nama_bank_sampah }}" onclick="selectOption('bank-sampah-select', '{{ $bs->id }}', '{{ $bs->nama_bank_sampah }}')">
+                                                {{ $bs->nama_bank_sampah }}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="custom-select-no-results">Tidak ada hasil</div>
                                 </div>
-                                <div class="custom-select-no-results">Tidak ada hasil</div>
                             </div>
-                        </div>
+                        @endif
                         @error('bank_sampah_id')
                             <div class="form-error">{{ $message }}</div>
                         @enderror
@@ -1461,10 +1477,20 @@
 
             // Initialize Bank Sampah select if value exists
             const bankSampahValue = document.getElementById('bank_sampah_id').value;
+            const bankSampahSelect = document.getElementById('bank-sampah-select');
+
             if (bankSampahValue) {
-                const bankOption = document.querySelector('#bank-sampah-select .custom-select-option[data-value="' + bankSampahValue + '"]');
-                if (bankOption) {
-                    selectOption('bank-sampah-select', bankSampahValue, bankOption.dataset.text);
+                // If there's a dropdown (non-cabang user)
+                if (bankSampahSelect) {
+                    const bankOption = document.querySelector('#bank-sampah-select .custom-select-option[data-value="' + bankSampahValue + '"]');
+                    if (bankOption) {
+                        selectOption('bank-sampah-select', bankSampahValue, bankOption.dataset.text);
+                    }
+                } else {
+                    // For cabang users (no dropdown, bank sampah is readonly)
+                    // Fetch inventory and enable buttons
+                    fetchInventory(bankSampahValue);
+                    toggleAddItemButtons(true);
                 }
             } else {
                 // Disable buttons if no bank sampah selected
