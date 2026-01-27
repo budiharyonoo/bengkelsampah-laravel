@@ -64,12 +64,12 @@
         ],
     ];
 
-    // Admin-only standalone menus
-    $adminOnlyMenu = [
+    // Transaksi menu (visible to both admin and cabang)
+    $transaksiMenu = [
         [
             'label' => 'Transaksi',
             'icon' => 'icon/ic_laporan.svg',
-            'children' => [
+            'children' => array_filter([
                 [
                     'route' => 'waste-transactions.sales.index',
                     'label' => 'Penjualan & Pengolahan',
@@ -81,13 +81,19 @@
                         'waste-transactions.processing.create',
                     ],
                 ],
-                [
-                    'route' => 'waste-inventory.index',
-                    'label' => 'Inventori Sampah',
-                    'subroutes' => ['waste-inventory.index', 'waste-inventory.show'],
-                ],
-            ],
+                !$isCabang
+                    ? [
+                        'route' => 'waste-inventory.index',
+                        'label' => 'Inventori Sampah',
+                        'subroutes' => ['waste-inventory.index', 'waste-inventory.show'],
+                    ]
+                    : null,
+            ]),
         ],
+    ];
+
+    // Admin-only standalone menus
+    $adminOnlyMenu = [
         [
             'label' => 'Laporan',
             'icon' => 'icon/ic_poin.svg',
@@ -221,6 +227,38 @@
                 </div>
                 <ul class="nav-submenu{{ $parentActive ? ' show' : '' }}">
                     @foreach ($group['children'] as $child)
+                        @if ($child !== null)
+                            <li class="nav-subitem">
+                                <a href="{{ route($child['route']) }}"
+                                    class="nav-sublink{{ (isset($child['subroutes']) && in_array($current, $child['subroutes'])) || $current === $child['route'] ? ' active' : '' }}">
+                                    {{ $child['label'] }}
+                                </a>
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+            </li>
+        @endforeach
+
+        {{-- Transaksi menu (visible to both admin and cabang) --}}
+        @foreach ($transaksiMenu as $item)
+            @php
+                $parentActive = $isParentActive($item['children'], $current);
+            @endphp
+            <li class="nav-item nav-item-parent{{ $parentActive ? ' open' : '' }}">
+                <div class="nav-link-parent" onclick="toggleSubmenu(this)">
+                    <span class="nav-icon"><img src="/{{ $item['icon'] }}" alt="{{ $item['label'] }}"></span>
+                    <span class="nav-text">{{ $item['label'] }}</span>
+                    <span class="nav-arrow">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                </div>
+                <ul class="nav-submenu{{ $parentActive ? ' show' : '' }}">
+                    @foreach ($item['children'] as $child)
                         @if ($child !== null)
                             <li class="nav-subitem">
                                 <a href="{{ route($child['route']) }}"
