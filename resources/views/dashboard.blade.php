@@ -111,23 +111,6 @@
             </form>
         </div>
         <div style="display:flex;align-items:center;gap:1.2rem;">
-            {{-- @if (!$isCabang)
-                <!-- Zenziva Balance Cards -->
-                <div style="display:flex;gap:0.8rem;align-items:center;">
-                    <div
-                        style="background:#E8F5E8;border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:0.5rem;border:1px solid #BBF7D0;">
-                        <i class="fas fa-key" style="font-size:0.9rem;color:#166534;"></i>
-                        <div style="font-size:0.85rem;font-weight:600;color:#166534;">
-                            OTP: @if (isset($zenzivaOtpBalance['status']) && $zenzivaOtpBalance['status'] == '1')
-                                Rp{{ $zenzivaOtpBalance['balance'] }}
-                            @else
-                                <span style="color:#EF4444;">Gagal</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif --}}
-
             <!-- Avatar User with Dropdown -->
             <div style="position:relative;">
                 <div style="width:40px;height:40px;border-radius:50%;background:#0FB7A6;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;cursor:pointer;transition:background 0.2s;"
