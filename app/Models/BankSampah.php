@@ -122,4 +122,12 @@ class BankSampah extends Model
     {
         return $this->hasMany(Setoran::class, 'bank_sampah_id');
     }
+
+    /**
+     * Get the SK (Surat Keputusan) for this bank sampah.
+     */
+    public function sk(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SkBankSampah::class, 'bank_sampah_id');
+    }
 }

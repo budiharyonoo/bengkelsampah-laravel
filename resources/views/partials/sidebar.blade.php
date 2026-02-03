@@ -139,17 +139,6 @@
             'subroutes' => ['dashboard.user-redeem.index', 'dashboard.user-redeem.edit'],
         ],
         [
-            'route' => 'dashboard.artikel',
-            'icon' => 'icon/ic_artikel.svg',
-            'label' => 'Artikel',
-            'subroutes' => [
-                'dashboard.artikel',
-                'dashboard.artikel.create',
-                'dashboard.artikel.edit',
-                'dashboard.artikel.show',
-            ],
-        ],
-        [
             'route' => 'admin.xp-reset.index',
             'icon' => 'icon/ic_xp_reset.svg',
             'label' => 'Reset User XP',
@@ -159,7 +148,7 @@
 
     // Conditional menu for Blast Notification (admin OR cabang with bank_sampah_id = 13)
     $blastNotificationMenu = [];
-    if (!$isCabang || ($admin->role === 'cabang' && $admin->id_bank_sampah == 13)) {
+    if (!$isCabang || ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id'))) {
         $blastNotificationMenu = [
             [
                 'route' => 'dashboard.blast-notification.index',
@@ -168,6 +157,24 @@
                 'subroutes' => [
                     'dashboard.blast-notification.index',
                     'dashboard.blast-notification.create',
+                ],
+            ],
+        ];
+    }
+
+    // Conditional menu for Artikel (admin OR cabang with bank_sampah_id = 13)
+    $artikelMenu = [];
+    if (!$isCabang || ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id'))) {
+        $artikelMenu = [
+            [
+                'route' => 'dashboard.artikel',
+                'icon' => 'icon/ic_artikel.svg',
+                'label' => 'Artikel',
+                'subroutes' => [
+                    'dashboard.artikel',
+                    'dashboard.artikel.create',
+                    'dashboard.artikel.edit',
+                    'dashboard.artikel.show',
                 ],
             ],
         ];
@@ -318,6 +325,17 @@
 
         {{-- Conditional Blast Notification menu (admin or cabang with bank_sampah_id = 13) --}}
         @foreach ($blastNotificationMenu as $item)
+            <li class="nav-item">
+                <a href="{{ route($item['route']) }}"
+                    class="nav-link{{ (isset($item['subroutes']) && in_array($current, $item['subroutes'])) || $current === $item['route'] ? ' active' : '' }}">
+                    <span class="nav-icon"><img src="/{{ $item['icon'] }}" alt="{{ $item['label'] }}"></span>
+                    <span class="nav-text">{{ $item['label'] }}</span>
+                </a>
+            </li>
+        @endforeach
+
+        {{-- Conditional Artikel menu (admin or cabang with bank_sampah_id = 13) --}}
+        @foreach ($artikelMenu as $item)
             <li class="nav-item">
                 <a href="{{ route($item['route']) }}"
                     class="nav-link{{ (isset($item['subroutes']) && in_array($current, $item['subroutes'])) || $current === $item['route'] ? ' active' : '' }}">

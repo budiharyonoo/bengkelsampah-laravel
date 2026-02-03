@@ -748,180 +748,233 @@
             }
         }
 
-        /* tCO2e Hero Card */
-        .tco2e-hero-card {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            position: relative;
-            overflow: visible;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        /* Environmental Impact Card */
+        .environmental-impact-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .tco2e-hero-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-            pointer-events: none;
         }
 
-        .tco2e-header {
+        .env-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            justify-content: space-between;
             margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
         }
 
-        .tco2e-icon {
-            width: 40px;
-            height: 40px;
-            background: #10b981;
+        .env-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .env-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .env-info-trigger {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .env-tooltip {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            min-width: 320px;
+            max-width: 400px;
+            z-index: 100;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+
+        .env-info-trigger:hover .env-tooltip,
+        .env-info-trigger:focus .env-tooltip {
+            display: block;
+        }
+
+        /* Carousel Container */
+        .env-carousel-container {
+            position: relative;
+            overflow: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .env-carousel-track {
+            display: flex;
+            transition: transform 0.4s ease;
+            touch-action: pan-y;
+        }
+
+        .env-slide {
+            min-width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+
+        .env-slide-icon {
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
+            background: #10b981;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.2rem;
+            font-size: 28px;
+            margin-bottom: 1rem;
         }
 
-        .tco2e-title {
+        .env-slide-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0fb7a6;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .env-slide-unit {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .env-slide-title {
             font-size: 1rem;
             font-weight: 600;
-            color: #065f46;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
         }
 
-        /* Circular Progress Ring */
-        .tco2e-ring-container {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 1rem;
+        .env-slide-context {
+            font-size: 0.85rem;
+            color: #6b7280;
+            line-height: 1.4;
+            max-width: 260px;
         }
 
-        .tco2e-ring {
-            transform: rotate(-90deg);
-            width: 100%;
-            height: 100%;
-        }
-
-        .tco2e-ring-bg {
-            fill: none;
-            stroke: #d1fae5;
-            stroke-width: 8;
-        }
-
-        .tco2e-ring-progress {
-            fill: none;
-            stroke: url(#tco2e-gradient);
-            stroke-width: 8;
-            stroke-linecap: round;
-            stroke-dasharray: 377;
-            stroke-dashoffset: 377;
-            animation: tco2e-progress 1.5s ease-out forwards;
-        }
-
-        @keyframes tco2e-progress {
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-
-        /* Value Display */
-        .tco2e-value-container {
+        /* Navigation Arrows */
+        .env-carousel-arrow {
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-
-        .tco2e-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #065f46;
-            line-height: 1;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-
-        .tco2e-unit {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #10b981;
-            margin-top: 0.25rem;
-        }
-
-        .tco2e-description {
-            font-size: 0.85rem;
-            color: #047857;
-            margin-top: 0.5rem;
-        }
-
-        /* Count-up Animation */
-        .tco2e-animated {
-            animation: tco2e-fadeIn 0.5s ease-out;
-        }
-
-        @keyframes tco2e-fadeIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        /* Tooltip */
-        .tco2e-info-trigger {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            cursor: pointer;
-        }
-
-        .tco2e-tooltip {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
+            transform: translateY(-50%);
             background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            min-width: 280px;
-            z-index: 100;
-            text-align: left;
-            font-size: 0.82rem;
-            line-height: 1.5;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+            color: #6b7280;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .tco2e-info-trigger:hover .tco2e-tooltip,
-        .tco2e-info-trigger:focus .tco2e-tooltip {
-            display: block;
+        .env-carousel-arrow:hover {
+            background: #0fb7a6;
+            color: white;
+            border-color: #0fb7a6;
+            box-shadow: 0 4px 8px rgba(15, 183, 166, 0.2);
+        }
+
+        .env-carousel-prev {
+            left: 0;
+        }
+
+        .env-carousel-next {
+            right: 0;
+        }
+
+        /* Indicators */
+        .env-carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 1rem;
+        }
+
+        .env-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d1d5db;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .env-indicator.active {
+            background: #0fb7a6;
+            width: 24px;
+            border-radius: 4px;
         }
 
         /* Mobile Responsive */
         @media (max-width: 600px) {
-            .tco2e-hero-card {
+            .environmental-impact-card {
                 padding: 1rem;
-                min-height: 180px;
             }
-            .tco2e-ring-container {
-                width: 120px;
-                height: 120px;
+
+            .env-title {
+                font-size: 1rem;
             }
-            .tco2e-value {
-                font-size: 1.6rem;
+
+            .env-tooltip {
+                min-width: 280px;
+                max-width: 90vw;
+                right: -20px;
             }
-            .tco2e-tooltip {
-                min-width: 220px;
-                right: -50px;
+
+            .env-slide {
+                padding: 1rem 0.5rem;
+            }
+
+            .env-slide-icon {
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+            }
+
+            .env-slide-value {
+                font-size: 2rem;
+            }
+
+            .env-slide-unit {
+                font-size: 0.9rem;
+            }
+
+            .env-slide-title {
+                font-size: 0.95rem;
+            }
+
+            .env-slide-context {
+                font-size: 0.8rem;
+            }
+
+            .env-carousel-arrow {
+                width: 32px;
+                height: 32px;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -1157,8 +1210,9 @@
                     ? 100
                     : 0);
 
-        // Dampak lingkungan - hanya tCO₂e (Small City CO2e Model)
+        // Dampak lingkungan - tCO₂e dan pohon setara (IPCC International Standards)
         $co2SavedTon = $environmentalImpact['co2_saved_ton'] ?? 0;
+        $treesEquivalent = $environmentalImpact['trees_saved'] ?? 0;
 
         // Sales metrics (Penjualan ke Offtaker)
         $totalPenjualan = $dashboardSummary['total_penjualan'] ?? 0;
@@ -1452,66 +1506,161 @@
                 </div>
             </div>
         </div>
-        <!-- tCO₂e Hero Card -->
+        <!-- Environmental Impact Carousel -->
         <div style="flex:1 1 280px;min-width:240px;max-width:360px;">
-            <div class="tco2e-hero-card">
-                <!-- Info Tooltip Trigger -->
-                <div class="tco2e-info-trigger" tabindex="0">
-                    <i class="fa-solid fa-circle-info" style="color:#10b981;font-size:16px;"></i>
-                    <div class="tco2e-tooltip">
-                        <strong style="color:#065f46;">Rumus Perhitungan CO₂e</strong>
-                        <p style="margin:0.5rem 0;color:#374151;">
-                            <strong>Small City Model:</strong><br>
-                            Total Sampah (kg) × 1,18305 / 1000 = tCO₂e
-                        </p>
-                        <p style="margin:0.5rem 0;color:#6b7280;font-size:0.78rem;">
-                            Multiplier 1,18305 = 1 + (EF_CH₄ × GWP_CH₄) + (EF_N₂O × GWP_N₂O)<br>
-                            = 1 + (0,0065 × 21) + (0,00015 × 310)
-                        </p>
-                        <p style="margin:0.5rem 0;color:#6b7280;font-size:0.78rem;">
-                            <strong>Konstanta:</strong><br>
-                            • GWP CH₄ = 21 (kota kecil)<br>
-                            • GWP N₂O = 310 (kota kecil)<br>
-                            • EF CH₄ = 0,0065<br>
-                            • EF N₂O = 0,00015
-                        </p>
-                        <p style="margin-top:0.75rem;color:#9ca3af;font-size:0.72rem;">
-                            Sumber: IPCC Guidelines for Small Cities
-                        </p>
+            <div class="environmental-impact-card">
+                <!-- Header with Info Icon -->
+                <div class="env-header">
+                    <div class="env-header-left">
+                        <i class="fa-solid fa-earth-americas" style="color:#10b981;font-size:20px;"></i>
+                        <span class="env-title">Dampak Lingkungan</span>
                     </div>
-                </div>
+                    <div class="env-info-trigger" tabindex="0">
+                        <i class="fa-solid fa-circle-info" style="color:#10b981;font-size:16px;"></i>
+                        <div class="env-tooltip">
+                            <strong style="color:#065f46;font-size:0.9rem;">Cara Perhitungan:</strong>
 
-                <!-- Header -->
-                <div class="tco2e-header">
-                    <div class="tco2e-icon">
-                        <i class="fa-solid fa-earth-americas"></i>
-                    </div>
-                    <span class="tco2e-title">Dampak Lingkungan</span>
-                </div>
-
-                <!-- Circular Progress Ring with Value -->
-                <div class="tco2e-ring-container">
-                    <svg class="tco2e-ring" viewBox="0 0 128 128">
-                        <defs>
-                            <linearGradient id="tco2e-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#10b981"/>
-                                <stop offset="100%" style="stop-color:#059669"/>
-                            </linearGradient>
-                        </defs>
-                        <circle class="tco2e-ring-bg" cx="64" cy="64" r="60"/>
-                        <circle class="tco2e-ring-progress" cx="64" cy="64" r="60"/>
-                    </svg>
-                    <div class="tco2e-value-container tco2e-animated">
-                        <div class="tco2e-value" data-target="{{ $co2SavedTon }}">
-                            {{ number_format($co2SavedTon, 2, ',', '.') }}
+                            <ul style="margin:0.5rem 0;padding-left:1.2rem;color:#374151;font-size:0.78rem;line-height:1.6;">
+                                <li><strong>CO₂ Dicegah:</strong> Total Sampah (kg) × 1,18305 (kg CO₂e, IPCC 2006 Guidelines)</li>
+                                <li><strong>Setara Pohon:</strong> CO₂ Dicegah / 21 (1 pohon dewasa serap 21 kg CO₂/tahun)</li>
+                                <li><strong>Setara Mobil:</strong> CO₂ Dicegah / 4.600 (1 mobil keluarkan 4.600 kg CO₂/tahun)</li>
+                                <li><strong>Energi Dihemat:</strong> Total Sampah (kg) × 2,5 (kWh, rata-rata EPA/iWARM)</li>
+                                <li><strong>Setara Rumah:</strong> Energi Dihemat / 2.200 (1 rumah tangga Indonesia rata-rata 2.200 kWh/tahun)</li>
+                                <li><strong>Lahan TPA:</strong> Total Sampah (kg) × 0,0015 (m², 1 ton = 1,5 m³, tinggi landfill 1m)</li>
+                                <li><strong>Air Dihemat:</strong> Total Sampah (kg) × 25 (liter, konservatif kertas/plastik, EPA iWARM, Water Footprint)</li>
+                                <li><strong>Energi Fosil Dihemat:</strong> Total Sampah (kg) × 35 (MJ, konservatif plastik/kertas, EPA iWARM, PlasticsEurope)</li>
+                                <li><strong>Setara BBM Dihemat:</strong> Energi Fosil Dihemat / 32 (liter bensin, 1 liter = 32 MJ, EPA iWARM)</li>
+                            </ul>
                         </div>
-                        <div class="tco2e-unit">tCO₂e</div>
                     </div>
                 </div>
 
-                <!-- Description -->
-                <div class="tco2e-description">
-                    Emisi karbon yang berhasil dicegah
+                @php
+                    $co2SavedKg = $environmentalImpact['co2_saved_kg'] ?? 0;
+                    $treesEquivalent = $environmentalImpact['trees_saved'] ?? 0;
+                    $carsRemoved = $environmentalImpact['cars_removed'] ?? 0;
+                    $energySavedKwh = $environmentalImpact['energy_saved_kwh'] ?? 0;
+                    $householdEnergy = $environmentalImpact['household_energy'] ?? 0;
+                    $landfillSaved = $environmentalImpact['landfill_saved_m3'] ?? 0;
+                    $waterSaved = $environmentalImpact['water_saved_liters'] ?? 0;
+                    $fossilEnergySaved = $environmentalImpact['fossil_energy_saved_mj'] ?? 0;
+                    $fuelSaved = $environmentalImpact['fuel_saved_liters'] ?? 0;
+                @endphp
+
+                <!-- Carousel Container -->
+                <div class="env-carousel-container">
+                    <!-- Navigation Arrows -->
+                    <button class="env-carousel-arrow env-carousel-prev" onclick="envCarouselPrev()">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button class="env-carousel-arrow env-carousel-next" onclick="envCarouselNext()">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+
+                    <!-- Slides Wrapper -->
+                    <div class="env-carousel-track" id="envCarouselTrack">
+                        <!-- Slide 1: CO₂ Dicegah -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon">
+                                <i class="fa-solid fa-leaf"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($co2SavedKg, 1, ',', '.') }}</div>
+                            <div class="env-slide-unit">kg CO₂</div>
+                            <div class="env-slide-title">Emisi Dicegah</div>
+                            <div class="env-slide-context">Gas rumah kaca yang tidak terlepas ke udara</div>
+                        </div>
+
+                        <!-- Slide 2: Setara Pohon -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#059669;">
+                                <i class="fa-solid fa-tree"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($treesEquivalent, 1, ',', '.') }}</div>
+                            <div class="env-slide-unit">pohon</div>
+                            <div class="env-slide-title">Setara Pohon Ditanam</div>
+                            <div class="env-slide-context">1 pohon serap 21 kg CO₂ per tahun</div>
+                        </div>
+
+                        <!-- Slide 3: Energi Dihemat -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#0891b2;">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($energySavedKwh, 0, ',', '.') }}</div>
+                            <div class="env-slide-unit">kWh</div>
+                            <div class="env-slide-title">Energi Listrik Hemat</div>
+                            <div class="env-slide-context">Energi yang tidak perlu diproduksi</div>
+                        </div>
+
+                        <!-- Slide 4: Air Dihemat -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#06b6d4;">
+                                <i class="fa-solid fa-droplet"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($waterSaved, 0, ',', '.') }}</div>
+                            <div class="env-slide-unit">liter</div>
+                            <div class="env-slide-title">Air Hemat</div>
+                            <div class="env-slide-context">Air bersih yang dihemat dari produksi</div>
+                        </div>
+
+                        <!-- Slide 5: Lahan TPA -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#84cc16;">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($landfillSaved, 2, ',', '.') }}</div>
+                            <div class="env-slide-unit">m²</div>
+                            <div class="env-slide-title">Lahan TPA Dihemat</div>
+                            <div class="env-slide-context">Ruang di tempat pembuangan akhir</div>
+                        </div>
+
+                        <!-- Slide 6: Setara Rumah -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#f59e0b;">
+                                <i class="fa-solid fa-house"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($householdEnergy, 2, ',', '.') }}</div>
+                            <div class="env-slide-unit">rumah/tahun</div>
+                            <div class="env-slide-title">Setara Listrik Rumah</div>
+                            <div class="env-slide-context">1 rumah pakai 2.200 kWh per tahun</div>
+                        </div>
+
+                        <!-- Slide 7: Setara Mobil -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#8b5cf6;">
+                                <i class="fa-solid fa-car"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($carsRemoved, 2, ',', '.') }}</div>
+                            <div class="env-slide-unit">mobil/tahun</div>
+                            <div class="env-slide-title">Setara Mobil Dikurangi</div>
+                            <div class="env-slide-context">1 mobil keluarkan 4.600 kg CO₂ per tahun</div>
+                        </div>
+
+                        <!-- Slide 8: BBM Dihemat -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#ec4899;">
+                                <i class="fa-solid fa-gas-pump"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($fuelSaved, 2, ',', '.') }}</div>
+                            <div class="env-slide-unit">liter</div>
+                            <div class="env-slide-title">BBM Hemat</div>
+                            <div class="env-slide-context">Bensin yang tidak perlu dibakar</div>
+                        </div>
+
+                        <!-- Slide 9: Energi Fosil -->
+                        <div class="env-slide">
+                            <div class="env-slide-icon" style="background:#ef4444;">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                            <div class="env-slide-value">{{ number_format($fossilEnergySaved, 0, ',', '.') }}</div>
+                            <div class="env-slide-unit">MJ</div>
+                            <div class="env-slide-title">Energi Fosil Hemat</div>
+                            <div class="env-slide-context">Energi dari bahan bakar fosil</div>
+                        </div>
+                    </div>
+
+                    <!-- Indicators -->
+                    <div class="env-carousel-indicators" id="envCarouselIndicators"></div>
                 </div>
             </div>
         </div>
@@ -1898,34 +2047,132 @@
             }
         });
 
-        // tCO2e Counter Animation
-        (function() {
-            const valueEl = document.querySelector('.tco2e-value');
-            if (!valueEl) return;
+        // Environmental Impact Carousel
+        let envCurrentSlide = 0;
+        const envTotalSlides = 9;
+        let envTouchStartX = 0;
+        let envTouchEndX = 0;
 
-            const target = parseFloat(valueEl.dataset.target) || 0;
-            const duration = 1500;
-            const startTime = performance.now();
+        // Initialize carousel
+        document.addEventListener('DOMContentLoaded', function() {
+            envInitCarousel();
+        });
 
-            function animate(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-
-                // Easing function (ease-out cubic)
-                const easeOut = 1 - Math.pow(1 - progress, 3);
-                const current = target * easeOut;
-
-                valueEl.textContent = current.toLocaleString('id-ID', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
+        function envInitCarousel() {
+            // Create indicators
+            const indicatorsContainer = document.getElementById('envCarouselIndicators');
+            if (indicatorsContainer) {
+                for (let i = 0; i < envTotalSlides; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'env-indicator' + (i === 0 ? ' active' : '');
+                    indicator.onclick = () => envGoToSlide(i);
+                    indicatorsContainer.appendChild(indicator);
                 }
             }
 
-            requestAnimationFrame(animate);
-        })();
+            // Touch/swipe support
+            const track = document.getElementById('envCarouselTrack');
+            if (track) {
+                track.addEventListener('touchstart', envHandleTouchStart, false);
+                track.addEventListener('touchend', envHandleTouchEnd, false);
+
+                // Mouse drag support (desktop)
+                let isDragging = false;
+                let startX = 0;
+                let scrollLeft = 0;
+
+                track.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startX = e.pageX;
+                    track.style.cursor = 'grabbing';
+                });
+
+                track.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    const x = e.pageX;
+                    const walk = (startX - x);
+                    if (Math.abs(walk) > 50) {
+                        if (walk > 0) {
+                            envCarouselNext();
+                        } else {
+                            envCarouselPrev();
+                        }
+                        isDragging = false;
+                        track.style.cursor = 'grab';
+                    }
+                });
+
+                track.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    track.style.cursor = 'grab';
+                });
+
+                track.addEventListener('mouseleave', () => {
+                    isDragging = false;
+                    track.style.cursor = 'grab';
+                });
+
+                track.style.cursor = 'grab';
+            }
+        }
+
+        function envHandleTouchStart(e) {
+            envTouchStartX = e.changedTouches[0].screenX;
+        }
+
+        function envHandleTouchEnd(e) {
+            envTouchEndX = e.changedTouches[0].screenX;
+            envHandleSwipe();
+        }
+
+        function envHandleSwipe() {
+            const swipeThreshold = 50;
+            const diff = envTouchStartX - envTouchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    envCarouselNext();
+                } else {
+                    envCarouselPrev();
+                }
+            }
+        }
+
+        function envCarouselNext() {
+            if (envCurrentSlide < envTotalSlides - 1) {
+                envCurrentSlide++;
+                envUpdateCarousel();
+            }
+        }
+
+        function envCarouselPrev() {
+            if (envCurrentSlide > 0) {
+                envCurrentSlide--;
+                envUpdateCarousel();
+            }
+        }
+
+        function envGoToSlide(index) {
+            envCurrentSlide = index;
+            envUpdateCarousel();
+        }
+
+        function envUpdateCarousel() {
+            const track = document.getElementById('envCarouselTrack');
+            if (track) {
+                track.style.transform = `translateX(-${envCurrentSlide * 100}%)`;
+            }
+
+            // Update indicators
+            const indicators = document.querySelectorAll('.env-indicator');
+            indicators.forEach((indicator, index) => {
+                if (index === envCurrentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
     </script>
 @endsection

@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Artikel;
+use App\Models\BankSampah;
 use App\Models\KategoriArtikel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -18,11 +22,78 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class ArtikelController extends Controller
 {
     /**
+     * Check if current admin can access artikel feature.
+     * - Super admin (role='admin'): Always true
+     * - GOCAP branch admin (role='cabang' AND id_bank_sampah=13): True
+     * - Other branch admins: False
+     */
+    private function canAccessArtikel(): bool
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role === 'admin') {
+            return true;
+        }
+
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get bank_sampah_id for new artikel based on admin role.
+     * - Super admin: NULL (visible to all)
+     * - GOCAP admin: 13 (GOCAP-specific)
+     */
+    private function getBankSampahIdForArtikel(): ?int
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role === 'admin') {
+            return null;
+        }
+
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
+            return (int) $admin->id_bank_sampah;
+        }
+
+        return null;
+    }
+
+    /**
+     * Apply bank sampah filter to query.
+     * - Super admin: See all
+     * - GOCAP admin: See only own (13)
+     * - Others: Empty result
+     */
+    private function applyBankSampahFilter($query)
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role === 'admin') {
+            return $query;
+        }
+
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
+            return $query->where('bank_sampah_id', $admin->id_bank_sampah);
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         $query = Artikel::with('kategori');
+        $query = $this->applyBankSampahFilter($query);
 
         // Search
         if ($request->filled('search')) {
@@ -63,6 +134,10 @@ class ArtikelController extends Controller
      */
     public function create()
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         $kategoris = KategoriArtikel::all();
 
         return view('dashboard-artikel-create', compact('kategoris'));
@@ -73,6 +148,10 @@ class ArtikelController extends Controller
      */
     public function store(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'title' => 'required|string|max:255',
@@ -106,6 +185,7 @@ class ArtikelController extends Controller
                     'content' => $request->content,
                     'cover' => $coverUrl,
                     'kategori_id' => $request->kategori_id,
+                    'bank_sampah_id' => $this->getBankSampahIdForArtikel(),
                     'creator' => auth()->guard('admin')->user()->name,
                 ]);
 
@@ -144,7 +224,18 @@ class ArtikelController extends Controller
      */
     public function edit($id)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         $artikel = Artikel::with('kategori')->findOrFail($id);
+
+        // Verify ownership for GOCAP admins
+        $admin = Auth::guard('admin')->user();
+        if ($admin->role === 'cabang' && $artikel->bank_sampah_id != $admin->id_bank_sampah) {
+            abort(403, 'Anda tidak dapat mengedit artikel ini');
+        }
+
         $kategoris = KategoriArtikel::all();
 
         return view('dashboard-artikel-edit', compact('artikel', 'kategoris'));
@@ -155,8 +246,18 @@ class ArtikelController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $artikel = Artikel::findOrFail($id);
+
+            // Verify ownership for GOCAP admins
+            $admin = Auth::guard('admin')->user();
+            if ($admin->role === 'cabang' && $artikel->bank_sampah_id != $admin->id_bank_sampah) {
+                abort(403, 'Anda tidak dapat mengedit artikel ini');
+            }
 
             $request->validate([
                 'title' => 'required|string|max:255',
@@ -225,15 +326,28 @@ class ArtikelController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         // Jika request berisi array ids, hapus multiple
         if ($request->has('ids') && is_array($request->ids)) {
-            Artikel::whereIn('id', $request->ids)->delete();
+            $query = Artikel::whereIn('id', $request->ids);
+            $query = $this->applyBankSampahFilter($query);
+            $query->delete();
 
             return response()->json(['success' => true, 'message' => 'Artikel berhasil dihapus.']);
         }
+
         // Hapus satu artikel
         $artikel = Artikel::find($id);
         if ($artikel) {
+            // Verify ownership for GOCAP admins
+            $admin = Auth::guard('admin')->user();
+            if ($admin->role === 'cabang' && $artikel->bank_sampah_id != $admin->id_bank_sampah) {
+                abort(403, 'Anda tidak dapat menghapus artikel ini');
+            }
+
             $artikel->delete();
 
             return response()->json(['success' => true, 'message' => 'Artikel berhasil dihapus.']);
@@ -247,6 +361,10 @@ class ArtikelController extends Controller
      */
     public function exportExcel(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'period' => 'required|string',
@@ -256,6 +374,7 @@ class ArtikelController extends Controller
             ]);
 
             $query = Artikel::with('kategori');
+            $query = $this->applyBankSampahFilter($query);
 
             // Apply period filter
             switch ($request->period) {
@@ -461,6 +580,10 @@ class ArtikelController extends Controller
      */
     public function exportCsv(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'period' => 'required|string',
@@ -470,6 +593,7 @@ class ArtikelController extends Controller
             ]);
 
             $query = Artikel::with('kategori');
+            $query = $this->applyBankSampahFilter($query);
 
             // Apply period filter
             switch ($request->period) {
@@ -583,6 +707,10 @@ class ArtikelController extends Controller
      */
     public function exportPdf(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'period' => 'required|string',
@@ -592,6 +720,7 @@ class ArtikelController extends Controller
             ]);
 
             $query = Artikel::with('kategori');
+            $query = $this->applyBankSampahFilter($query);
 
             // Apply period filter
             switch ($request->period) {

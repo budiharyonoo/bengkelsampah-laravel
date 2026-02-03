@@ -7,17 +7,22 @@ namespace App\Services\Dashboard;
 /**
  * Service for calculating environmental impact metrics.
  *
- * Uses Small City CO2e calculation model based on IPCC guidelines.
- * Calculates CO2 equivalent emissions prevented by waste recycling.
+ * Uses IPCC 2006 Guidelines for National Greenhouse Gas Inventories
+ * and international standards (FAO, EPA) for environmental impact calculations.
  *
- * Formula Components:
+ * CO2 Equivalent (tCO2e) Formula Components:
  * - GWP_CO2 = 1 (Global Warming Potential for CO2)
- * - GWP_CH4 = 21 (Global Warming Potential for Methane)
- * - GWP_N2O = 310 (Global Warming Potential for Nitrous Oxide)
+ * - GWP_CH4 = 21 (Global Warming Potential for Methane - IPCC)
+ * - GWP_N2O = 310 (Global Warming Potential for Nitrous Oxide - IPCC)
  * - EF_CH4 = 0.0065 (Emission Factor for Methane)
  * - EF_N2O = 0.00015 (Emission Factor for Nitrous Oxide)
  *
  * Combined Multiplier: 1.18305 = 1 + (0.0065 * 21) + (0.00015 * 310)
+ * Formula: waste_kg × 1.18305 / 1000 = tCO2e
+ *
+ * Trees Equivalent Formula (FAO/IPCC International Standard):
+ * - 1 mature tree absorbs approximately 21 kg CO2 per year
+ * Formula: (CO2e in kg) / 21 = Trees needed for one year of carbon absorption
  */
 final class EnvironmentalImpactService
 {
@@ -59,10 +64,13 @@ final class EnvironmentalImpactService
     }
 
     /**
-     * Calculate CO2 equivalent in kilograms using Small City model.
+     * Calculate CO2 equivalent in kilograms using IPCC 2006 formula.
      *
      * Formula: waste_kg * (1 + EF_CH4*GWP_CH4 + EF_N2O*GWP_N2O)
      * = waste_kg * 1.18305
+     *
+     * This represents the amount of CO2 emissions prevented by recycling
+     * instead of sending waste to landfill.
      */
     public function calculateCo2eKg(float $wasteKg): float
     {
@@ -80,7 +88,13 @@ final class EnvironmentalImpactService
     }
 
     /**
-     * Calculate trees equivalent (1 tree absorbs 21 kg CO2/year).
+     * Calculate trees equivalent using international standard.
+     *
+     * Formula: CO2_kg / 21 = Number of trees
+     * Based on FAO/IPCC standard: 1 mature tree absorbs ~21 kg CO2/year
+     *
+     * This represents how many mature trees would be needed to absorb
+     * the same amount of CO2 over one year.
      */
     public function calculateTreesEquivalent(float $co2Kg): float
     {

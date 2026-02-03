@@ -29,6 +29,16 @@ class ArtikelController extends Controller
      *             default=1
      *         )
      *     ),
+     *     @OA\Parameter(
+     *         name="bank_sampah_id",
+     *         in="query",
+     *         description="Filter by bank sampah ID (optional). Returns bank-specific articles only.",
+     *         required=false,
+     *
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -90,8 +100,18 @@ class ArtikelController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Artikel::with('kategori')
-            ->orderBy('created_at', 'desc');
+        $query = Artikel::with('kategori');
+
+        // Apply bank sampah filter if provided
+        if ($request->filled('bank_sampah_id')) {
+            $bankSampahId = (int) $request->bank_sampah_id;
+            $query->where('bank_sampah_id', $bankSampahId)
+                ->orWhere('bank_sampah_id', null);
+        } else {
+            $query->whereNull('bank_sampah_id');
+        }
+
+        $query->orderBy('created_at', 'desc');
 
         $artikels = $query->paginate(10);
 

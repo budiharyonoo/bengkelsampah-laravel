@@ -33,7 +33,7 @@ class BlastNotificationController extends Controller
             $query->where('topic', 'broadcast');
         }
         // Cabang users with bank_sampah_id = 13 only see "broadcast-gocap" topic
-        elseif ($admin->role === 'cabang' && $admin->id_bank_sampah == 13) {
+        elseif ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
             $query->where('topic', 'broadcast-gocap');
         }
         // Other users should not see any data (shouldn't reach here due to menu access control)
@@ -184,7 +184,7 @@ class BlastNotificationController extends Controller
         }
 
         // Rule 2: cabang role AND bank_sampah_id = 13 → broadcast-gocap topic
-        if ($admin->role === 'cabang' && $admin->id_bank_sampah == 13) {
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
             return 'broadcast-gocap';
         }
 

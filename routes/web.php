@@ -18,6 +18,7 @@ use App\Http\Controllers\OfftakerController;
 use App\Http\Controllers\RedeemItemController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SampahController;
+use App\Http\Controllers\SkBankSampahController;
 use App\Http\Controllers\WasteInventoryController;
 use App\Http\Controllers\WasteTransactionController;
 use Illuminate\Support\Facades\Route;
@@ -141,6 +142,12 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('bank-sampah/export/excel', [BankSampahController::class, 'exportExcel'])->name('dashboard.bank.export.excel');
     Route::post('bank-sampah/export/csv', [BankSampahController::class, 'exportCsv'])->name('dashboard.bank.export.csv');
     Route::post('bank-sampah/export/pdf', [BankSampahController::class, 'exportPdf'])->name('dashboard.bank.export.pdf');
+
+    // SK Bank Sampah routes
+    Route::post('sk-bank-sampah/preview', [SkBankSampahController::class, 'preview'])->name('sk-bank-sampah.preview');
+    Route::post('bank-sampah/{bankSampah}/sk', [SkBankSampahController::class, 'store'])->name('sk-bank-sampah.store');
+    Route::get('bank-sampah/{bankSampah}/sk', [SkBankSampahController::class, 'show'])->name('sk-bank-sampah.show');
+    Route::get('sk-bank-sampah/{sk}/download', [SkBankSampahController::class, 'download'])->name('sk-bank-sampah.download');
 
     // User routes
     Route::resource('user', DashboardUserController::class)->names([
