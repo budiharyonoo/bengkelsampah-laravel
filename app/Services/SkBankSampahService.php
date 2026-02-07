@@ -189,7 +189,7 @@ class SkBankSampahService
      */
     private function uploadImage(int $bankSampahId, UploadedFile $file, string $type): string
     {
-        $uploadPath = public_path(self::UPLOAD_PATH);
+        $uploadPath = base_path('../' . self::UPLOAD_PATH);
 
         // Create directory if not exists
         if (! File::isDirectory($uploadPath)) {
@@ -207,7 +207,7 @@ class SkBankSampahService
      */
     private function getImageBase64(string $filename): ?string
     {
-        $filePath = public_path(self::UPLOAD_PATH . '/' . $filename);
+        $filePath = base_path('../' . self::UPLOAD_PATH . '/' . $filename);
 
         if (! File::exists($filePath)) {
             return null;
@@ -223,7 +223,7 @@ class SkBankSampahService
      */
     private function deleteImage(string $filename): void
     {
-        $filePath = public_path(self::UPLOAD_PATH . '/' . $filename);
+        $filePath = base_path('../' . self::UPLOAD_PATH . '/' . $filename);
 
         if (File::exists($filePath)) {
             File::delete($filePath);
