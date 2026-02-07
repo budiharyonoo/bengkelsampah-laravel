@@ -7,26 +7,25 @@
     <title>SK Bank Sampah - {{ $sk->nama_bank_sampah ?? 'Bank Sampah' }}</title>
     <style>
         @page {
-            margin: 2cm 2cm 2cm 2cm;
             size: A4 portrait;
+            margin: 0;
         }
 
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Bookman Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
-            /* font-family: 'Times New Roman', Palatino, Georgia, serif; */
+            font-family: serif;
             font-size: 9pt;
-            line-height: 1.35;
+            line-height: 1.4;
             color: #000;
             background: #fff;
         }
 
         .page {
+            padding: 1.5cm 2cm 1.5cm 2cm;
             page-break-after: always;
         }
 
@@ -34,54 +33,27 @@
             page-break-after: auto;
         }
 
-        /* Header Styles - No separator */
         .header {
-            margin-top: -25px;
             text-align: center;
-            /* margin-bottom: 10px; */
-        }
-
-        .header-logo {
-            /* margin-bottom: 8px; */
         }
 
         .header-logo img {
-            width: 200px;
+            width: 180px;
+            margin-top: -0.5cm;
             height: auto;
         }
 
-        /* Document Title */
         .document-title {
             text-align: center;
-            margin: 0;
         }
 
         .document-title h1 {
             font-size: 9pt;
             font-weight: bold;
-            /* text-decoration: underline; */
-            /* letter-spacing: 2px; */
-            /* margin-bottom: 3px; */
         }
 
         .document-number {
             font-size: 9pt;
-            /* margin-top: 3px; */
-        }
-
-        /* Content Styles */
-        .content {
-            text-align: justify;
-            margin: 15px 0;
-        }
-
-        .content p {
-            margin-bottom: 8px;
-            text-indent: 1.27cm;
-        }
-
-        .content p.no-indent {
-            text-indent: 0;
         }
 
         .tentang-section {
@@ -103,59 +75,11 @@
             margin: 10px 0;
         }
 
-        /* Menimbang/Mengingat Lists */
-        .consideration-list {
-            margin: 10px 0;
-        }
-
-        .consideration-item {
-            display: table;
-            width: 100%;
-            margin-bottom: 5px;
-        }
-
-        .consideration-label {
-            display: table-cell;
-            width: 70px;
-            vertical-align: top;
-        }
-
-        .consideration-colon {
-            display: table-cell;
-            width: 10px;
-            vertical-align: top;
-        }
-
-        .consideration-content {
-            display: table-cell;
-            vertical-align: top;
+        .content {
             text-align: justify;
+            margin: 15px 0;
         }
 
-        /* Lettered List (a, b, c) */
-        .lettered-list {
-            padding-left: 0;
-        }
-
-        .lettered-item {
-            display: table;
-            width: 100%;
-            margin-bottom: 4px;
-        }
-
-        .lettered-label {
-            display: table-cell;
-            width: 20px;
-            vertical-align: top;
-        }
-
-        .lettered-content {
-            display: table-cell;
-            vertical-align: top;
-            text-align: justify;
-        }
-
-        /* MEMUTUSKAN Section */
         .memutuskan {
             text-align: center;
             margin: 15px 0;
@@ -164,71 +88,15 @@
         .memutuskan h2 {
             font-size: 9pt;
             font-weight: bold;
-            /* letter-spacing: 3px; */
         }
 
-        .menetapkan {
-            display: table;
-            width: 100%;
-            margin: 10px 0;
-        }
-
-        .menetapkan-label {
-            display: table-cell;
-            width: 70px;
-            vertical-align: top;
-        }
-
-        .menetapkan-colon {
-            display: table-cell;
-            width: 10px;
-            vertical-align: top;
-        }
-
-        .menetapkan-content {
-            display: table-cell;
-            vertical-align: top;
-        }
-
-        /* Pasal Section */
-        .pasal {
-            margin: 12px 0;
-        }
-
-        .pasal-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        .pasal-content {
-            text-align: justify;
-        }
-
-        .pasal-content p {
-            margin-bottom: 6px;
-            text-indent: 1.27cm;
-        }
-
-        /* Signature Section */
         .signature-section {
             margin-top: 25px;
             page-break-inside: avoid;
         }
 
-        .signature-date {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-
-        .signature-block {
-            float: right;
-            width: 200px;
-            text-align: center;
-        }
-
         .signature-title {
-            margin-bottom: 50px;
+            margin-bottom: 70px;
         }
 
         .signature-name {
@@ -236,24 +104,15 @@
             text-decoration: underline;
         }
 
-        /* Image Sections */
         .image-section {
             text-align: center;
             margin: 20px 0;
             page-break-inside: avoid;
         }
 
-        .image-title {
-            font-size: 9pt;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-decoration: underline;
-        }
-
         .image-container img {
             max-width: 100%;
             max-height: 450px;
-            margin: 0 auto;
         }
 
         .image-placeholder {
@@ -263,7 +122,22 @@
             font-style: italic;
         }
 
-        /* Preview Mode Styles */
+        .lampiran-title {
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0 15px 0;
+        }
+
+        .data-section {
+            margin: 15px 0;
+        }
+
+        .data-section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* Preview extra styling */
         @if (isset($isPreview) && $isPreview)
             body {
                 padding: 15px;
@@ -272,30 +146,20 @@
 
             .page {
                 border: 1px solid #ccc;
-                padding: 2cm;
                 margin-bottom: 15px;
                 background: #fff;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                max-width: 210mm;
             }
         @endif
-
-        /* Clear float */
-        .clearfix::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
     </style>
 </head>
 
 <body>
     @php
-        // Convert Garuda logo to base64 for PDF
         $garudaBase64 = null;
-        $garudaPath = public_path('assets/garuda.png');
-        if (file_exists($garudaPath)) {
-            $garudaBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($garudaPath));
-        }
+        $garudaPath = asset('assets/garuda.png');
+        $garudaBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($garudaPath));
     @endphp
 
     <!-- Page 1: SK Document -->
@@ -317,260 +181,387 @@
             <div class="tentang-title">TENTANG</div>
             <div class="tentang-content">
                 PEMBENTUKAN PENGURUS BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-                KECAMATAN {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }}
+                {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }}
                 {{ strtoupper($sk->kabupaten ?? 'KABUPATEN') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }} -
                 {{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
             </div>
-
             <div class="tentang-content-desa">
                 KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }},
             </div>
         </div>
 
         <div class="content">
-            <div class="consideration-list">
-                <div class="consideration-item">
-                    <div class="consideration-label">Menimbang</div>
-                    <div class="consideration-colon">:</div>
-                    <div class="consideration-content">
-                        <div class="lettered-list">
-                            <div class="lettered-item">
-                                <div class="lettered-label">a.</div>
-                                <div class="lettered-content">
-                                    bahwa dalam rangka mengurangi volume sampah dan meningkatkan kesadaran masyarakat
-                                    dalam pengelolaan sampah, dipandang perlu membentuk Bank Sampah di tingkat
-                                    desa/kelurahan;
-                                </div>
-                            </div>
-                            <div class="lettered-item">
-                                <div class="lettered-label">b.</div>
-                                <div class="lettered-content">
-                                    bahwa berdasarkan pertimbangan sebagaimana dimaksud pada huruf a, perlu menetapkan
-                                    Keputusan Kepala Desa/Lurah tentang Pembentukan Pengurus Bank Sampah;
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {{-- Menimbang --}}
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 8px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;" rowspan="3">Menimbang</td>
+                    <td style="width: 2%; vertical-align: top;" rowspan="3">:</td>
+                    <td style="width: 4%; vertical-align: top;">a.</td>
+                    <td style="width: 79%; vertical-align: top; text-align: justify;">
+                        bahwa sampah selama ini belum dikelola dengan baik sehingga menimbulkan dampak negatif terhadap kesehatan masyarakat dan lingkungan
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">b.</td>
+                    <td style="vertical-align: top; text-align: justify;">
+                        bahwa pengelolaan sampah perlu dilakukan secara komprehensif dan terpadu agar dapat mengubah perilaku hidup sehat masyarakat dan sekaligus dapat memberikan manfaat secara ekonomi dan kesehatan lingkungan;
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">c.</td>
+                    <td style="vertical-align: top; text-align: justify;">
+                        bahwa berdasarkan pertimbangan sebagaimana dimaksud dalam huruf a dan b maka perlu menetapkan Keputusan Kepala {{ $sk->nama_desa_kelurahan ?? 'Desa' }} tentang Pembentukan Bank Sampah {{ $sk->nama_desa_kelurahan ?? 'Desa' }}.
+                    </td>
+                </tr>
+            </table>
 
-            <div class="consideration-list">
-                <div class="consideration-item">
-                    <div class="consideration-label">Mengingat</div>
-                    <div class="consideration-colon">:</div>
-                    <div class="consideration-content">
-                        <div class="lettered-list">
-                            <div class="lettered-item">
-                                <div class="lettered-label">1.</div>
-                                <div class="lettered-content">
-                                    Undang-Undang Nomor 18 Tahun 2008 tentang Pengelolaan Sampah;
-                                </div>
-                            </div>
-                            <div class="lettered-item">
-                                <div class="lettered-label">2.</div>
-                                <div class="lettered-content">
-                                    Peraturan Pemerintah Nomor 81 Tahun 2012 tentang Pengelolaan Sampah Rumah Tangga dan
-                                    Sampah Sejenis Sampah Rumah Tangga;
-                                </div>
-                            </div>
-                            <div class="lettered-item">
-                                <div class="lettered-label">3.</div>
-                                <div class="lettered-content">
-                                    Peraturan Menteri Lingkungan Hidup dan Kehutanan Nomor
-                                    P.97/MENLHK/SETJEN/KUM.1/11/2017 tentang Pedoman Pengembangan Sistem Bank Sampah;
-                                </div>
-                            </div>
-                            <div class="lettered-item">
-                                <div class="lettered-label">4.</div>
-                                <div class="lettered-content">
-                                    Hasil Rapat Musyawarah Pembentukan Bank Sampah tanggal
-                                    {{ $sk->tanggal_rapat_musyawarah ? $sk->tanggal_rapat_musyawarah->translatedFormat('d F Y') : '____' }};
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {{-- Mengingat --}}
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 8px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;" rowspan="5">Mengingat</td>
+                    <td style="width: 2%; vertical-align: top;" rowspan="5">:</td>
+                    <td style="width: 4%; vertical-align: top;">1.</td>
+                    <td style="width: 79%; vertical-align: top; text-align: justify;">
+                        Undang-Undang Nomor 18 Tahun 2008 tentang Pengelolaan Sampah (Lembaran Negara Republik Indonesia Tahun 2008 Nomor 690);
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">2.</td>
+                    <td style="vertical-align: top; text-align: justify;">
+                        Undang-Undang Nomor 32 Tahun 2009 tentang Perlindungan dan Pengelolaan Lingkungan Hidup (Lembaran Negara Republik Indonesia Tahun 2009 Nomor 14);
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">3.</td>
+                    <td style="vertical-align: top; text-align: justify;">
+                        Peraturan Presiden Nomor 81 Tahun 2012 tentang Pengelolaan Sampah Rumah Tangga dan Sampah Sejenis Sampah Rumah Tangga;
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">4.</td>
+                    <td style="vertical-align: top; text-align: justify;">
+                        Peraturan Menteri Lingkungan Hidup Republik Indonesia Nomor 13 Tahun 2012 tentang Pedoman Pelaksanaan Reduce, Reuse, dan Recycle melalui Bank Sampah;
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">5.</td>
+                    <td style="vertical-align: top; text-align: justify;">
+                        Peraturan Daerah {{ $sk->kabupaten ?? 'Kabupaten' }} Nomor 5 Tahun 2020 Tentang Pengelolaan Sampah (Lembaran Daerah {{ $sk->kabupaten ?? 'Kabupaten' }} Tahun 2020 Nomor 5);
+                    </td>
+                </tr>
+            </table>
+
+            {{-- Memperhatikan --}}
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 8px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">Memperhatikan</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 83%; vertical-align: top; text-align: justify;">
+                        Rapat Musyawarah Kelompok Masyarakat {{ $sk->nama_desa_kelurahan ?? 'Desa' }} tanggal {{ $sk->tanggal_rapat_musyawarah ? $sk->tanggal_rapat_musyawarah->translatedFormat('d F Y') : '____' }}.
+                    </td>
+                </tr>
+            </table>
 
             <div class="memutuskan">
                 <h2>MEMUTUSKAN</h2>
             </div>
 
-            <div class="menetapkan">
-                <div class="menetapkan-label">Menetapkan</div>
-                <div class="menetapkan-colon">:</div>
-                <div class="menetapkan-content">
-                    <strong>KEPUTUSAN KEPALA DESA/LURAH TENTANG PEMBENTUKAN PENGURUS BANK SAMPAH
-                        "{{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}"</strong>
-                </div>
+            {{-- Menetapkan --}}
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">Menetapkan</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 83%; vertical-align: top; text-align: justify;">
+                        <strong>
+                            KEPUTUSAN KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} TENTANG PEMBENTUKAN BANK SAMPAH {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }} {{ strtoupper($sk->kabupaten ?? 'KABUPATEN') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                        </strong>
+                    </td>
+                </tr>
+            </table>
+
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">KESATU</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 83%; vertical-align: top; text-align: justify;">
+                        Mengesahkan berdirinya Bank Sampah {{ $sk->nama_desa_kelurahan ?? 'Desa' }} dengan nama "{{ $sk->nama_bank_sampah ?? '' }}" {{ $sk->nama_desa_kelurahan ?? 'Desa' }};
+                    </td>
+                </tr>
+            </table>
+
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">KEDUA</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 83%; vertical-align: top; text-align: justify;">
+                        Menetapkan saudara-saudara yang namanya dan jabatannya tercantum dalam lampiran keputusan ini sebagai pengurus kelompok Pengelola Bank Sampah "{{ $sk->nama_bank_sampah ?? '' }}" {{ $sk->nama_desa_kelurahan ?? 'Desa' }} sebagaimana lampiran yang tidak terpisahkan dengan keputusan ini;
+                    </td>
+                </tr>
+            </table>
+
+            @php
+                $masaBaktiYears = ($sk->masa_bakti_selesai ?? date('Y') + 4) - ($sk->masa_bakti_mulai ?? date('Y'));
+                $masaBaktiTerbilang =
+                    [
+                        1 => 'satu',
+                        2 => 'dua',
+                        3 => 'tiga',
+                        4 => 'empat',
+                        5 => 'lima',
+                        6 => 'enam',
+                        7 => 'tujuh',
+                        8 => 'delapan',
+                        9 => 'sembilan',
+                        10 => 'sepuluh',
+                    ][$masaBaktiYears] ?? (string) $masaBaktiYears;
+            @endphp
+
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">KETIGA</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 83%; vertical-align: top; text-align: justify;">
+                        Masa bakti kepengurusan adalah selama {{ $masaBaktiYears }} ({{ $masaBaktiTerbilang }}) tahun sejak keputusan ini ditetapkan;
+                    </td>
+                </tr>
+            </table>
+
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">KEEMPAT</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 83%; vertical-align: top; text-align: justify;">
+                        Surat keputusan ini mulai berlaku sejak tanggal ditetapkan dan apabila dikemudian hari terdapat kekeliruan dalam keputusan ini maka akan diadakan perbaikan sebagaimana mestinya;
+                    </td>
+                </tr>
+            </table>
+
+            {{-- Signature --}}
+            <div class="signature-section" style="margin-top: 15px !important;">
+                <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                    <tr>
+                        <td style="width: 55%;"></td>
+                        <td style="width: 45%; vertical-align: top;">
+                            Ditetapkan di : {{ $sk->nama_desa_kelurahan ?? '' }}<br>
+                            Pada tanggal : {{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: center; padding-top: 10px;">
+                            <div class="signature-title">Kepala Desa/lurah</div>
+                            <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Page 2: Pasal-pasal -->
+    <!-- Page 2: Lampiran I - Susunan Pengurus -->
     <div class="page">
-        <div class="pasal">
-            <div class="pasal-title">KESATU</div>
-            <div class="pasal-content">
-                <p>Membentuk Pengurus Bank Sampah "{{ $sk->nama_bank_sampah ?? '' }}" Desa/Kelurahan
-                    {{ $sk->nama_desa_kelurahan ?? '' }}, Kecamatan {{ $sk->kecamatan ?? '' }},
-                    {{ $sk->kabupaten ?? '' }}, {{ $sk->provinsi ?? '' }} dengan susunan pengurus sebagaimana
-                    terlampir.</p>
+        <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 15px;">
+            <tr>
+                <td style="width: 13%; vertical-align: top;">Lampiran 1</td>
+                <td style="width: 2%; vertical-align: top;">:</td>
+                <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top;">Nomor</td>
+                <td style="vertical-align: top;">:</td>
+                <td style="vertical-align: top;">{{ $sk->nomor_surat ?? '____/____/____' }}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top;">Tanggal</td>
+                <td style="vertical-align: top;">:</td>
+                <td style="vertical-align: top;">{{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top;">Tentang</td>
+                <td style="vertical-align: top;">:</td>
+                <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} {{ ucwords(strtolower($sk->kecamatan ?? '')) }} {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+            </tr>
+        </table>
+
+        <div class="lampiran-title">
+            SUSUNAN ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
+            {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+        </div>
+
+        <div class="data-section">
+            <div class="data-section-title">I. DATA ORGANISASI</div>
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 95%; margin-left: 20px;">
+                <tr>
+                    <td style="width: 5%; vertical-align: top;">1.</td>
+                    <td style="width: 30%; vertical-align: top;">NAMA BANK SAMPAH</td>
+                    <td style="width: 3%; vertical-align: top;">:</td>
+                    <td style="width: 62%; vertical-align: top;">{{ strtoupper($sk->nama_bank_sampah ?? '') }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">2.</td>
+                    <td style="vertical-align: top;">ALAMAT</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">{{ strtoupper($sk->alamat_bank_sampah ?? '') }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="data-section">
+            <div class="data-section-title">II. PEMBINA :</div>
+            <div style="margin-left: 20px;">
+                - KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} / lurah
             </div>
         </div>
 
-        <div class="pasal">
-            <div class="pasal-title">KEDUA</div>
-            <div class="pasal-content">
-                <p class="no-indent">Pengurus sebagaimana dimaksud pada diktum KESATU bertugas:</p>
-                <div class="lettered-list" style="margin-left: 15px; margin-top: 5px;">
-                    <div class="lettered-item">
-                        <div class="lettered-label">a.</div>
-                        <div class="lettered-content">Mengelola operasional Bank Sampah secara profesional dan
-                            transparan;</div>
-                    </div>
-                    <div class="lettered-item">
-                        <div class="lettered-label">b.</div>
-                        <div class="lettered-content">Melakukan penimbangan, pencatatan, dan pembayaran kepada nasabah;
-                        </div>
-                    </div>
-                    <div class="lettered-item">
-                        <div class="lettered-label">c.</div>
-                        <div class="lettered-content">Menyusun laporan kegiatan dan keuangan Bank Sampah secara berkala;
-                        </div>
-                    </div>
-                    <div class="lettered-item">
-                        <div class="lettered-label">d.</div>
-                        <div class="lettered-content">Melakukan sosialisasi dan edukasi tentang pengelolaan sampah
-                            kepada masyarakat;</div>
-                    </div>
-                    <div class="lettered-item">
-                        <div class="lettered-label">e.</div>
-                        <div class="lettered-content">Menjalin kerjasama dengan pihak terkait dalam pengembangan Bank
-                            Sampah.</div>
-                    </div>
-                </div>
-            </div>
+        <div class="data-section">
+            <div class="data-section-title">III. PENGELOLA :</div>
         </div>
 
-        <div class="pasal">
-            <div class="pasal-title">KETIGA</div>
-            <div class="pasal-content">
-                <p>Masa bakti pengurus Bank Sampah sebagaimana dimaksud pada diktum KESATU adalah
-                    {{ $sk->masa_bakti_mulai ?? date('Y') }} sampai dengan
-                    {{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}.</p>
-            </div>
-        </div>
-
-        <div class="pasal">
-            <div class="pasal-title">KEEMPAT</div>
-            <div class="pasal-content">
-                <p>Segala biaya yang timbul akibat ditetapkannya keputusan ini dibebankan pada anggaran yang sesuai.</p>
-            </div>
-        </div>
-
-        <div class="pasal">
-            <div class="pasal-title">KELIMA</div>
-            <div class="pasal-content">
-                <p>Keputusan ini mulai berlaku pada tanggal ditetapkan dengan ketentuan apabila di kemudian hari
-                    ternyata terdapat kekeliruan dalam penetapannya akan diadakan perbaikan sebagaimana mestinya.</p>
-            </div>
-        </div>
-
-        <div class="signature-section clearfix">
-            <div class="signature-date">
-                Ditetapkan di: {{ $sk->nama_desa_kelurahan ?? '' }}<br>
-                Pada tanggal: {{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}
-            </div>
-
-            <div class="signature-block">
-                <div class="signature-title">
-                    KEPALA DESA/LURAH {{ strtoupper($sk->nama_desa_kelurahan ?? '') }}
-                </div>
-                <div class="signature-name">
-                    {{ strtoupper($sk->nama_kepala_desa ?? '') }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Page 3: Lampiran Pengurus (Image) -->
-    @if (isset($pengurusImageBase64) && $pengurusImageBase64)
-        <div class="page">
-            <div class="image-section">
-                <div class="image-title">
-                    LAMPIRAN SUSUNAN PENGURUS<br>
-                    BANK SAMPAH "{{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}"
-                </div>
+        @if (isset($pengurusImageBase64) && $pengurusImageBase64)
+            <div class="image-section" style="margin-top: 10px;">
                 <div class="image-container">
                     <img src="{{ $pengurusImageBase64 }}" alt="Susunan Pengurus">
                 </div>
             </div>
-
-            <div class="signature-section clearfix" style="margin-top: 40px;">
-                <div class="signature-block">
-                    <div class="signature-title">
-                        Mengetahui,<br>
-                        KEPALA DESA/LURAH {{ strtoupper($sk->nama_desa_kelurahan ?? '') }}
-                    </div>
-                    <div class="signature-name">
-                        {{ strtoupper($sk->nama_kepala_desa ?? '') }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    @elseif(isset($isPreview) && $isPreview)
-        <div class="page">
-            <div class="image-section">
-                <div class="image-title">
-                    LAMPIRAN SUSUNAN PENGURUS<br>
-                    BANK SAMPAH "{{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}"
-                </div>
+        @elseif(isset($isPreview) && $isPreview)
+            <div class="image-section" style="margin-top: 10px;">
                 <div class="image-placeholder">
-                    <p>Gambar susunan pengurus akan ditampilkan di sini</p>
+                    <p>Gambar susunan pengurus dengan nama-nama yang terisi akan ditampilkan di sini</p>
                     <p style="font-size: 8pt; margin-top: 8px;">(Upload gambar pengurus pada form)</p>
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
 
-    <!-- Page 4: Struktur Organisasi (Optional Image) -->
+        <div class="signature-section" style="margin-top: 40px;">
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td style="width: 45%; vertical-align: top;">
+                        Ditetapkan di : {{ $sk->nama_desa_kelurahan ?? '' }}<br>
+                        Pada tanggal : {{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="text-align: center; padding-top: 10px;">
+                        <div class="signature-title">Kepala Desa/lurah</div>
+                        <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Page 3: Lampiran II - Struktur Organisasi (Optional) -->
     @if (isset($strukturOrganisasiBase64) && $strukturOrganisasiBase64)
         <div class="page">
-            <div class="image-section">
-                <div class="image-title">
-                    STRUKTUR ORGANISASI<br>
-                    BANK SAMPAH "{{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}"
-                </div>
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 15px;">
+                <tr>
+                    <td style="width: 13%; vertical-align: top;">Lampiran 2</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">Nomor</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">{{ $sk->nomor_surat ?? '____/____/____' }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">Tanggal</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">{{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">Tentang</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} {{ ucwords(strtolower($sk->kecamatan ?? '')) }} {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+                </tr>
+            </table>
+
+            <div class="lampiran-title">
+                STRUKTUR ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
+                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+            </div>
+
+            <div class="image-section" style="margin-top: 25px;">
                 <div class="image-container">
                     <img src="{{ $strukturOrganisasiBase64 }}" alt="Struktur Organisasi">
                 </div>
             </div>
 
-            <div class="signature-section clearfix" style="margin-top: 40px;">
-                <div class="signature-block">
-                    <div class="signature-title">
-                        Mengetahui,<br>
-                        KEPALA DESA/LURAH {{ strtoupper($sk->nama_desa_kelurahan ?? '') }}
-                    </div>
-                    <div class="signature-name">
-                        {{ strtoupper($sk->nama_kepala_desa ?? '') }}
-                    </div>
-                </div>
+            <div class="signature-section" style="margin-top: 40px;">
+                <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                    <tr>
+                        <td style="width: 55%;"></td>
+                        <td style="width: 45%; vertical-align: top;">
+                            Ditetapkan di : {{ $sk->nama_desa_kelurahan ?? '' }}<br>
+                            Pada tanggal : {{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: center; padding-top: 10px;">
+                            <div class="signature-title">Kepala Desa</div>
+                            <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     @elseif(isset($isPreview) && $isPreview)
         <div class="page">
-            <div class="image-section">
-                <div class="image-title">
-                    STRUKTUR ORGANISASI<br>
-                    BANK SAMPAH "{{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}"
-                </div>
+            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 15px;">
+                <tr>
+                    <td style="width: 13%; vertical-align: top;">Lampiran 2</td>
+                    <td style="width: 2%; vertical-align: top;">:</td>
+                    <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ $sk->nama_desa_kelurahan ?? 'Desa' }} {{ $sk->nama_desa_kelurahan ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">Nomor</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">{{ $sk->nomor_surat ?? '____/____/____' }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">Tanggal</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">{{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;">Tentang</td>
+                    <td style="vertical-align: top;">:</td>
+                    <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? '')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} Kecamatan {{ ucwords(strtolower($sk->kecamatan ?? '')) }} Kabupaten {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+                </tr>
+            </table>
+
+            <div class="lampiran-title">
+                STRUKTUR ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
+                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+            </div>
+
+            <div class="image-section" style="margin-top: 25px;">
                 <div class="image-placeholder">
                     <p>Gambar struktur organisasi akan ditampilkan di sini</p>
-                    <p style="font-size: 8pt; margin-top: 8px;">(Upload gambar struktur organisasi pada form -
-                        opsional)</p>
+                    <p style="font-size: 8pt; margin-top: 8px;">(Upload gambar struktur organisasi pada form - opsional)</p>
                 </div>
+            </div>
+
+            <div class="signature-section" style="margin-top: 40px;">
+                <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                    <tr>
+                        <td style="width: 55%;"></td>
+                        <td style="width: 45%; vertical-align: top;">
+                            Ditetapkan di : {{ $sk->nama_desa_kelurahan ?? '' }}<br>
+                            Pada tanggal : {{ $sk->tanggal_ditetapkan ? $sk->tanggal_ditetapkan->translatedFormat('d F Y') : '____' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: center; padding-top: 10px;">
+                            <div class="signature-title">Kepala Desa/lurah</div>
+                            <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     @endif

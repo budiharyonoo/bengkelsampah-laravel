@@ -42,6 +42,20 @@ class SkBankSampahService
      */
     public function generatePreviewHtml(BankSampah $bankSampah, array $data): string
     {
+        // Build full address for preview
+        $addressParts = [
+            $data['nama_desa_kelurahan'] ?? '',
+            $data['kecamatan'] ?? '',
+            $data['kabupaten'] ?? '',
+            $data['provinsi'] ?? '',
+        ];
+
+        if (! empty($data['kode_pos'])) {
+            $addressParts[] = $data['kode_pos'];
+        }
+
+        $fullAddress = implode(', ', array_filter($addressParts));
+
         // Create a mock SK object for preview
         $sk = (object) [
             'nama_bank_sampah' => $data['nama_bank_sampah'] ?? $bankSampah->nama_bank_sampah,
@@ -57,6 +71,7 @@ class SkBankSampahService
             'masa_bakti_mulai' => $data['masa_bakti_mulai'] ?? date('Y'),
             'masa_bakti_selesai' => $data['masa_bakti_selesai'] ?? (date('Y') + 4),
             'nama_kepala_desa' => $data['nama_kepala_desa'] ?? '',
+            'full_address' => $fullAddress,
         ];
 
         return view('pdf.sk-bank-sampah', [
