@@ -165,7 +165,11 @@ class HomeController extends Controller
         $unreadCount = $this->notificationService->getUnreadCount($user->id);
 
         // Get app version info for Android
-        $appVersion = AppVersion::getLatestVersion('android');
+        $bankSampahId = $request->get('bank_sampah_id');
+        $appVersion = AppVersion::when($bankSampahId, function ($query) {
+            return $query->where('id', 4);
+        })
+            ->getLatestVersion('android');
 
         return response()->json([
             'status' => 'success',
