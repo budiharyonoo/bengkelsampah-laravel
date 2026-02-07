@@ -71,7 +71,8 @@ class WhatsAppService
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                 ])
-                ->post($url, $payload);
+                ->post($url, $payload)
+                ->throw();
 
             return $response->successful();
         } catch (\Exception $e) {
