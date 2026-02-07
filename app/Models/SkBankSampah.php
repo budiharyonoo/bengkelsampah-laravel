@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * SK Bank Sampah Model
- *
+ * 
  * Represents the official decree (Surat Keputusan) for a Bank Sampah.
  * All data is stored independently in this table (not referenced from bank_sampah).
  *
@@ -34,6 +34,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read BankSampah $bankSampah
+ * @property-read string $full_address
+ * @property-read string $masa_bakti
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah query()
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereAlamatBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereBankSampahId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereKabupaten($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereKecamatan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereKodePos($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereMasaBaktiMulai($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereMasaBaktiSelesai($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereNamaBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereNamaDesaKelurahan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereNamaKepalaDesa($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereNomorSurat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah wherePengurusImagePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereProvinsi($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereStrukturOrganisasiPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereTanggalDitetapkan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereTanggalRapatMusyawarah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class SkBankSampah extends Model
 {

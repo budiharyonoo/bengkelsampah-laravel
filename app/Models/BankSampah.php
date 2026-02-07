@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereNamaPenanggungJawab($value)
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereTipeLayanan($value)
  * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereUpdatedAt($value)
+ * @property-read \App\Models\SkBankSampah|null $sk
  * @mixin \Eloquent
  */
 class BankSampah extends Model

@@ -30,14 +30,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read User $user
  * @property-read RedeemItem $redeemItem
  * @property-read Admin|null $statusChangedBy
- *
  * @method static \Illuminate\Database\Eloquent\Builder|UserRedeem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|UserRedeem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|UserRedeem query()
  * @method static \Illuminate\Database\Eloquent\Builder|UserRedeem status(string $status)
  * @method static \Illuminate\Database\Eloquent\Builder|UserRedeem waiting()
  * @method static \Illuminate\Database\Eloquent\Builder|UserRedeem approved()
- *
+ * @method static Builder|UserRedeem whereCreatedAt($value)
+ * @method static Builder|UserRedeem whereId($value)
+ * @method static Builder|UserRedeem whereInfoJson($value)
+ * @method static Builder|UserRedeem whereNotes($value)
+ * @method static Builder|UserRedeem wherePointUsed($value)
+ * @method static Builder|UserRedeem whereRedeemItemDescription($value)
+ * @method static Builder|UserRedeem whereRedeemItemId($value)
+ * @method static Builder|UserRedeem whereRedeemItemName($value)
+ * @method static Builder|UserRedeem whereRewardProofUrl($value)
+ * @method static Builder|UserRedeem whereStatus($value)
+ * @method static Builder|UserRedeem whereStatusChangedAt($value)
+ * @method static Builder|UserRedeem whereStatusChangedBy($value)
+ * @method static Builder|UserRedeem whereStatusChangedByName($value)
+ * @method static Builder|UserRedeem whereUpdatedAt($value)
+ * @method static Builder|UserRedeem whereUserId($value)
+ * @method static Builder|UserRedeem whereUserIdentifier($value)
+ * @method static Builder|UserRedeem whereUserName($value)
  * @mixin \Eloquent
  */
 class UserRedeem extends Model

@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array|null $fcm_response
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- *
  * @method static \Illuminate\Database\Eloquent\Builder|BlastNotification newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BlastNotification newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BlastNotification query()
@@ -36,7 +35,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|BlastNotification whereTopic($value)
  * @method static \Illuminate\Database\Eloquent\Builder|BlastNotification whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|BlastNotification whereUpdatedAt($value)
- *
+ * @property-read \App\Models\Admin|null $admin
  * @mixin \Eloquent
  */
 class BlastNotification extends Model
