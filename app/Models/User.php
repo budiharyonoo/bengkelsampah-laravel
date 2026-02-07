@@ -2,12 +2,57 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property int $user_type
+ * @property mixed $password
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Address> $addresses
+ * @property-read int|null $addresses_count
+ * @property-read \App\Models\Level|null $level
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Point> $points
+ * @property-read int|null $points_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Setoran> $setorans
+ * @property-read int|null $setorans_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User query()
+ * @property int $id
+ * @property string $name
+ * @property string $identifier
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $poin
+ * @property int $setor
+ * @property string $sampah
+ * @property string|null $fcm_token
+ * @property string $xp
+ * @property-read \App\Models\BankSampah|null $bankSampah
+ * @property-read mixed $jenis_nasabah
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereFcmToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereIdentifier($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePoin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereSetor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUserType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereXp($value)
+ * @mixin \Eloquent
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -20,6 +65,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'identifier',
+        'user_type',
         'password',
         'poin',
         'xp',
@@ -45,6 +91,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        'user_type' => 'integer',
     ];
 
     public function level()
@@ -74,5 +121,30 @@ class User extends Authenticatable
     public function setorans()
     {
         return $this->hasMany(Setoran::class);
+    }
+
+    /**
+     * Get the bank sampah for this user (when user_type >= 1)
+     */
+    public function bankSampah()
+    {
+        return $this->belongsTo(BankSampah::class, 'user_type');
+    }
+
+    /**
+     * Get the customer type display text
+     */
+    public function getJenisNasabahAttribute()
+    {
+        if ($this->user_type === -1) {
+            return 'Instansi';
+        }
+
+        if ($this->user_type === 0) {
+            return 'Umum';
+        }
+
+        // user_type >= 1 means it's a bank_sampah_id
+        return $this->bankSampah?->nama_bank_sampah ?? 'Bank Sampah #'.$this->user_type;
     }
 }

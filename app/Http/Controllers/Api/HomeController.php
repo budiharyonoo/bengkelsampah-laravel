@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppVersion;
+use App\Models\Artikel;
 use App\Models\Level;
 use App\Models\User;
-use App\Models\Artikel;
-use App\Models\AppVersion;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class HomeController extends Controller
@@ -29,10 +28,13 @@ class HomeController extends Controller
      *     operationId="getHomeData",
      *     tags={"Beranda"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -52,8 +54,10 @@ class HomeController extends Controller
      *                 @OA\Property(
      *                     property="articles",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="title", type="string", example="Tips Memilah Sampah"),
      *                         @OA\Property(property="content", type="string", example="Konten artikel..."),
@@ -73,18 +77,24 @@ class HomeController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Pengguna tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Pengguna tidak ditemukan.")
      *         )
@@ -95,27 +105,27 @@ class HomeController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -132,7 +142,7 @@ class HomeController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get()
-            ->map(function($event) {
+            ->map(function ($event) {
                 return [
                     'id' => $event->id,
                     'title' => $event->title,
@@ -178,8 +188,8 @@ class HomeController extends Controller
                     'is_required' => $appVersion->is_required,
                     'update_message' => $appVersion->update_message,
                     'store_url' => $appVersion->store_url,
-                ] : null
-            ]
+                ] : null,
+            ],
         ]);
     }
 }

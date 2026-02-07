@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\PersonalAccessToken;
+use Symfony\Component\HttpFoundation\Response;
 
 class ApiAuth
 {
@@ -13,20 +13,20 @@ class ApiAuth
     {
         $token = $request->bearerToken();
 
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized. Token not provided.'
+                'message' => 'Unauthorized. Token not provided.',
             ], 401);
         }
 
         // Validate token using Sanctum
         $accessToken = PersonalAccessToken::findToken($token);
-        
-        if (!$accessToken) {
+
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized. Invalid token.'
+                'message' => 'Unauthorized. Invalid token.',
             ], 401);
         }
 
@@ -34,10 +34,10 @@ class ApiAuth
         if ($accessToken->expires_at && now()->gt($accessToken->expires_at)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized. Token has expired.'
+                'message' => 'Unauthorized. Token has expired.',
             ], 401);
         }
 
         return $next($request);
     }
-} 
+}

@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('fcm_token')->nullable()->after('sampah');
-        });
+        if (! Schema::hasColumn('users', 'fcm_token')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('fcm_token')->nullable();
+            });
+        }
     }
 
     /**
@@ -25,4 +27,4 @@ return new class extends Migration
             $table->dropColumn('fcm_token');
         });
     }
-}; 
+};

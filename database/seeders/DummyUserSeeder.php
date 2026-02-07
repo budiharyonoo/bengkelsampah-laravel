@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\EventParticipant;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DummyUserSeeder extends Seeder
@@ -107,9 +106,10 @@ class DummyUserSeeder extends Seeder
 
         // Get existing events from database
         $events = \App\Models\Event::where('status', 'active')->take(3)->get();
-        
+
         if ($events->isEmpty()) {
             $this->command->warn('No active events found. Please run EventSeeder first.');
+
             return;
         }
 
@@ -135,7 +135,7 @@ class DummyUserSeeder extends Seeder
         foreach ($events as $eventIndex => $event) {
             $participantsPerEvent = 5; // Add 5 participants per event
             $startIndex = $eventIndex * $participantsPerEvent;
-            
+
             for ($i = 0; $i < $participantsPerEvent; $i++) {
                 $userIndex = $startIndex + $i;
                 if (isset($createdUsers[$userIndex])) {
@@ -151,6 +151,6 @@ class DummyUserSeeder extends Seeder
             }
         }
 
-        $this->command->info('Created ' . count($createdUsers) . ' dummy users and added participants to ' . $events->count() . ' events');
+        $this->command->info('Created '.count($createdUsers).' dummy users and added participants to '.$events->count().' events');
     }
-} 
+}

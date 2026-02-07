@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Laravel\Sanctum\PersonalAccessToken;
-use App\Models\User;
 use App\Models\Address;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AddressController extends Controller
 {
@@ -19,10 +19,13 @@ class AddressController extends Controller
      *     operationId="addAddress",
      *     tags={"Alamat"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"nama", "nomor_handphone", "label_alamat", "provinsi", "kota_kabupaten", "kecamatan", "kode_pos", "is_default"},
+     *
      *             @OA\Property(property="nama", type="string", example="John Doe"),
      *             @OA\Property(property="nomor_handphone", type="string", example="081234567890"),
      *             @OA\Property(property="label_alamat", type="string", example="Rumah"),
@@ -34,10 +37,13 @@ class AddressController extends Controller
      *             @OA\Property(property="is_default", type="boolean", example=true)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Alamat berhasil dibuat",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Alamat berhasil dibuat"),
      *             @OA\Property(
@@ -56,18 +62,24 @@ class AddressController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Data yang diberikan tidak valid."),
      *             @OA\Property(
@@ -90,27 +102,27 @@ class AddressController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -124,14 +136,14 @@ class AddressController extends Controller
             'kecamatan' => 'required|string|max:100',
             'kode_pos' => 'required|string|max:10',
             'detail_lain' => 'nullable|string',
-            'is_default' => 'required|boolean'
+            'is_default' => 'required|boolean',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data yang diberikan tidak valid.',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -150,13 +162,14 @@ class AddressController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Alamat berhasil dibuat',
-                'data' => $address
+                'data' => $address,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal membuat alamat.'
+                'message' => 'Gagal membuat alamat.',
             ], 500);
         }
     }
@@ -169,16 +182,21 @@ class AddressController extends Controller
      *     operationId="updateAddress",
      *     tags={"Alamat"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="ID Alamat",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="nama", type="string", example="John Doe"),
      *             @OA\Property(property="nomor_handphone", type="string", example="081234567890"),
      *             @OA\Property(property="label_alamat", type="string", example="Rumah"),
@@ -190,10 +208,13 @@ class AddressController extends Controller
      *             @OA\Property(property="is_default", type="boolean", example=true)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Alamat berhasil diperbarui",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Alamat berhasil diperbarui"),
      *             @OA\Property(
@@ -212,26 +233,35 @@ class AddressController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Alamat tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Alamat tidak ditemukan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Data yang diberikan tidak valid."),
      *             @OA\Property(
@@ -254,36 +284,36 @@ class AddressController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
         // Find address
         $address = $user->addresses()->find($id);
-        if (!$address) {
+        if (! $address) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Alamat tidak ditemukan.'
+                'message' => 'Alamat tidak ditemukan.',
             ], 404);
         }
 
@@ -297,14 +327,14 @@ class AddressController extends Controller
             'kecamatan' => 'sometimes|string|max:100',
             'kode_pos' => 'sometimes|string|max:10',
             'detail_lain' => 'nullable|string',
-            'is_default' => 'sometimes|boolean'
+            'is_default' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data yang diberikan tidak valid.',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -323,13 +353,14 @@ class AddressController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Alamat berhasil diperbarui',
-                'data' => $address
+                'data' => $address,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal memperbarui alamat.'
+                'message' => 'Gagal memperbarui alamat.',
             ], 500);
         }
     }
@@ -342,33 +373,44 @@ class AddressController extends Controller
      *     operationId="deleteAddress",
      *     tags={"Alamat"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="ID Alamat",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Alamat berhasil dihapus",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Alamat berhasil dihapus")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Alamat tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Alamat tidak ditemukan.")
      *         )
@@ -379,36 +421,36 @@ class AddressController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
         // Find address
         $address = $user->addresses()->find($id);
-        if (!$address) {
+        if (! $address) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Alamat tidak ditemukan.'
+                'message' => 'Alamat tidak ditemukan.',
             ], 404);
         }
 
@@ -429,13 +471,14 @@ class AddressController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Alamat berhasil dihapus'
+                'message' => 'Alamat berhasil dihapus',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal menghapus alamat.'
+                'message' => 'Gagal menghapus alamat.',
             ], 500);
         }
     }
@@ -448,16 +491,21 @@ class AddressController extends Controller
      *     operationId="getAllAddresses",
      *     tags={"Alamat"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
+     *
      *                 @OA\Items(
      *                     type="object",
+     *
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="nama", type="string", example="John Doe"),
      *                     @OA\Property(property="nomor_handphone", type="string", example="081234567890"),
@@ -472,10 +520,13 @@ class AddressController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
@@ -486,27 +537,27 @@ class AddressController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -515,7 +566,7 @@ class AddressController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $addresses
+            'data' => $addresses,
         ]);
     }
 
@@ -527,17 +578,22 @@ class AddressController extends Controller
      *     operationId="getAddressDetail",
      *     tags={"Alamat"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="ID Alamat",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -555,18 +611,24 @@ class AddressController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Alamat tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Alamat tidak ditemukan.")
      *         )
@@ -577,42 +639,42 @@ class AddressController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
         // Find address
         $address = $user->addresses()->find($id);
-        if (!$address) {
+        if (! $address) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Alamat tidak ditemukan.'
+                'message' => 'Alamat tidak ditemukan.',
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $address
+            'data' => $address,
         ]);
     }
 }

@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Point;
+use App\Models\User;
 use App\Services\NotificationService;
-use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DashboardRedeemController extends Controller
 {
@@ -30,29 +29,29 @@ class DashboardRedeemController extends Controller
         $search = $request->get('search');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        
+
         // Build query
         $query = Point::where('type', 'redeem');
-        
+
         // Apply search filter
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('user_name', 'like', "%{$search}%")
-                  ->orWhere('user_identifier', 'like', "%{$search}%");
+                    ->orWhere('user_identifier', 'like', "%{$search}%");
             });
         }
-        
+
         // Apply date filter
         if ($startDate && $endDate) {
             $query->whereBetween('tanggal', [$startDate, $endDate]);
         }
-        
+
         // Get redeem history with pagination
         $redeems = $query->orderBy('created_at', 'desc')->paginate(10);
-        
+
         // Append query parameters to pagination links
         $redeems->appends($request->query());
-        
+
         return view('dashboard-redeem', compact('redeems'));
     }
 
@@ -64,24 +63,24 @@ class DashboardRedeemController extends Controller
     public function searchUser(Request $request)
     {
         $query = $request->get('query');
-        
+
         $users = User::where('name', 'like', "%{$query}%")
-                    ->orWhere('identifier', 'like', "%{$query}%")
-                    ->select('id', 'name', 'identifier', 'poin', 'xp')
-                    ->get();
-        
+            ->orWhere('identifier', 'like', "%{$query}%")
+            ->select('id', 'name', 'identifier', 'poin', 'xp')
+            ->get();
+
         return response()->json($users);
     }
 
     public function getUserInfo($id)
     {
         $user = User::select('id', 'name', 'identifier', 'poin', 'xp', 'setor', 'sampah')
-                   ->find($id);
-        
-        if (!$user) {
+            ->find($id);
+
+        if (! $user) {
             return response()->json(['error' => 'User tidak ditemukan'], 404);
         }
-        
+
         return response()->json($user);
     }
 
@@ -91,34 +90,34 @@ class DashboardRedeemController extends Controller
             'user_id' => 'required|exists:users,id',
             'jumlah_point' => 'required|numeric|min:1',
             'alasan_redeem' => 'required|string|max:500',
-            'bukti_redeem' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'bukti_redeem' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         try {
             DB::beginTransaction();
 
             $user = User::find($request->user_id);
-            
+
             // Check if user has enough points
             if ($user->poin < $request->jumlah_point) {
                 return response()->json([
-                    'error' => 'Poin tidak mencukupi. Poin tersedia: ' . $user->poin
+                    'error' => 'Poin tidak mencukupi. Poin tersedia: '.$user->poin,
                 ], 400);
             }
 
             // Handle file upload
             $file = $request->file('bukti_redeem');
-            $fileName = 'redeem_' . time() . '_' . $file->getClientOriginalName();
-            
+            $fileName = 'redeem_'.time().'_'.$file->getClientOriginalName();
+
             // Create upload directory if it doesn't exist
             $uploadPath = base_path('../uploads/redeem');
-            if (!file_exists($uploadPath)) {
+            if (! file_exists($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
-            
+
             // Store file outside Laravel project
             $file->move($uploadPath, $fileName);
-            $fileUrl = env('APP_URL') . '/uploads/redeem/' . $fileName;
+            $fileUrl = env('APP_URL').'/uploads/redeem/'.$fileName;
 
             // Create point record for redeem
             Point::create([
@@ -153,20 +152,20 @@ class DashboardRedeemController extends Controller
                 'data' => [
                     'user_id' => $user->id,
                     'jumlah_point' => $request->jumlah_point,
-                    'sisa_poin' => $user->poin - $request->jumlah_point
-                ]
+                    'sisa_poin' => $user->poin - $request->jumlah_point,
+                ],
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             // Delete uploaded file if exists
-            if (isset($fileUrl) && file_exists(base_path('../uploads/redeem/' . $fileName))) {
-                unlink(base_path('../uploads/redeem/' . $fileName));
+            if (isset($fileUrl) && file_exists(base_path('../uploads/redeem/'.$fileName))) {
+                unlink(base_path('../uploads/redeem/'.$fileName));
             }
-            
+
             return response()->json([
-                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'error' => 'Terjadi kesalahan: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -184,15 +183,16 @@ class DashboardRedeemController extends Controller
             } elseif ($type === 'pdf') {
                 return $this->exportPdf();
             }
-            
+
             return response()->json([
-                'error' => 'Format export tidak didukung'
+                'error' => 'Format export tidak didukung',
             ], 400);
-            
+
         } catch (\Exception $e) {
-            \Log::error('Error in DashboardRedeemController@export: ' . $e->getMessage());
+            \Log::error('Error in DashboardRedeemController@export: '.$e->getMessage());
+
             return response()->json([
-                'error' => 'Gagal export data: ' . $e->getMessage()
+                'error' => 'Gagal export data: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -207,10 +207,10 @@ class DashboardRedeemController extends Controller
         $period = $request->get('period', 'all');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        
+
         // Build query
         $query = Point::where('type', 'redeem');
-        
+
         // Apply period filter
         switch ($period) {
             case 'today':
@@ -247,12 +247,12 @@ class DashboardRedeemController extends Controller
                 // No date filter
                 break;
         }
-        
+
         // Get redeem data
         $redeems = $query->orderBy('created_at', 'desc')->get();
 
         // Create new Spreadsheet
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set document properties
@@ -322,18 +322,18 @@ class DashboardRedeemController extends Controller
                 break;
             case 'range':
                 if ($startDate && $endDate) {
-                    $periodText = 'Periode: ' . date('d/m/Y', strtotime($startDate)) . ' - ' . date('d/m/Y', strtotime($endDate));
+                    $periodText = 'Periode: '.date('d/m/Y', strtotime($startDate)).' - '.date('d/m/Y', strtotime($endDate));
                 }
                 break;
         }
-        
-        $sheet->setCellValue('A2', $periodText . ' | Total Data: ' . $redeems->count() . ' redeem');
+
+        $sheet->setCellValue('A2', $periodText.' | Total Data: '.$redeems->count().' redeem');
         $sheet->mergeCells('A2:G2');
         $sheet->getStyle('A2')->getFont()->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set export date
-        $sheet->setCellValue('A3', 'Tanggal Export: ' . now()->format('d F Y H:i:s'));
+        $sheet->setCellValue('A3', 'Tanggal Export: '.now()->format('d F Y H:i:s'));
         $sheet->mergeCells('A3:G3');
         $sheet->getStyle('A3')->getFont()->setSize(10);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -359,20 +359,20 @@ class DashboardRedeemController extends Controller
         // Set data
         $row = 6;
         foreach ($redeems as $index => $redeem) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, \Carbon\Carbon::parse($redeem->tanggal)->format('d/m/Y'));
-            $sheet->setCellValue('C' . $row, $redeem->user_name);
-            $sheet->setCellValue('D' . $row, $redeem->user_identifier);
-            $sheet->setCellValue('E' . $row, number_format(abs($redeem->jumlah_point)) . ' Poin');
-            $sheet->setCellValue('F' . $row, $redeem->keterangan);
-            
+            $sheet->setCellValue('A'.$row, $index + 1);
+            $sheet->setCellValue('B'.$row, \Carbon\Carbon::parse($redeem->tanggal)->format('d/m/Y'));
+            $sheet->setCellValue('C'.$row, $redeem->user_name);
+            $sheet->setCellValue('D'.$row, $redeem->user_identifier);
+            $sheet->setCellValue('E'.$row, number_format(abs($redeem->jumlah_point)).' Poin');
+            $sheet->setCellValue('F'.$row, $redeem->keterangan);
+
             // Set bukti redeem URL
             $buktiUrl = $redeem->bukti_redeem ?: '-';
-            $sheet->setCellValue('G' . $row, $buktiUrl);
+            $sheet->setCellValue('G'.$row, $buktiUrl);
 
             // Set border for data row
-            $sheet->getStyle('A' . $row . ':G' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            
+            $sheet->getStyle('A'.$row.':G'.$row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
             $row++;
         }
 
@@ -392,14 +392,14 @@ class DashboardRedeemController extends Controller
 
         // Create Excel file
         $writer = new Xlsx($spreadsheet);
-        
+
         // Set headers for download
-        $filename = 'redeem_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-        
+        $filename = 'redeem_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         $writer->save('php://output');
         exit;
     }
@@ -414,10 +414,10 @@ class DashboardRedeemController extends Controller
         $period = $request->get('period', 'all');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        
+
         // Build query
         $query = Point::where('type', 'redeem');
-        
+
         // Apply period filter
         switch ($period) {
             case 'today':
@@ -454,23 +454,23 @@ class DashboardRedeemController extends Controller
                 // No date filter
                 break;
         }
-        
+
         // Get redeem data
         $redeems = $query->orderBy('created_at', 'desc')->get();
 
         // Set headers for download
-        $filename = 'redeem_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        
+        $filename = 'redeem_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.csv';
+
         header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         // Add BOM for UTF-8 to ensure proper encoding in Excel
         echo "\xEF\xBB\xBF";
-        
+
         // Create output stream
         $output = fopen('php://output', 'w');
-        
+
         // Write header row
         $headers = [
             'No',
@@ -479,26 +479,26 @@ class DashboardRedeemController extends Controller
             'Identifier',
             'Jumlah Poin',
             'Alasan',
-            'URL Bukti Redeem'
+            'URL Bukti Redeem',
         ];
         fputcsv($output, $headers);
-        
+
         // Write data rows
         foreach ($redeems as $index => $redeem) {
             $buktiUrl = $redeem->bukti_redeem ?: '-';
-            
+
             $row = [
                 $index + 1,
                 \Carbon\Carbon::parse($redeem->tanggal)->format('d/m/Y'),
                 $redeem->user_name,
                 $redeem->user_identifier,
-                number_format(abs($redeem->jumlah_point)) . ' Poin',
+                number_format(abs($redeem->jumlah_point)).' Poin',
                 $redeem->keterangan,
-                $buktiUrl
+                $buktiUrl,
             ];
             fputcsv($output, $row);
         }
-        
+
         fclose($output);
         exit;
     }
@@ -513,10 +513,10 @@ class DashboardRedeemController extends Controller
         $period = $request->get('period', 'all');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        
+
         // Build query
         $query = Point::where('type', 'redeem');
-        
+
         // Apply period filter
         switch ($period) {
             case 'today':
@@ -553,16 +553,16 @@ class DashboardRedeemController extends Controller
                 // No date filter
                 break;
         }
-        
+
         // Get redeem data
         $redeems = $query->orderBy('created_at', 'desc')->get();
 
         // Create PDF
         $pdf = Pdf::loadView('exports.redeem', compact('redeems', 'period'));
-        
+
         // Set headers for download
-        $filename = 'redeem_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-        
+        $filename = 'redeem_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.pdf';
+
         return $pdf->download($filename);
     }
 }

@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BankSampah;
-use App\Models\Sampah;
-use App\Models\Price;
 use App\Models\Admin;
+use App\Models\BankSampah;
+use App\Models\Price;
+use App\Models\Sampah;
 use App\Models\Setoran;
-use App\Models\Point;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class BankSampahController extends Controller
 {
@@ -30,12 +29,12 @@ class BankSampahController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kode_bank_sampah', 'like', '%' . $search . '%')
-                  ->orWhere('nama_bank_sampah', 'like', '%' . $search . '%')
-                  ->orWhere('alamat_bank_sampah', 'like', '%' . $search . '%')
-                  ->orWhere('nama_penanggung_jawab', 'like', '%' . $search . '%')
-                  ->orWhere('kontak_penanggung_jawab', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_bank_sampah', 'like', '%'.$search.'%')
+                    ->orWhere('nama_bank_sampah', 'like', '%'.$search.'%')
+                    ->orWhere('alamat_bank_sampah', 'like', '%'.$search.'%')
+                    ->orWhere('nama_penanggung_jawab', 'like', '%'.$search.'%')
+                    ->orWhere('kontak_penanggung_jawab', 'like', '%'.$search.'%');
             });
         }
 
@@ -65,6 +64,8 @@ class BankSampahController extends Controller
                 'nama_penanggung_jawab' => 'required|string|max:255',
                 'kontak_penanggung_jawab' => 'required|string|max:255',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+                'latitude' => 'nullable|numeric|min:-90|max:90',
+                'longitude' => 'nullable|numeric|min:-180|max:180',
                 'tipe_layanan' => 'required|in:jemput,tempat,keduanya',
             ]);
 
@@ -72,23 +73,23 @@ class BankSampahController extends Controller
 
             if ($request->hasFile('foto')) {
                 $file = $request->file('foto');
-                $filename = time() . '_' . Str::random(10) . '_' . Str::slug($request->nama_bank_sampah) . '.' . $file->getClientOriginalExtension();
-                
+                $filename = time().'_'.Str::random(10).'_'.Str::slug($request->nama_bank_sampah).'.'.$file->getClientOriginalExtension();
+
                 // Create directory if it doesn't exist
                 $uploadPath = base_path('../uploads/bank_sampah');
-                if (!file_exists($uploadPath)) {
+                if (! file_exists($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
-                
+
                 // Store the file
                 $path = $file->storeAs('bank_sampah', $filename, 'public');
-                
-                if (!$path) {
+
+                if (! $path) {
                     throw new \Exception('Failed to upload file');
                 }
-                
+
                 // Get the full URL for the image
-                $data['foto'] = env('APP_URL') . '/uploads/' . $path;
+                $data['foto'] = env('APP_URL').'/uploads/'.$path;
             }
 
             $bankSampah = BankSampah::create($data);
@@ -99,14 +100,15 @@ class BankSampahController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Bank Sampah berhasil dibuat',
-                'data' => $bankSampah
+                'data' => $bankSampah,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@store: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@store: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat Bank Sampah: ' . $e->getMessage()
+                'message' => 'Gagal membuat Bank Sampah: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -117,15 +119,15 @@ class BankSampahController extends Controller
     private function createPriceEntriesForNewBank($bankSampahId)
     {
         $sampahList = Sampah::all();
-        
+
         foreach ($sampahList as $sampah) {
             // Get the lowest price for this sampah from all existing bank sampah
             $lowestPrice = Price::where('sampah_id', $sampah->id)
                 ->min('harga');
-            
+
             // If no existing price, use default price of 1000
             $defaultPrice = $lowestPrice ?: 1000;
-            
+
             // Create price entry for the new bank sampah
             Price::create([
                 'sampah_id' => $sampah->id,
@@ -141,20 +143,20 @@ class BankSampahController extends Controller
     public function show($id)
     {
         $bankSampah = BankSampah::with(['admin'])->findOrFail($id);
-        
+
         // Get statistics
         $stats = $this->getBankSampahStats($id);
-        
+
         // Get recent setoran
         $recentSetoran = \App\Models\Setoran::where('bank_sampah_id', $id)
             ->with(['user', 'points'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-        
+
         return view('dashboard-bank-sampah-show', compact('bankSampah', 'stats', 'recentSetoran'));
     }
-    
+
     /**
      * Get bank sampah statistics
      */
@@ -170,21 +172,25 @@ class BankSampahController extends Controller
         $cancelledSetoran = \App\Models\Setoran::where('bank_sampah_id', $bankSampahId)
             ->where('status', 'batal')
             ->count();
-            
+
         $totalRevenue = \App\Models\Setoran::where('bank_sampah_id', $bankSampahId)
             ->where('status', 'selesai')
             ->sum('aktual_total');
-            
-        $totalPoints = \App\Models\Point::whereHas('setoran', function($query) use ($bankSampahId) {
+
+        $totalPoints = \App\Models\Point::whereHas('setoran', function ($query) use ($bankSampahId) {
             $query->where('bank_sampah_id', $bankSampahId);
         })->sum('jumlah_point');
-        
-        $uniqueUsers = \App\Models\Setoran::where('bank_sampah_id', $bankSampahId)
+
+        // Registered customers from this bank sampah (based on users table)
+        $registeredCustomers = \App\Models\User::query()->whereUserType($bankSampahId)->count();
+
+        // Unique customers who have setoran transactions in this bank sampah
+        $uniqueTransactionUsers = \App\Models\Setoran::where('bank_sampah_id', $bankSampahId)
             ->distinct('user_id')
             ->count('user_id');
-            
+
         $avgSetoranValue = $completedSetoran > 0 ? $totalRevenue / $completedSetoran : 0;
-        
+
         return [
             'total_setoran' => $totalSetoran,
             'completed_setoran' => $completedSetoran,
@@ -192,7 +198,8 @@ class BankSampahController extends Controller
             'cancelled_setoran' => $cancelledSetoran,
             'total_revenue' => $totalRevenue,
             'total_points' => $totalPoints,
-            'unique_users' => $uniqueUsers,
+            'registered_customers' => $registeredCustomers,
+            'unique_transaction_users' => $uniqueTransactionUsers,
             'avg_setoran_value' => $avgSetoranValue,
             'completion_rate' => $totalSetoran > 0 ? ($completedSetoran / $totalSetoran) * 100 : 0,
         ];
@@ -204,6 +211,7 @@ class BankSampahController extends Controller
     public function edit($id)
     {
         $bankSampah = BankSampah::findOrFail($id);
+
         return view('dashboard-bank-sampah-edit', compact('bankSampah'));
     }
 
@@ -214,13 +222,15 @@ class BankSampahController extends Controller
     {
         try {
             $bankSampah = BankSampah::findOrFail($id);
-            
+
             $request->validate([
                 'nama_bank_sampah' => 'required|string|max:255',
                 'alamat_bank_sampah' => 'required|string',
                 'nama_penanggung_jawab' => 'required|string|max:255',
                 'kontak_penanggung_jawab' => 'required|string|max:255',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+                'latitude' => 'nullable|numeric|min:-90|max:90',
+                'longitude' => 'nullable|numeric|min:-180|max:180',
                 'tipe_layanan' => 'required|in:jemput,tempat,keduanya',
             ]);
 
@@ -229,31 +239,31 @@ class BankSampahController extends Controller
             if ($request->hasFile('foto')) {
                 // Delete old foto if exists
                 if ($bankSampah->foto) {
-                    $oldPath = str_replace(env('APP_URL') . '/uploads/', '', $bankSampah->foto);
-                    $fullOldPath = base_path('../api.bengkelsampah.com/uploads/' . $oldPath);
+                    $oldPath = str_replace(env('APP_URL').'/uploads/', '', $bankSampah->foto);
+                    $fullOldPath = base_path('../api.bengkelsampah.com/uploads/'.$oldPath);
                     if (file_exists($fullOldPath)) {
                         unlink($fullOldPath);
                     }
                 }
 
                 $file = $request->file('foto');
-                $filename = time() . '_' . Str::random(10) . '_' . Str::slug($request->nama_bank_sampah) . '.' . $file->getClientOriginalExtension();
-                
+                $filename = time().'_'.Str::random(10).'_'.Str::slug($request->nama_bank_sampah).'.'.$file->getClientOriginalExtension();
+
                 // Create directory if it doesn't exist
                 $uploadPath = base_path('../uploads/bank_sampah');
-                if (!file_exists($uploadPath)) {
+                if (! file_exists($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
-                
+
                 // Store the file
                 $path = $file->storeAs('bank_sampah', $filename, 'public');
-                
-                if (!$path) {
+
+                if (! $path) {
                     throw new \Exception('Failed to upload file');
                 }
-                
+
                 // Get the full URL for the image
-                $data['foto'] = env('APP_URL') . '/uploads/' . $path;
+                $data['foto'] = env('APP_URL').'/uploads/'.$path;
             }
 
             $bankSampah->update($data);
@@ -261,14 +271,15 @@ class BankSampahController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Bank Sampah berhasil diupdate',
-                'data' => $bankSampah
+                'data' => $bankSampah,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@update: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@update: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengupdate Bank Sampah: ' . $e->getMessage()
+                'message' => 'Gagal mengupdate Bank Sampah: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -280,34 +291,35 @@ class BankSampahController extends Controller
     {
         try {
             $bankSampah = BankSampah::findOrFail($id);
-            
+
             // Delete foto if exists
             if ($bankSampah->foto) {
-                $oldPath = str_replace(env('APP_URL') . '/uploads/', '', $bankSampah->foto);
-                $fullOldPath = base_path('../api.bengkelsampah.com/uploads/' . $oldPath);
+                $oldPath = str_replace(env('APP_URL').'/uploads/', '', $bankSampah->foto);
+                $fullOldPath = base_path('../api.bengkelsampah.com/uploads/'.$oldPath);
                 if (file_exists($fullOldPath)) {
                     unlink($fullOldPath);
                 }
             }
-            
+
             // Delete all related prices first
             Price::where('bank_sampah_id', $bankSampah->id)->delete();
-            
+
             // Delete all related admin accounts
             Admin::where('id_bank_sampah', $bankSampah->id)->delete();
-            
+
             $bankSampah->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Bank Sampah berhasil dihapus'
+                'message' => 'Bank Sampah berhasil dihapus',
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@destroy: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@destroy: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus Bank Sampah: ' . $e->getMessage()
+                'message' => 'Gagal menghapus Bank Sampah: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -319,32 +331,33 @@ class BankSampahController extends Controller
     {
         try {
             $ids = $request->ids;
-            
+
             if (empty($ids)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang dipilih'
+                    'message' => 'Tidak ada data yang dipilih',
                 ], 400);
             }
 
             // Delete all related prices first
             Price::whereIn('bank_sampah_id', $ids)->delete();
-            
+
             // Delete all related admin accounts
             Admin::whereIn('id_bank_sampah', $ids)->delete();
-            
+
             BankSampah::whereIn('id', $ids)->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Bank Sampah berhasil dihapus'
+                'message' => 'Bank Sampah berhasil dihapus',
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@bulkDestroy: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@bulkDestroy: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus Bank Sampah: ' . $e->getMessage()
+                'message' => 'Gagal menghapus Bank Sampah: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -365,17 +378,18 @@ class BankSampahController extends Controller
 
             // Apply filters based on request
             $this->applyExportFilters($query, $request);
-            
+
             $bankSampah = $query->orderBy('created_at', 'desc')->get();
 
             // Generate Excel file
             return $this->generateExcelFile($bankSampah, $request->period);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@exportExcel: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@exportExcel: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export Excel: ' . $e->getMessage()
+                'message' => 'Gagal export Excel: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -386,14 +400,14 @@ class BankSampahController extends Controller
     private function generateExcelFile($bankSampah, $period)
     {
         // Create new Spreadsheet
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set document properties
         $spreadsheet->getProperties()
             ->setCreator('Bengkel Sampah Admin')
             ->setLastModifiedBy('Bengkel Sampah Admin')
-            ->setTitle('Laporan Bank Sampah - ' . ucfirst($period))
+            ->setTitle('Laporan Bank Sampah - '.ucfirst($period))
             ->setSubject('Laporan Data Bank Sampah')
             ->setDescription('Laporan data bank sampah Bengkel Sampah')
             ->setKeywords('bank sampah, laporan, bengkel sampah')
@@ -428,13 +442,13 @@ class BankSampahController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set subtitle
-        $sheet->setCellValue('A2', 'Periode: ' . ucfirst(str_replace('_', ' ', $period)) . ' | Total Data: ' . $bankSampah->count() . ' bank sampah');
+        $sheet->setCellValue('A2', 'Periode: '.ucfirst(str_replace('_', ' ', $period)).' | Total Data: '.$bankSampah->count().' bank sampah');
         $sheet->mergeCells('A2:J2');
         $sheet->getStyle('A2')->getFont()->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set export date
-        $sheet->setCellValue('A3', 'Tanggal Export: ' . now()->format('d F Y H:i:s'));
+        $sheet->setCellValue('A3', 'Tanggal Export: '.now()->format('d F Y H:i:s'));
         $sheet->mergeCells('A3:J3');
         $sheet->getStyle('A3')->getFont()->setSize(10);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -463,25 +477,25 @@ class BankSampahController extends Controller
         // Add data rows
         $row = 6;
         foreach ($bankSampah as $index => $bank) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $bank->id);
-            $sheet->setCellValue('C' . $row, $bank->kode_bank_sampah);
-            $sheet->setCellValue('D' . $row, $bank->nama_bank_sampah);
-            $sheet->setCellValue('E' . $row, $bank->alamat_bank_sampah);
-            $sheet->setCellValue('F' . $row, $bank->nama_penanggung_jawab);
-            $sheet->setCellValue('G' . $row, $bank->kontak_penanggung_jawab);
-            $sheet->setCellValue('H' . $row, ucfirst($bank->tipe_layanan));
-            
+            $sheet->setCellValue('A'.$row, $index + 1);
+            $sheet->setCellValue('B'.$row, $bank->id);
+            $sheet->setCellValue('C'.$row, $bank->kode_bank_sampah);
+            $sheet->setCellValue('D'.$row, $bank->nama_bank_sampah);
+            $sheet->setCellValue('E'.$row, $bank->alamat_bank_sampah);
+            $sheet->setCellValue('F'.$row, $bank->nama_penanggung_jawab);
+            $sheet->setCellValue('G'.$row, $bank->kontak_penanggung_jawab);
+            $sheet->setCellValue('H'.$row, ucfirst($bank->tipe_layanan));
+
             // Add image link
             if ($bank->foto) {
-                $sheet->setCellValue('I' . $row, 'Lihat Gambar');
-                $sheet->getCell('I' . $row)->getHyperlink()->setUrl($bank->foto);
-                $sheet->getCell('I' . $row)->getHyperlink()->setTooltip('Klik untuk melihat gambar');
+                $sheet->setCellValue('I'.$row, 'Lihat Gambar');
+                $sheet->getCell('I'.$row)->getHyperlink()->setUrl($bank->foto);
+                $sheet->getCell('I'.$row)->getHyperlink()->setTooltip('Klik untuk melihat gambar');
             } else {
-                $sheet->setCellValue('I' . $row, 'Tidak ada gambar');
+                $sheet->setCellValue('I'.$row, 'Tidak ada gambar');
             }
-            
-            $sheet->setCellValue('J' . $row, $bank->created_at->format('d/m/Y H:i'));
+
+            $sheet->setCellValue('J'.$row, $bank->created_at->format('d/m/Y H:i'));
             $row++;
         }
 
@@ -504,14 +518,14 @@ class BankSampahController extends Controller
 
         // Create Excel file
         $writer = new Xlsx($spreadsheet);
-        
+
         // Set headers for download
-        $filename = 'bank_sampah_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-        
+        $filename = 'bank_sampah_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         $writer->save('php://output');
         exit;
     }
@@ -532,17 +546,18 @@ class BankSampahController extends Controller
 
             // Apply filters based on request
             $this->applyExportFilters($query, $request);
-            
+
             $bankSampah = $query->orderBy('created_at', 'desc')->get();
 
             // Generate CSV file
             return $this->generateCsvFile($bankSampah, $request->period);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@exportCsv: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@exportCsv: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export CSV: ' . $e->getMessage()
+                'message' => 'Gagal export CSV: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -553,18 +568,18 @@ class BankSampahController extends Controller
     private function generateCsvFile($bankSampah, $period)
     {
         // Set headers for download
-        $filename = 'bank_sampah_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        
+        $filename = 'bank_sampah_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.csv';
+
         header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         // Add BOM for UTF-8 to ensure proper encoding in Excel
         echo "\xEF\xBB\xBF";
-        
+
         // Create output stream
         $output = fopen('php://output', 'w');
-        
+
         // Add headers
         fputcsv($output, [
             'No',
@@ -576,7 +591,7 @@ class BankSampahController extends Controller
             'Kontak Penanggung Jawab',
             'Tipe Layanan',
             'Gambar',
-            'Tanggal Dibuat'
+            'Tanggal Dibuat',
         ]);
 
         // Add data rows
@@ -591,10 +606,10 @@ class BankSampahController extends Controller
                 $bank->kontak_penanggung_jawab,
                 ucfirst($bank->tipe_layanan),
                 $bank->foto ? $bank->foto : 'Tidak ada gambar',
-                $bank->created_at->format('d/m/Y H:i')
+                $bank->created_at->format('d/m/Y H:i'),
             ]);
         }
-        
+
         fclose($output);
         exit;
     }
@@ -615,17 +630,18 @@ class BankSampahController extends Controller
 
             // Apply filters based on request
             $this->applyExportFilters($query, $request);
-            
+
             $bankSampah = $query->orderBy('created_at', 'desc')->get();
 
             // Generate PDF
             return $this->generatePdfFile($bankSampah, $request->period, $request->start_date, $request->end_date);
 
         } catch (\Exception $e) {
-            \Log::error('Error in BankSampahController@exportPdf: ' . $e->getMessage());
+            \Log::error('Error in BankSampahController@exportPdf: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export PDF: ' . $e->getMessage()
+                'message' => 'Gagal export PDF: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -637,7 +653,7 @@ class BankSampahController extends Controller
     {
         // Get comprehensive statistics
         $stats = $this->getComprehensiveBankSampahStats($bankSampah, $period, $startDate, $endDate);
-        
+
         // Generate PDF using DomPDF
         $pdf = \PDF::loadView('pdf.bank-sampah-report', [
             'bankSampah' => $bankSampah,
@@ -651,15 +667,15 @@ class BankSampahController extends Controller
             'totalPembelian' => $stats['totalPembelian'],
             'totalAdmin' => $stats['totalAdmin'],
             'bankSampahSummary' => $stats['bankSampahSummary'],
-            'bankStats' => $stats['bankStats']
+            'bankStats' => $stats['bankStats'],
         ]);
 
         // Set paper to A4 landscape
         $pdf->setPaper('A4', 'landscape');
-        
+
         // Set filename
-        $filename = 'bank_sampah_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-        
+        $filename = 'bank_sampah_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.pdf';
+
         // Return PDF for download
         return $pdf->download($filename);
     }
@@ -670,21 +686,21 @@ class BankSampahController extends Controller
     private function getComprehensiveBankSampahStats($bankSampah, $period = null, $startDate = null, $endDate = null)
     {
         $bankSampahIds = $bankSampah->pluck('id')->toArray();
-        
+
         // Build setoran query with period filters - ONLY COMPLETED SETORAN
         $setoranQuery = Setoran::whereIn('bank_sampah_id', $bankSampahIds)
             ->where('status', 'selesai');
-        
+
         // Apply period filters
         if ($period && $startDate && $endDate) {
             $setoranQuery->whereBetween('created_at', [$startDate, $endDate]);
         } elseif ($period) {
             $this->applyDateFilter($setoranQuery, $period);
         }
-        
+
         // Get setoran data
         $setorans = $setoranQuery->get();
-        
+
         // Calculate statistics from items_json
         $bankStats = [];
         $totalSetoran = $setorans->count();
@@ -692,22 +708,22 @@ class BankSampahController extends Controller
         $totalSampahUnit = 0;
         $totalPoint = 0;
         $totalPelangganUnik = $setorans->unique('user_id')->count();
-        
+
         foreach ($setorans as $setoran) {
             $bankId = $setoran->bank_sampah_id;
-            
-            if (!isset($bankStats[$bankId])) {
+
+            if (! isset($bankStats[$bankId])) {
                 $bankStats[$bankId] = [
                     'setoran' => 0,
                     'sampah_kg' => 0,
                     'sampah_unit' => 0,
                     'point' => 0,
-                    'pelanggan' => 0
+                    'pelanggan' => 0,
                 ];
             }
-            
+
             $bankStats[$bankId]['setoran']++;
-            
+
             // Calculate from items_json
             $items = [];
             if ($setoran->items_json) {
@@ -728,13 +744,13 @@ class BankSampahController extends Controller
                     $bankStats[$bankId]['sampah_unit'] += $berat;
                 }
             }
-            
+
             // Get points from related points table
             $setoranPoints = \App\Models\Point::where('setoran_id', $setoran->id)->sum('jumlah_point');
             $totalPoint += $setoranPoints;
             $bankStats[$bankId]['point'] += $setoranPoints;
         }
-        
+
         // Count unique customers per bank
         foreach ($setorans->groupBy('bank_sampah_id') as $bankId => $bankSetorans) {
             $bankStats[$bankId]['pelanggan'] = $bankSetorans->unique('user_id')->count();
@@ -752,13 +768,13 @@ class BankSampahController extends Controller
         // Calculate total pembelian from completed setoran with period filter
         $pembelianQuery = Setoran::whereIn('bank_sampah_id', $bankSampahIds)
             ->where('status', 'selesai');
-            
+
         if ($period && $startDate && $endDate) {
             $pembelianQuery->whereBetween('created_at', [$startDate, $endDate]);
         } elseif ($period) {
             $this->applyDateFilter($pembelianQuery, $period);
         }
-        
+
         $totalPembelian = $pembelianQuery->sum('aktual_total');
 
         // Prepare bank sampah summary
@@ -770,7 +786,7 @@ class BankSampahController extends Controller
                 'sampah_kg' => $bankStats[$bank->id]['sampah_kg'] ?? 0,
                 'sampah_unit' => $bankStats[$bank->id]['sampah_unit'] ?? 0,
                 'point' => $bankStats[$bank->id]['point'] ?? 0,
-                'pelanggan' => $bankStats[$bank->id]['pelanggan'] ?? 0
+                'pelanggan' => $bankStats[$bank->id]['pelanggan'] ?? 0,
             ];
         }
 
@@ -784,7 +800,7 @@ class BankSampahController extends Controller
             'totalPembelian' => $totalPembelian,
             'totalAdmin' => $totalAdmin,
             'bankSampahSummary' => $bankSampahSummary,
-            'bankStats' => $bankStats
+            'bankStats' => $bankStats,
         ];
     }
 
@@ -853,7 +869,7 @@ class BankSampahController extends Controller
                     break;
                 case 'range':
                     if ($startDate && $endDate) {
-                        $query->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                        $query->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
                     }
                     break;
             }

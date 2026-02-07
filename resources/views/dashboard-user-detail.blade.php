@@ -335,6 +335,180 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        /* Export Dropdown Styles */
+        .export-dropdown {
+            position: relative;
+        }
+
+        .export-button {
+            padding: 0 1rem;
+            background: #39746E;
+            border: 1px solid #E5E6E6;
+            border-radius: 8px;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #DFF0EE;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 37px;
+            transition: all 0.2s;
+        }
+
+        .export-button:hover {
+            background: #2d5a55;
+        }
+
+        .export-button img {
+            filter: brightness(0) invert(1);
+        }
+
+        .export-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            min-width: 180px;
+            padding: 0.5rem;
+            margin-top: 4px;
+        }
+
+        .export-dropdown-content.show {
+            display: block;
+        }
+
+        .export-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 4px;
+        }
+
+        .export-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        .export-option img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .export-option span {
+            font-family: 'Urbanist', sans-serif;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .modal-close img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: 'Urbanist', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            font-family: 'Urbanist', sans-serif;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cancel-button {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+
+        .cancel-button:hover {
+            background: #f3f4f6;
+        }
+
+        .confirm-button {
+            background: #39746E;
+            border: none;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background: #2d5a55;
+        }
     </style>
 </head>
 <body>
@@ -363,6 +537,26 @@
             <div style="background:none; border:none; box-shadow:none; padding:0; margin-bottom:24px;">
                 <div class="detail-header" style="border:none; margin-bottom:0; padding-bottom:0; justify-content: flex-end;">
                     <div class="detail-actions" style="gap:12px; justify-content: flex-end;">
+                        <div class="export-dropdown">
+                            <button class="export-button" id="exportButton">
+                                <span>Export</span>
+                                <img src="{{ asset('icon/ic_trailing.svg') }}" alt="Export" width="16" height="16">
+                            </button>
+                            <div class="export-dropdown-content" id="exportDropdown">
+                                <div class="export-option" onclick="exportData('excel')">
+                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Excel">
+                                    <span>Export Excel</span>
+                                </div>
+                                <div class="export-option" onclick="exportData('csv')">
+                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="CSV">
+                                    <span>Export CSV</span>
+                                </div>
+                                <div class="export-option" onclick="exportData('pdf')">
+                                    <img src="{{ asset('icon/ic_laporan.svg') }}" alt="PDF">
+                                    <span>Export PDF</span>
+                                </div>
+                            </div>
+                        </div>
                         <a href="{{ route('dashboard.user') }}" class="btn-back" style="padding:8px 16px; border-radius:8px; background:transparent; border:1.5px solid #F73541; color:#F73541; font-family:'Urbanist',sans-serif; font-size:14px; font-weight:600; display:inline-flex; align-items:center; transition:background 0.2s;">
                             Kembali
                         </a>
@@ -409,6 +603,10 @@
                         <div class="info-item">
                             <span class="info-label">Nama User</span>
                             <div class="info-value">{{ $user->name }}</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Jenis Nasabah</span>
+                            <div class="info-value">{{ $user->jenis_nasabah }}</div>
                         </div>
                         <div class="info-item">
                             <span class="info-label">No. Telepon</span>
@@ -529,6 +727,57 @@
             </div>
         </div>
     </div>
+    <!-- Export Excel Modal -->
+    <div class="modal" id="exportExcelModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeExportModalBtn">
+                <img src="{{ asset('icon/ic_close.svg') }}" alt="Close">
+            </button>
+            <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Export" class="modal-icon">
+            <h2 class="modal-title">Export Excel Detail User</h2>
+            <p class="modal-subtitle">Apakah Anda yakin ingin mengekspor detail user {{ $user->name }}?</p>
+
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="cancelExportBtn">Batal</button>
+                <button class="modal-button confirm-button" id="confirmExportBtn">Export Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export CSV Modal -->
+    <div class="modal" id="exportCsvModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeCsvModalBtn">
+                <img src="{{ asset('icon/ic_close.svg') }}" alt="Close">
+            </button>
+            <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Export" class="modal-icon">
+            <h2 class="modal-title">Export CSV Detail User</h2>
+            <p class="modal-subtitle">Apakah Anda yakin ingin mengekspor detail user {{ $user->name }}?</p>
+
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="cancelCsvBtn">Batal</button>
+                <button class="modal-button confirm-button" id="confirmCsvBtn">Export CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export PDF Modal -->
+    <div class="modal" id="exportPdfModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closePdfModalBtn">
+                <img src="{{ asset('icon/ic_close.svg') }}" alt="Close">
+            </button>
+            <img src="{{ asset('icon/ic_laporan.svg') }}" alt="Export" class="modal-icon">
+            <h2 class="modal-title">Export PDF Detail User</h2>
+            <p class="modal-subtitle">Apakah Anda yakin ingin mengekspor detail user {{ $user->name }}?</p>
+
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="cancelPdfBtn">Batal</button>
+                <button class="modal-button confirm-button" id="confirmPdfBtn">Export PDF</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Loading helper functions
         function showLoading(message = 'Memuat...') {
@@ -554,6 +803,181 @@
                 showLoading('Memuat halaman...');
             });
         });
+
+        // Export Dropdown Toggle
+        document.getElementById('exportButton').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('exportDropdown').classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.export-dropdown')) {
+                document.getElementById('exportDropdown').classList.remove('show');
+            }
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Export Data Function
+        function exportData(format) {
+            document.getElementById('exportDropdown').classList.remove('show');
+            switch(format) {
+                case 'excel':
+                    document.getElementById('exportExcelModal').classList.add('show');
+                    break;
+                case 'csv':
+                    document.getElementById('exportCsvModal').classList.add('show');
+                    break;
+                case 'pdf':
+                    document.getElementById('exportPdfModal').classList.add('show');
+                    break;
+                default:
+                    alert('Format export tidak valid');
+            }
+        }
+
+        // Excel Export Modal Events
+        document.getElementById('closeExportModalBtn').addEventListener('click', function() {
+            document.getElementById('exportExcelModal').classList.remove('show');
+        });
+        document.getElementById('cancelExportBtn').addEventListener('click', function() {
+            document.getElementById('exportExcelModal').classList.remove('show');
+        });
+        document.getElementById('confirmExportBtn').addEventListener('click', function() {
+            exportExcel();
+        });
+
+        // CSV Export Modal Events
+        document.getElementById('closeCsvModalBtn').addEventListener('click', function() {
+            document.getElementById('exportCsvModal').classList.remove('show');
+        });
+        document.getElementById('cancelCsvBtn').addEventListener('click', function() {
+            document.getElementById('exportCsvModal').classList.remove('show');
+        });
+        document.getElementById('confirmCsvBtn').addEventListener('click', function() {
+            exportCsv();
+        });
+
+        // PDF Export Modal Events
+        document.getElementById('closePdfModalBtn').addEventListener('click', function() {
+            document.getElementById('exportPdfModal').classList.remove('show');
+        });
+        document.getElementById('cancelPdfBtn').addEventListener('click', function() {
+            document.getElementById('exportPdfModal').classList.remove('show');
+        });
+        document.getElementById('confirmPdfBtn').addEventListener('click', function() {
+            exportPdf();
+        });
+
+        // Export Excel Function
+        function exportExcel() {
+            showLoading('Mengexport Excel...');
+
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            fetch('{{ route("dashboard.user.export-detail.excel", $user->id) }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Export failed');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'user_detail_{{ $user->identifier }}_' + new Date().toISOString().slice(0,19).replace(/[:T]/g, '-') + '.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                hideLoading();
+                document.getElementById('exportExcelModal').classList.remove('show');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                hideLoading();
+                alert('Gagal export Excel: ' + error.message);
+            });
+        }
+
+        // Export CSV Function
+        function exportCsv() {
+            showLoading('Mengexport CSV...');
+
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            fetch('{{ route("dashboard.user.export-detail.csv", $user->id) }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Export failed');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'user_detail_{{ $user->identifier }}_' + new Date().toISOString().slice(0,19).replace(/[:T]/g, '-') + '.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                hideLoading();
+                document.getElementById('exportCsvModal').classList.remove('show');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                hideLoading();
+                alert('Gagal export CSV: ' + error.message);
+            });
+        }
+
+        // Export PDF Function
+        function exportPdf() {
+            showLoading('Mengexport PDF...');
+
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            fetch('{{ route("dashboard.user.export-detail.pdf", $user->id) }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Export failed');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'user_detail_{{ $user->identifier }}_' + new Date().toISOString().slice(0,19).replace(/[:T]/g, '-') + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                hideLoading();
+                document.getElementById('exportPdfModal').classList.remove('show');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                hideLoading();
+                alert('Gagal export PDF: ' + error.message);
+            });
+        }
     </script>
 </body>
 </html>

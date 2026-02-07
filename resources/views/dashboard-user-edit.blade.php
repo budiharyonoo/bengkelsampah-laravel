@@ -44,6 +44,31 @@
         @media (max-width: 900px) { .main-container { flex-direction: column; } }
         @media (max-width: 600px) { .form-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const poinInput = document.getElementById('poin');
+            const xpInput = document.getElementById('xp');
+
+            // Function to parse formatted number (1.234,56 -> 1234.56)
+            function parseFormattedNumber(value) {
+                if (!value) return 0;
+                // Remove thousands separator (.) and replace comma with dot
+                return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+            }
+
+            // Function to format number as integer with thousands separator (1234 -> 1.234)
+            function formatInteger(value) {
+                return Math.floor(value).toLocaleString('id-ID');
+            }
+
+            // Auto-calculate XP when Poin changes
+            poinInput.addEventListener('input', function() {
+                const poinValue = parseFormattedNumber(this.value);
+                const xpValue = poinValue / 1000;
+                xpInput.value = formatInteger(xpValue);
+            });
+        });
+    </script>
 </head>
 <body>
     <header class="header">
@@ -93,6 +118,26 @@
                         <div class="form-group">
                             <label class="form-label" for="identifier">Identifier *</label>
                             <input type="text" class="form-input" id="identifier" name="identifier" value="{{ old('identifier', $user->identifier) }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label class="form-label" for="user_type">Jenis Nasabah *</label>
+                            <select class="form-select" id="user_type" name="user_type" required>
+                                <option value="-1" {{ old('user_type', $user->user_type) == -1 ? 'selected' : '' }}>Instansi</option>
+                                <option value="0" {{ old('user_type', $user->user_type) == 0 ? 'selected' : '' }}>Umum</option>
+                                @foreach($bankSampahList as $bankSampah)
+                                    <option value="{{ $bankSampah->id }}" {{ old('user_type', $user->user_type) == $bankSampah->id ? 'selected' : '' }}>
+                                        {{ $bankSampah->nama_bank_sampah }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text">Pilih jenis nasabah: Instansi, Umum, atau Bank Sampah tertentu</small>
+                            @error('user_type')
+                                <div class="form-text" style="color:#F73541;">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>

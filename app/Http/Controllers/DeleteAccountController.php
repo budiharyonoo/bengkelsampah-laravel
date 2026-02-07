@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Models\DeleteAccountRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DeleteAccountController extends Controller
 {
@@ -74,4 +73,4 @@ class DeleteAccountController extends Controller
             return back()->withErrors(['general' => 'Terjadi kesalahan saat memproses request. Silakan coba lagi atau hubungi tim dukungan kami.']);
         }
     }
-} 
+}

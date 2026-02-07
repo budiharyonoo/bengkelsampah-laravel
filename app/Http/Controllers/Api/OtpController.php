@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper as R;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Otp;
 use App\Models\User;
 use Carbon\Carbon;
-use App\Helpers\ResponseHelper as R;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class OtpController extends Controller
 {
@@ -18,10 +18,13 @@ class OtpController extends Controller
      *     tags={"Autentikasi"},
      *     summary="Kirim OTP ke email atau WhatsApp",
      *     description="Endpoint untuk mengirim kode OTP ke email atau nomor WhatsApp pengguna. OTP berlaku selama 5 menit dan maksimal 10 permintaan per jam. Untuk tipe register, identifier harus belum terdaftar. Untuk tipe login dan forgot, identifier harus sudah terdaftar.",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"identifier","type"},
+     *
      *             @OA\Property(
      *                 property="identifier",
      *                 type="string",
@@ -37,10 +40,13 @@ class OtpController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="OTP berhasil dikirim",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="OTP berhasil dikirim"),
      *             @OA\Property(
@@ -50,12 +56,16 @@ class OtpController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
      *             oneOf={
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Validasi gagal"),
      *                     @OA\Property(
@@ -64,38 +74,51 @@ class OtpController extends Controller
      *                         @OA\Property(
      *                             property="identifier",
      *                             type="array",
+     *
      *                             @OA\Items(type="string", example="Field identifier wajib diisi.")
      *                         ),
+     *
      *                         @OA\Property(
      *                             property="type",
      *                             type="array",
+     *
      *                             @OA\Items(type="string", example="Field tipe wajib diisi.")
      *                         )
      *                     )
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Identifier sudah terdaftar.")
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Identifier tidak terdaftar.")
      *                 )
      *             }
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=429,
      *         description="Terlalu banyak permintaan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Maksimal 10 OTP per jam. Silakan coba nanti.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=500,
      *         description="Kesalahan server",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Gagal mengirim OTP")
      *         )
@@ -106,7 +129,7 @@ class OtpController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
-            'type' => 'required|string|in:register,login,forgot,change',
+            'type' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -126,7 +149,7 @@ class OtpController extends Controller
         // Cek apakah user terdaftar untuk tipe login dan forgot
         else {
             $userExists = User::where('identifier', $identifier)->exists();
-            if (!$userExists) {
+            if (! $userExists) {
                 return R::error('Identifier tidak terdaftar', 422);
             }
         }
@@ -134,7 +157,7 @@ class OtpController extends Controller
         $existing = Otp::where('identifier', $identifier)->first();
 
         // Jika belum ada OTP, buat baru
-        if (!$existing) {
+        if (! $existing) {
             return $this->createOtp($identifier, $type, 1);
         }
 
@@ -175,7 +198,7 @@ class OtpController extends Controller
         }
 
         return R::success('OTP berhasil dikirim', [
-            'expires_at' => $existing->expires_at
+            'expires_at' => $existing->expires_at,
         ]);
     }
 
@@ -200,7 +223,7 @@ class OtpController extends Controller
         }
 
         return R::success('OTP berhasil dikirim', [
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
         ]);
     }
 
@@ -221,7 +244,7 @@ class OtpController extends Controller
 
         \Mail::raw($message, function ($message) use ($email) {
             $message->to($email)
-                    ->subject('Kode OTP Bengkel Sampah');
+                ->subject('Kode OTP Bengkel Sampah');
         });
     }
 
@@ -229,7 +252,7 @@ class OtpController extends Controller
     {
         $userkey = env('ZENZIVA_USERKEY');
         $passkey = env('ZENZIVA_PASSKEY');
-        $brand   = env('ZENZIVA_BRAND');
+        $brand = env('ZENZIVA_BRAND');
 
         $url = 'https://console.zenziva.net/waofficial/api/sendWAOfficial/';
 
@@ -244,9 +267,9 @@ class OtpController extends Controller
         curl_setopt($curl, CURLOPT_POSTFIELDS, [
             'userkey' => $userkey,
             'passkey' => $passkey,
-            'to'      => $phone,
-            'brand'   => $brand,
-            'otp'     => $code,
+            'to' => $phone,
+            'brand' => $brand,
+            'otp' => $code,
         ]);
 
         $response = curl_exec($curl);
@@ -255,7 +278,7 @@ class OtpController extends Controller
         $result = json_decode($response, true);
 
         // Cek status
-        if (!isset($result['status']) || $result['status'] != '1') {
+        if (! isset($result['status']) || $result['status'] != '1') {
             \Log::error("Gagal kirim OTP via WA ke $phone", [
                 'response' => $result,
                 'raw' => $response,
@@ -272,7 +295,7 @@ class OtpController extends Controller
     {
         $userkey = env('ZENZIVA_USERKEY');
         $passkey = env('ZENZIVA_PASSKEY');
-        $url = 'https://console.zenziva.net/api/balance/?userkey=' . $userkey . '&passkey=' . $passkey;
+        $url = 'https://console.zenziva.net/api/balance/?userkey='.$userkey.'&passkey='.$passkey;
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -284,6 +307,7 @@ class OtpController extends Controller
         curl_close($curl);
 
         $result = json_decode($response, true);
+
         return $result;
     }
 }

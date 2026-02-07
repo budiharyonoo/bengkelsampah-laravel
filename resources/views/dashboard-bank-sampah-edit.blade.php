@@ -441,6 +441,22 @@
                     <small style="color: #6B7271; font-size: 12px;">Masukkan link Google Maps lokasi bank sampah (opsional)</small>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Latitude</label>
+                        <input type="text" class="form-input" name="latitude" placeholder="Contoh: -6.2088" value="{{ $bankSampah->latitude ?? '' }}">
+                        <div class="error-message" id="latitude_error"></div>
+                        <small style="color: #6B7271; font-size: 12px;">Koordinat latitude (-90 hingga 90)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Longitude</label>
+                        <input type="text" class="form-input" name="longitude" placeholder="Contoh: 106.8456" value="{{ $bankSampah->longitude ?? '' }}">
+                        <div class="error-message" id="longitude_error"></div>
+                        <small style="color: #6B7271; font-size: 12px;">Koordinat longitude (-180 hingga 180)</small>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Tipe Layanan *</label>
                     <select class="form-input" name="tipe_layanan" required>

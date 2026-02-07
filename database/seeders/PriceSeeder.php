@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Sampah;
 use App\Models\BankSampah;
 use App\Models\Price;
+use App\Models\Sampah;
+use Illuminate\Database\Seeder;
 
 class PriceSeeder extends Seeder
 {
@@ -25,10 +24,10 @@ class PriceSeeder extends Seeder
                     ->where('bank_sampah_id', $bankSampah->id)
                     ->first();
 
-                if (!$existingPrice) {
+                if (! $existingPrice) {
                     // Generate random price between 1000 and 10000
                     $harga = rand(1000, 10000);
-                    
+
                     Price::create([
                         'sampah_id' => $sampah->id,
                         'bank_sampah_id' => $bankSampah->id,
@@ -40,4 +39,4 @@ class PriceSeeder extends Seeder
 
         $this->command->info('Price data seeded successfully!');
     }
-} 
+}

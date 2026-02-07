@@ -149,6 +149,7 @@
                 <th>ID Event</th>
                 <th>Judul Event</th>
                 <th>Lokasi</th>
+                <th>URL Event</th>
                 <th>Waktu Mulai</th>
                 <th>Waktu Berakhir</th>
                 <th>Status</th>
@@ -163,6 +164,7 @@
                 <td>{{ $event->id }}</td>
                 <td>{{ $event->title }}</td>
                 <td>{{ $event->location }}</td>
+                <td>{{ $event->url ?? '-' }}</td>
                 <td>{{ $event->start_datetime->format('d/m/Y H:i') }}</td>
                 <td>{{ $event->end_datetime->format('d/m/Y H:i') }}</td>
                 <td class="status-{{ $event->status }}">{{ ucfirst($event->status) }}</td>

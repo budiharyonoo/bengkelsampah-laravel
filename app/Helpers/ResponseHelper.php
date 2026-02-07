@@ -10,7 +10,7 @@ class ResponseHelper
             'success' => true,
             'message' => $message,
             'data' => $data,
-            'timestamp' => now()->toIso8601String()
+            'timestamp' => now()->toIso8601String(),
         ]);
     }
 
@@ -20,7 +20,7 @@ class ResponseHelper
             'success' => false,
             'message' => $message,
             'data' => $data,
-            'timestamp' => now()->toIso8601String()
+            'timestamp' => now()->toIso8601String(),
         ], $code);
     }
 }

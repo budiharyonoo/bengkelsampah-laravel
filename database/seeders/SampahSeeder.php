@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Sampah;
-use App\Models\Price;
 use App\Models\BankSampah;
+use App\Models\Price;
+use App\Models\Sampah;
+use Illuminate\Database\Seeder;
 
 class SampahSeeder extends Seeder
 {
@@ -112,6 +111,7 @@ class SampahSeeder extends Seeder
 
         if ($bankSampah->isEmpty()) {
             $this->command->warn('No bank sampah found. Please run BankSampahSeeder first.');
+
             return;
         }
 

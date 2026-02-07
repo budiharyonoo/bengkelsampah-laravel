@@ -1,40 +1,111 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Artikel;
+use App\Models\BankSampah;
 use App\Models\KategoriArtikel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ArtikelController extends Controller
 {
+    /**
+     * Check if current admin can access artikel feature.
+     * - Super admin (role='admin'): Always true
+     * - GOCAP branch admin (role='cabang' AND id_bank_sampah=13): True
+     * - Other branch admins: False
+     */
+    private function canAccessArtikel(): bool
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role === 'admin') {
+            return true;
+        }
+
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get bank_sampah_id for new artikel based on admin role.
+     * - Super admin: NULL (visible to all)
+     * - GOCAP admin: 13 (GOCAP-specific)
+     */
+    private function getBankSampahIdForArtikel(): ?int
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role === 'admin') {
+            return null;
+        }
+
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
+            return (int) $admin->id_bank_sampah;
+        }
+
+        return null;
+    }
+
+    /**
+     * Apply bank sampah filter to query.
+     * - Super admin: See all
+     * - GOCAP admin: See only own (13)
+     * - Others: Empty result
+     */
+    private function applyBankSampahFilter($query)
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin->role === 'admin') {
+            return $query;
+        }
+
+        if ($admin->role === 'cabang' && $admin->id_bank_sampah == config('bank_sampah.gocap.id')) {
+            return $query->where('bank_sampah_id', $admin->id_bank_sampah);
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         $query = Artikel::with('kategori');
+        $query = $this->applyBankSampahFilter($query);
 
         // Search
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('content', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%'.$request->search.'%')
+                    ->orWhere('content', 'like', '%'.$request->search.'%');
             });
         }
 
         // Filter kategori
         if ($request->filled('kategori')) {
-            $query->whereHas('kategori', function($q) use ($request) {
+            $query->whereHas('kategori', function ($q) use ($request) {
                 $q->where('nama', $request->kategori);
             });
         }
@@ -46,7 +117,7 @@ class ArtikelController extends Controller
             return response()->json([
                 'artikels' => $artikels,
                 'html' => view('partials.artikel-table', compact('artikels'))->render(),
-                'pagination' => view('partials.pagination', compact('artikels'))->render()
+                'pagination' => view('partials.pagination', compact('artikels'))->render(),
             ]);
         }
 
@@ -63,7 +134,12 @@ class ArtikelController extends Controller
      */
     public function create()
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         $kategoris = KategoriArtikel::all();
+
         return view('dashboard-artikel-create', compact('kategoris'));
     }
 
@@ -72,59 +148,65 @@ class ArtikelController extends Controller
      */
     public function store(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'cover' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-                'kategori_id' => 'required|exists:kategori_artikels,id'
+                'kategori_id' => 'required|exists:kategori_artikels,id',
             ]);
 
             if ($request->hasFile('cover')) {
                 $file = $request->file('cover');
-                $filename = time() . '_' . Str::random(10) . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension();
-                
+                $filename = time().'_'.Str::random(10).'_'.Str::slug($request->title).'.'.$file->getClientOriginalExtension();
+
                 // Create directory if it doesn't exist
                 $uploadPath = base_path('../uploads/artikel_cover');
-                if (!file_exists($uploadPath)) {
+                if (! file_exists($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
-                
+
                 // Store the file
                 $path = $file->storeAs('artikel_cover', $filename, 'public');
-                
-                if (!$path) {
+
+                if (! $path) {
                     throw new \Exception('Failed to upload file');
                 }
-                
+
                 // Get the full URL for the image
-                $coverUrl = env('APP_URL') . '/uploads/' . $path;
-                
+                $coverUrl = env('APP_URL').'/uploads/'.$path;
+
                 $artikel = Artikel::create([
                     'title' => $request->title,
                     'content' => $request->content,
                     'cover' => $coverUrl,
                     'kategori_id' => $request->kategori_id,
-                    'creator' => auth()->guard('admin')->user()->name
+                    'bank_sampah_id' => $this->getBankSampahIdForArtikel(),
+                    'creator' => auth()->guard('admin')->user()->name,
                 ]);
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Artikel berhasil ditambahkan',
-                    'data' => $artikel
+                    'data' => $artikel,
                 ]);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengupload gambar'
+                'message' => 'Gagal mengupload gambar',
             ], 400);
 
         } catch (\Exception $e) {
-            \Log::error('Error in ArtikelController@store: ' . $e->getMessage());
+            \Log::error('Error in ArtikelController@store: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menambahkan artikel: ' . $e->getMessage()
+                'message' => 'Gagal menambahkan artikel: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -142,8 +224,20 @@ class ArtikelController extends Controller
      */
     public function edit($id)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         $artikel = Artikel::with('kategori')->findOrFail($id);
+
+        // Verify ownership for GOCAP admins
+        $admin = Auth::guard('admin')->user();
+        if ($admin->role === 'cabang' && $artikel->bank_sampah_id != $admin->id_bank_sampah) {
+            abort(403, 'Anda tidak dapat mengedit artikel ini');
+        }
+
         $kategoris = KategoriArtikel::all();
+
         return view('dashboard-artikel-edit', compact('artikel', 'kategoris'));
     }
 
@@ -152,14 +246,24 @@ class ArtikelController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $artikel = Artikel::findOrFail($id);
-            
+
+            // Verify ownership for GOCAP admins
+            $admin = Auth::guard('admin')->user();
+            if ($admin->role === 'cabang' && $artikel->bank_sampah_id != $admin->id_bank_sampah) {
+                abort(403, 'Anda tidak dapat mengedit artikel ini');
+            }
+
             $request->validate([
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-                'kategori_id' => 'required|exists:kategori_artikels,id'
+                'kategori_id' => 'required|exists:kategori_artikels,id',
             ]);
 
             $data = [
@@ -171,8 +275,8 @@ class ArtikelController extends Controller
             if ($request->hasFile('cover')) {
                 // Delete old cover if exists
                 if ($artikel->cover) {
-                    $oldPath = str_replace(env('APP_URL') . '/uploads/', '', $artikel->cover);
-                    $fullOldPath = base_path('../api.bengkelsampah.com/uploads/' . $oldPath);
+                    $oldPath = str_replace(env('APP_URL').'/uploads/', '', $artikel->cover);
+                    $fullOldPath = base_path('../api.bengkelsampah.com/uploads/'.$oldPath);
                     if (file_exists($fullOldPath)) {
                         unlink($fullOldPath);
                     }
@@ -180,38 +284,39 @@ class ArtikelController extends Controller
 
                 $file = $request->file('cover');
                 // Generate unique filename using timestamp and random string
-                $filename = time() . '_' . Str::random(10) . '_' . Str::slug($request->title) . '.' . $file->getClientOriginalExtension();
-                
+                $filename = time().'_'.Str::random(10).'_'.Str::slug($request->title).'.'.$file->getClientOriginalExtension();
+
                 // Create directory if it doesn't exist
                 $uploadPath = base_path('../uploads/artikel_cover');
-                if (!file_exists($uploadPath)) {
+                if (! file_exists($uploadPath)) {
                     mkdir($uploadPath, 0755, true);
                 }
-                
+
                 // Store the file
                 $path = $file->storeAs('artikel_cover', $filename, 'public');
-                
-                if (!$path) {
+
+                if (! $path) {
                     throw new \Exception('Failed to upload file');
                 }
-                
+
                 // Get the full URL for the image
-                $data['cover'] = env('APP_URL') . '/uploads/' . $path;
+                $data['cover'] = env('APP_URL').'/uploads/'.$path;
             }
-            
+
             $artikel->update($data);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Artikel berhasil diubah',
-                'data' => $artikel
+                'data' => $artikel,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in ArtikelController@update: ' . $e->getMessage());
+            \Log::error('Error in ArtikelController@update: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengubah artikel: ' . $e->getMessage()
+                'message' => 'Gagal mengubah artikel: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -221,17 +326,33 @@ class ArtikelController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         // Jika request berisi array ids, hapus multiple
         if ($request->has('ids') && is_array($request->ids)) {
-            Artikel::whereIn('id', $request->ids)->delete();
+            $query = Artikel::whereIn('id', $request->ids);
+            $query = $this->applyBankSampahFilter($query);
+            $query->delete();
+
             return response()->json(['success' => true, 'message' => 'Artikel berhasil dihapus.']);
         }
+
         // Hapus satu artikel
         $artikel = Artikel::find($id);
         if ($artikel) {
+            // Verify ownership for GOCAP admins
+            $admin = Auth::guard('admin')->user();
+            if ($admin->role === 'cabang' && $artikel->bank_sampah_id != $admin->id_bank_sampah) {
+                abort(403, 'Anda tidak dapat menghapus artikel ini');
+            }
+
             $artikel->delete();
+
             return response()->json(['success' => true, 'message' => 'Artikel berhasil dihapus.']);
         }
+
         return response()->json(['success' => false, 'message' => 'Artikel tidak ditemukan.'], 404);
     }
 
@@ -240,6 +361,10 @@ class ArtikelController extends Controller
      */
     public function exportExcel(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'period' => 'required|string',
@@ -249,6 +374,7 @@ class ArtikelController extends Controller
             ]);
 
             $query = Artikel::with('kategori');
+            $query = $this->applyBankSampahFilter($query);
 
             // Apply period filter
             switch ($request->period) {
@@ -278,7 +404,7 @@ class ArtikelController extends Controller
                     break;
                 case 'range':
                     if ($request->start_date && $request->end_date) {
-                        $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+                        $query->whereBetween('created_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
                     }
                     break;
                 case 'all':
@@ -298,10 +424,11 @@ class ArtikelController extends Controller
             return $this->generateExcelFile($artikels, $request->period);
 
         } catch (\Exception $e) {
-            \Log::error('Error in ArtikelController@exportExcel: ' . $e->getMessage());
+            \Log::error('Error in ArtikelController@exportExcel: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export Excel: ' . $e->getMessage()
+                'message' => 'Gagal export Excel: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -312,14 +439,14 @@ class ArtikelController extends Controller
     private function generateExcelFile($artikels, $period)
     {
         // Create new Spreadsheet
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set document properties
         $spreadsheet->getProperties()
             ->setCreator('Bengkel Sampah Admin')
             ->setLastModifiedBy('Bengkel Sampah Admin')
-            ->setTitle('Laporan Artikel - ' . ucfirst($period))
+            ->setTitle('Laporan Artikel - '.ucfirst($period))
             ->setSubject('Laporan Data Artikel')
             ->setDescription('Laporan data artikel Bengkel Sampah')
             ->setKeywords('artikel, laporan, bengkel sampah')
@@ -354,13 +481,13 @@ class ArtikelController extends Controller
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set subtitle
-        $sheet->setCellValue('A2', 'Periode: ' . ucfirst(str_replace('_', ' ', $period)) . ' | Total Data: ' . $artikels->count() . ' artikel');
+        $sheet->setCellValue('A2', 'Periode: '.ucfirst(str_replace('_', ' ', $period)).' | Total Data: '.$artikels->count().' artikel');
         $sheet->mergeCells('A2:H2');
         $sheet->getStyle('A2')->getFont()->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set export date
-        $sheet->setCellValue('A3', 'Tanggal Export: ' . now()->format('d F Y H:i:s'));
+        $sheet->setCellValue('A3', 'Tanggal Export: '.now()->format('d F Y H:i:s'));
         $sheet->mergeCells('A3:H3');
         $sheet->getStyle('A3')->getFont()->setSize(10);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -387,22 +514,22 @@ class ArtikelController extends Controller
         // Set data
         $row = 6;
         foreach ($artikels as $index => $artikel) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $artikel->id);
-            $sheet->setCellValue('C' . $row, $artikel->title);
-            $sheet->setCellValue('D' . $row, $artikel->kategori->nama ?? '-');
-            $sheet->setCellValue('E' . $row, $artikel->creator);
-            $sheet->setCellValue('F' . $row, $artikel->created_at->format('d/m/Y H:i'));
-            $sheet->setCellValue('G' . $row, $artikel->cover ?? '-');
-            
+            $sheet->setCellValue('A'.$row, $index + 1);
+            $sheet->setCellValue('B'.$row, $artikel->id);
+            $sheet->setCellValue('C'.$row, $artikel->title);
+            $sheet->setCellValue('D'.$row, $artikel->kategori->nama ?? '-');
+            $sheet->setCellValue('E'.$row, $artikel->creator);
+            $sheet->setCellValue('F'.$row, $artikel->created_at->format('d/m/Y H:i'));
+            $sheet->setCellValue('G'.$row, $artikel->cover ?? '-');
+
             // Set full content without character limit
             $fullContent = strip_tags($artikel->content);
-            $sheet->setCellValue('H' . $row, $fullContent);
-            
+            $sheet->setCellValue('H'.$row, $fullContent);
+
             // Enable word wrap for content column
-            $sheet->getStyle('H' . $row)->getAlignment()->setWrapText(true);
-            $sheet->getStyle('H' . $row)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
-            
+            $sheet->getStyle('H'.$row)->getAlignment()->setWrapText(true);
+            $sheet->getStyle('H'.$row)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+
             // Set row height for content column to accommodate longer text
             $contentLength = strlen($fullContent);
             if ($contentLength > 500) {
@@ -414,8 +541,8 @@ class ArtikelController extends Controller
             }
 
             // Set border for data row
-            $sheet->getStyle('A' . $row . ':H' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            
+            $sheet->getStyle('A'.$row.':H'.$row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
             $row++;
         }
 
@@ -436,14 +563,14 @@ class ArtikelController extends Controller
 
         // Create Excel file
         $writer = new Xlsx($spreadsheet);
-        
+
         // Set headers for download
-        $filename = 'artikel_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-        
+        $filename = 'artikel_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         $writer->save('php://output');
         exit;
     }
@@ -453,6 +580,10 @@ class ArtikelController extends Controller
      */
     public function exportCsv(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'period' => 'required|string',
@@ -462,6 +593,7 @@ class ArtikelController extends Controller
             ]);
 
             $query = Artikel::with('kategori');
+            $query = $this->applyBankSampahFilter($query);
 
             // Apply period filter
             switch ($request->period) {
@@ -491,7 +623,7 @@ class ArtikelController extends Controller
                     break;
                 case 'range':
                     if ($request->start_date && $request->end_date) {
-                        $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+                        $query->whereBetween('created_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
                     }
                     break;
                 case 'all':
@@ -511,10 +643,11 @@ class ArtikelController extends Controller
             return $this->generateCsvFile($artikels, $request->period);
 
         } catch (\Exception $e) {
-            \Log::error('Error in ArtikelController@exportCsv: ' . $e->getMessage());
+            \Log::error('Error in ArtikelController@exportCsv: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export CSV: ' . $e->getMessage()
+                'message' => 'Gagal export CSV: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -525,31 +658,31 @@ class ArtikelController extends Controller
     private function generateCsvFile($artikels, $period)
     {
         // Set headers for download
-        $filename = 'artikel_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        
+        $filename = 'artikel_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.csv';
+
         header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        
+
         // Add BOM for UTF-8 to ensure proper encoding in Excel
         echo "\xEF\xBB\xBF";
-        
+
         // Create output stream
         $output = fopen('php://output', 'w');
-        
+
         // Write header row
         $headers = [
             'No',
             'ID Artikel',
-            'Judul Artikel', 
+            'Judul Artikel',
             'Kategori',
             'Creator',
             'Tanggal Dibuat',
             'URL Cover',
-            'Content'
+            'Content',
         ];
         fputcsv($output, $headers);
-        
+
         // Write data rows
         foreach ($artikels as $index => $artikel) {
             $row = [
@@ -560,11 +693,11 @@ class ArtikelController extends Controller
                 $artikel->creator,
                 $artikel->created_at->format('d/m/Y H:i'),
                 $artikel->cover ?? '-',
-                strip_tags($artikel->content) // Full content without HTML tags
+                strip_tags($artikel->content), // Full content without HTML tags
             ];
             fputcsv($output, $row);
         }
-        
+
         fclose($output);
         exit;
     }
@@ -574,6 +707,10 @@ class ArtikelController extends Controller
      */
     public function exportPdf(Request $request)
     {
+        if (! $this->canAccessArtikel()) {
+            abort(403);
+        }
+
         try {
             $request->validate([
                 'period' => 'required|string',
@@ -583,6 +720,7 @@ class ArtikelController extends Controller
             ]);
 
             $query = Artikel::with('kategori');
+            $query = $this->applyBankSampahFilter($query);
 
             // Apply period filter
             switch ($request->period) {
@@ -612,7 +750,7 @@ class ArtikelController extends Controller
                     break;
                 case 'range':
                     if ($request->start_date && $request->end_date) {
-                        $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+                        $query->whereBetween('created_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
                     }
                     break;
                 case 'all':
@@ -635,10 +773,11 @@ class ArtikelController extends Controller
             return $this->generatePdfFile($artikels, $request->period, $categoryFilter);
 
         } catch (\Exception $e) {
-            \Log::error('Error in ArtikelController@exportPdf: ' . $e->getMessage());
+            \Log::error('Error in ArtikelController@exportPdf: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal export PDF: ' . $e->getMessage()
+                'message' => 'Gagal export PDF: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -650,16 +789,16 @@ class ArtikelController extends Controller
     {
         // Load the view
         $html = view('pdf.artikel-report', compact('artikels', 'period', 'categoryFilter'))->render();
-        
+
         // Create PDF using DomPDF
         $pdf = Pdf::loadHTML($html);
-        
+
         // Set paper size and orientation
         $pdf->setPaper('A4', 'portrait');
-        
+
         // Set filename
-        $filename = 'artikel_export_' . $period . '_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-        
+        $filename = 'artikel_export_'.$period.'_'.now()->format('Y-m-d_H-i-s').'.pdf';
+
         // Return PDF for download
         return $pdf->download($filename);
     }

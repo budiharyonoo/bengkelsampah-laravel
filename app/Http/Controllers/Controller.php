@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller as BaseController;
  *     title="Bengkel Sampah API",
  *     version="1.0.0",
  *     description="Dokumentasi API untuk sistem OTP dan autentikasi Bengkel Sampah",
+ *
  *     @OA\Contact(
  *         email="support@bengkelsampah.com",
  *         name="Tim Bengkel Sampah"

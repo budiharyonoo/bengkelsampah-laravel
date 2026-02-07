@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Laravel\Sanctum\PersonalAccessToken;
-use App\Models\User;
 use App\Models\Otp;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Carbon\Carbon;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class DetailProfileController extends Controller
 {
@@ -21,10 +21,13 @@ class DetailProfileController extends Controller
      *     operationId="getDetailProfileData",
      *     tags={"Profil"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Operasi berhasil",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(
      *                 property="data",
@@ -33,8 +36,10 @@ class DetailProfileController extends Controller
      *                 @OA\Property(
      *                     property="addresses",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="nama", type="string", example="John Doe"),
      *                         @OA\Property(property="nomor_handphone", type="string", example="081234567890"),
@@ -50,18 +55,24 @@ class DetailProfileController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Pengguna tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Pengguna tidak ditemukan.")
      *         )
@@ -72,27 +83,27 @@ class DetailProfileController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::with('addresses')->find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -100,8 +111,8 @@ class DetailProfileController extends Controller
             'status' => 'success',
             'data' => [
                 'nama' => $user->name,
-                'addresses' => $user->addresses
-            ]
+                'addresses' => $user->addresses,
+            ],
         ]);
     }
 
@@ -113,43 +124,58 @@ class DetailProfileController extends Controller
      *     operationId="updateProfile",
      *     tags={"Profil"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="identifier", type="string", example="john@example.com"),
      *             @OA\Property(property="password", type="string", example="newpassword123"),
      *             @OA\Property(property="otp", type="string", example="123456", description="Diperlukan jika memperbarui identifier")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Profil berhasil diperbarui",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="message", type="string", example="Profil berhasil diperbarui")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Tidak terautentikasi",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Tidak terautentikasi. Token tidak diberikan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Pengguna tidak ditemukan",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Pengguna tidak ditemukan.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Data yang diberikan tidak valid."),
      *             @OA\Property(
@@ -162,10 +188,13 @@ class DetailProfileController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Kode OTP tidak valid",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="error"),
      *             @OA\Property(property="message", type="string", example="Kode OTP tidak valid.")
      *         )
@@ -176,27 +205,27 @@ class DetailProfileController extends Controller
     {
         // Get token from Authorization header
         $token = $request->bearerToken();
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak diberikan.'
+                'message' => 'Tidak terautentikasi. Token tidak diberikan.',
             ], 401);
         }
 
         // Get user from token
         $accessToken = PersonalAccessToken::findToken($token);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tidak terautentikasi. Token tidak valid.'
+                'message' => 'Tidak terautentikasi. Token tidak valid.',
             ], 401);
         }
 
         $user = User::find($accessToken->tokenable_id);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pengguna tidak ditemukan.'
+                'message' => 'Pengguna tidak ditemukan.',
             ], 404);
         }
 
@@ -207,10 +236,10 @@ class DetailProfileController extends Controller
                 'sometimes',
                 'string',
                 'max:255',
-                Rule::unique('users', 'identifier')->ignore($user->id)
+                Rule::unique('users', 'identifier')->ignore($user->id),
             ],
             'password' => 'sometimes|string|min:6',
-            'otp' => 'required_if:identifier,!=,null|string|size:6'
+            'otp' => 'required_if:identifier,!=,null|string|size:6',
         ];
 
         $validator = validator($request->all(), $rules);
@@ -218,7 +247,7 @@ class DetailProfileController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data yang diberikan tidak valid.',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -230,10 +259,10 @@ class DetailProfileController extends Controller
                 ->where('type', 'change')
                 ->first();
 
-            if (!$otp) {
+            if (! $otp) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Kode OTP tidak valid.'
+                    'message' => 'Kode OTP tidak valid.',
                 ], 400);
             }
 
@@ -241,7 +270,7 @@ class DetailProfileController extends Controller
             if (Carbon::parse($otp->expires_at)->isPast()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Kode OTP telah kedaluwarsa. Silakan minta kode baru.'
+                    'message' => 'Kode OTP telah kedaluwarsa. Silakan minta kode baru.',
                 ], 400);
             }
         }
@@ -260,7 +289,7 @@ class DetailProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Profil berhasil diperbarui'
+            'message' => 'Profil berhasil diperbarui',
         ]);
     }
 }

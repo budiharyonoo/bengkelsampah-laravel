@@ -141,6 +141,38 @@
         .btn-edit:hover {
             background: #2d5a55;
         }
+        .btn-generate-sk {
+            padding: 8px 16px;
+            background: #0FB7A6;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-generate-sk:hover {
+            background: #0a9a8c;
+        }
+        .btn-generate-sk img {
+            width: 16px;
+            height: 16px;
+        }
+        .detail-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .detail-card-actions {
+            display: flex;
+            gap: 8px;
+        }
         .info-section {
             margin-bottom: 32px;
         }
@@ -274,6 +306,9 @@
             .info-grid {
                 grid-template-columns: 1fr;
             }
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
         }
         .detail-card {
             background: #fff;
@@ -284,7 +319,7 @@
         }
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -596,8 +631,13 @@
                     <div class="stat-desc">Avg: Rp {{ number_format($stats['avg_setoran_value']) }}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-title">Pengguna Unik</div>
-                    <div class="stat-value">{{ number_format($stats['unique_users']) }}</div>
+                    <div class="stat-title">User Terdaftar</div>
+                    <div class="stat-value">{{ number_format($stats['registered_customers']) }}</div>
+                    <div class="stat-desc">Registered users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">User Transaksi</div>
+                    <div class="stat-value">{{ number_format($stats['unique_transaction_users']) }}</div>
                     <div class="stat-desc">Active customers</div>
                 </div>
                 <div class="stat-card">
@@ -607,8 +647,22 @@
                 </div>
             </div>
             <div class="detail-card">
-            <div class="info-section">
-                <h3 class="info-title">Data Bank Sampah</h3>
+                <div class="detail-card-header">
+                    <h3 class="info-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Data Bank Sampah</h3>
+                    <div class="detail-card-actions">
+                        <button type="button" class="btn-generate-sk" onclick="openSkModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            Generate SK
+                        </button>
+                    </div>
+                </div>
+            <div class="info-section" style="margin-top: 0;">
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">Kode Bank Sampah</span>
@@ -653,6 +707,26 @@
                                 </a>
                             @else
                                 <span style="color: #9ca3af;">Tidak ada link maps</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Latitude</span>
+                        <div class="info-value">
+                            @if($bankSampah->latitude)
+                                <span style="color: #374151;">{{ $bankSampah->latitude }}</span>
+                            @else
+                                <span style="color: #9ca3af;">-</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Longitude</span>
+                        <div class="info-value">
+                            @if($bankSampah->longitude)
+                                <span style="color: #374151;">{{ $bankSampah->longitude }}</span>
+                            @else
+                                <span style="color: #9ca3af;">-</span>
                             @endif
                         </div>
                     </div>
@@ -798,7 +872,7 @@
             document.getElementById('adminPasswordNote').textContent = isEdit ? '(Kosongkan jika tidak ingin mengubah password)' : '';
             document.getElementById('adminModalTitle').textContent = isEdit ? 'Edit Admin' : 'Tambah Admin';
             document.getElementById('adminModalSubtitle').textContent = isEdit ? 'Edit data admin' : 'Masukkan data admin baru';
-            
+
             if (isEdit && admin) {
                 document.getElementById('admin_id').value = admin.id;
                 document.getElementById('admin_name').value = admin.name;
@@ -828,7 +902,7 @@
             showLoading('Menghapus admin...');
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
+
             fetch(`/dashboard/admin/${adminId}`, {
                 method: 'DELETE',
                 headers: {
@@ -870,12 +944,12 @@
             if (adminForm) {
                 adminForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const adminId = document.getElementById('admin_id').value;
                     const name = document.getElementById('admin_name').value;
                     const username = document.getElementById('admin_email').value;
                     const password = document.getElementById('admin_password').value;
-                    
+
                     // Validate required fields
                     if (!name.trim()) {
                         alert('Nama admin harus diisi');
@@ -889,29 +963,29 @@
                         alert('Password harus diisi untuk admin baru');
                         return;
                     }
-                    
+
                     // Combine username with domain
                     const email = username + '@bengkelsampah.com';
-                    
+
                     // Show loading
                     showLoading('Menyimpan admin...');
-                    
+
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     const isEdit = adminId !== '';
-                    
+
                     const url = isEdit ? `/dashboard/admin/${adminId}` : '/dashboard/admin';
                     const method = isEdit ? 'PUT' : 'POST';
-                    
+
                     const formData = {
                         name: name,
                         email: email,
                         id_bank_sampah: {{ $bankSampah->id }}
                     };
-                    
+
                     if (password.trim()) {
                         formData.password = password;
                     }
-                    
+
                     fetch(url, {
                         method: method,
                         headers: {
@@ -957,13 +1031,13 @@
                     const adminId = this.getAttribute('data-admin-id');
                     const adminName = this.closest('.admin-item').querySelector('.admin-name').textContent;
                     const adminEmail = this.closest('.admin-item').querySelector('.admin-email').textContent;
-                    
+
                     const admin = {
                         id: adminId,
                         name: adminName,
                         email: adminEmail
                     };
-                    
+
                     openAdminModal(true, admin);
                 });
             });
@@ -973,12 +1047,15 @@
                 btn.addEventListener('click', function() {
                     const adminId = this.getAttribute('data-admin-id');
                     const adminName = this.closest('.admin-item').querySelector('.admin-name').textContent;
-                    
+
                     openDeleteAdminModal(adminId, adminName);
                 });
             });
         });
     </script>
+
+    {{-- SK Bank Sampah Modal --}}
+    @include('partials.sk-bank-sampah-modal')
 </body>
 </html>
-@endsection 
+@endsection

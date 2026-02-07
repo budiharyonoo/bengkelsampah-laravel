@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriArtikel;
-use App\Models\Artikel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class KategoriController extends Controller
 {
@@ -14,23 +13,24 @@ class KategoriController extends Controller
     {
         try {
             $request->validate([
-                'nama' => 'required|string|max:255'
+                'nama' => 'required|string|max:255',
             ]);
 
             $kategori = KategoriArtikel::create([
-                'nama' => $request->nama
+                'nama' => $request->nama,
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Kategori berhasil ditambahkan',
-                'category' => $kategori
+                'category' => $kategori,
             ]);
         } catch (\Exception $e) {
-            Log::error('Error creating category: ' . $e->getMessage());
+            Log::error('Error creating category: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menambahkan kategori: ' . $e->getMessage()
+                'message' => 'Gagal menambahkan kategori: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -39,11 +39,11 @@ class KategoriController extends Controller
     {
         try {
             $kategori = KategoriArtikel::withCount('artikels')->find($id);
-            
-            if (!$kategori) {
+
+            if (! $kategori) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kategori tidak ditemukan'
+                    'message' => 'Kategori tidak ditemukan',
                 ], 404);
             }
 
@@ -54,7 +54,7 @@ class KategoriController extends Controller
                     'has_articles' => true,
                     'message' => "Kategori '{$kategori->nama}' masih digunakan oleh {$kategori->artikels_count} artikel. Jika dihapus, semua artikel yang menggunakan kategori ini akan ikut terhapus.",
                     'article_count' => $kategori->artikels_count,
-                    'category_name' => $kategori->nama
+                    'category_name' => $kategori->nama,
                 ], 200); // Changed from 409 to 200 for better frontend handling
             }
 
@@ -63,13 +63,14 @@ class KategoriController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Kategori berhasil dihapus'
+                'message' => 'Kategori berhasil dihapus',
             ]);
         } catch (\Exception $e) {
-            Log::error('Error deleting category: ' . $e->getMessage());
+            Log::error('Error deleting category: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus kategori: ' . $e->getMessage()
+                'message' => 'Gagal menghapus kategori: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -80,11 +81,11 @@ class KategoriController extends Controller
             // Use database transaction for data consistency
             return DB::transaction(function () use ($id) {
                 $kategori = KategoriArtikel::with('artikels')->find($id);
-                
-                if (!$kategori) {
+
+                if (! $kategori) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Kategori tidak ditemukan'
+                        'message' => 'Kategori tidak ditemukan',
                     ], 404);
                 }
 
@@ -106,16 +107,16 @@ class KategoriController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => "Kategori '{$categoryName}' dan {$deletedArticlesCount} artikel yang menggunakannya berhasil dihapus",
-                    'deleted_articles_count' => $deletedArticlesCount
+                    'deleted_articles_count' => $deletedArticlesCount,
                 ]);
             });
         } catch (\Exception $e) {
-            Log::error('Error force deleting category: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            
+            Log::error('Error force deleting category: '.$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus kategori: ' . $e->getMessage()
+                'message' => 'Gagal menghapus kategori: '.$e->getMessage(),
             ], 500);
         }
     }

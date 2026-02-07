@@ -13,23 +13,23 @@ return new class extends Migration
     {
         Schema::create('points', function (Blueprint $table) {
             $table->id();
-            
+
             // User data (stored as text to avoid foreign key issues)
             $table->unsignedBigInteger('user_id');
             $table->string('user_name');
             $table->string('user_identifier'); // email or phone
-            
+
             // Point transaction details
             $table->enum('type', ['setor', 'redeem']);
             $table->date('tanggal');
             $table->integer('jumlah_point');
-            
+
             // Reference to setoran (if type is 'setor')
             $table->unsignedBigInteger('setoran_id')->nullable();
-            
+
             // Description
             $table->text('keterangan')->nullable();
-            
+
             $table->timestamps();
         });
     }

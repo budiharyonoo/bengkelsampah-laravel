@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper as R;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Otp;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use App\Helpers\ResponseHelper as R;
 
 class ForgotController extends Controller
 {
@@ -19,10 +19,13 @@ class ForgotController extends Controller
      *     tags={"Autentikasi"},
      *     summary="Reset kata sandi pengguna",
      *     description="Endpoint untuk reset kata sandi pengguna dengan verifikasi OTP. Setelah berhasil, pengguna harus login ulang.",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"identifier","new_password","new_password_confirmation","otp"},
+     *
      *             @OA\Property(
      *                 property="identifier",
      *                 type="string",
@@ -51,20 +54,27 @@ class ForgotController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Kata sandi berhasil direset",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Kata sandi berhasil direset. Silakan login dengan kata sandi baru Anda.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validasi gagal",
+     *
      *         @OA\JsonContent(
      *             oneOf={
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Validasi gagal"),
      *                     @OA\Property(
@@ -73,15 +83,20 @@ class ForgotController extends Controller
      *                         @OA\Property(
      *                             property="identifier",
      *                             type="array",
+     *
      *                             @OA\Items(type="string", example="Field identifier wajib diisi.")
      *                         )
      *                     )
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Kode OTP tidak valid")
      *                 ),
+     *
      *                 @OA\Schema(
+     *
      *                     @OA\Property(property="status", type="boolean", example=false),
      *                     @OA\Property(property="message", type="string", example="Kode OTP telah kedaluwarsa")
      *                 )
@@ -96,7 +111,7 @@ class ForgotController extends Controller
             'identifier' => 'required|string',
             'new_password' => 'required|string|min:8|confirmed',
             'new_password_confirmation' => 'required|string',
-            'otp' => 'required|string|size:6'
+            'otp' => 'required|string|size:6',
         ]);
 
         if ($validator->fails()) {
@@ -105,11 +120,11 @@ class ForgotController extends Controller
 
         // Verify OTP first
         $otp = Otp::where('identifier', $request->identifier)
-                  ->where('type', 'forgot')
-                  ->where('code', $request->otp)
-                  ->first();
+            ->where('type', 'forgot')
+            ->where('code', $request->otp)
+            ->first();
 
-        if (!$otp) {
+        if (! $otp) {
             return R::error('Kode OTP tidak valid', 422);
         }
 
@@ -128,4 +143,4 @@ class ForgotController extends Controller
 
         return R::success('Kata sandi berhasil direset. Silakan login dengan kata sandi baru Anda.');
     }
-} 
+}

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('bank_sampah_id')->constrained('bank_sampah')->onDelete('cascade');
             $table->decimal('harga', 10, 2);
             $table->timestamps();
-            
+
             // Unique constraint to prevent duplicate price entries
             $table->unique(['sampah_id', 'bank_sampah_id']);
         });

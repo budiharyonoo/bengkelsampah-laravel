@@ -13,7 +13,7 @@ return [
 
     'project_id' => env('FIREBASE_PROJECT_ID', ''),
     'database_url' => env('FIREBASE_DATABASE_URL', ''),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Firebase Service Account Key (for FCM API v1)
@@ -23,7 +23,7 @@ return [
     | Download from Firebase Console → Project Settings → Service Accounts
     |
     */
-    
+
     'service_account_key' => [
         'type' => env('FIREBASE_SERVICE_ACCOUNT_TYPE', 'service_account'),
         'project_id' => env('FIREBASE_PROJECT_ID', ''),
@@ -36,7 +36,7 @@ return [
         'auth_provider_x509_cert_url' => env('FIREBASE_AUTH_PROVIDER_X509_CERT_URL', 'https://www.googleapis.com/oauth2/v1/certs'),
         'client_x509_cert_url' => env('FIREBASE_CLIENT_X509_CERT_URL', ''),
     ],
-    
+
     /*
     |--------------------------------------------------------------------------
     | Legacy Server Key (for backward compatibility)
@@ -45,9 +45,9 @@ return [
     | Server key for legacy FCM API (deprecated but still supported)
     |
     */
-    
+
     'server_key' => env('FIREBASE_SERVER_KEY', ''),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Firebase Cloud Messaging (FCM)
@@ -56,10 +56,10 @@ return [
     | Configuration for Firebase Cloud Messaging
     |
     */
-    
+
     'fcm' => [
         'default_channel_id' => 'bengkelsampah_channel',
         'default_sound' => 'default',
         'default_priority' => 'high',
     ],
-]; 
+];

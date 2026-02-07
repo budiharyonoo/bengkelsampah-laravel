@@ -21,15 +21,15 @@ class WhatsAppService
             $clientId = env('TCAST_CLIENT_ID');
             $senderNumber = env('TCAST_SENDER_NUMBER');
             $metaTemplateId = env('TCAST_META_TEMPLATE_ID');
-            
+
             $phone = preg_replace('/\D/', '', $phone);
 
             if (preg_match('/^08/', $phone)) {
-                $phone = '62' . substr($phone, 1);
+                $phone = '62'.substr($phone, 1);
             } elseif (preg_match('/^8/', $phone)) {
-                $phone = '62' . $phone;
+                $phone = '62'.$phone;
             } elseif (preg_match('/^620/', $phone)) {
-                $phone = '62' . substr($phone, 3);
+                $phone = '62'.substr($phone, 3);
             }
 
             $userName = $setoranData['user_name'] ?? 'User';
@@ -47,12 +47,12 @@ class WhatsAppService
                 : 'N/A';
 
             $payload = [
-                "SenderNumber" => $senderNumber,
-                "MetaTemplateId" => $metaTemplateId,
-                "BulkPayload" => [
-                    "RecieverNumber" => $phone,
-                    "HeaderVariable" => "NOTIFIKASI SETORAN BARU",
-                    "BodyVariables" => [
+                'SenderNumber' => $senderNumber,
+                'MetaTemplateId' => $metaTemplateId,
+                'BulkPayload' => [
+                    'RecieverNumber' => $phone,
+                    'HeaderVariable' => 'NOTIFIKASI SETORAN BARU',
+                    'BodyVariables' => [
                         "#{$setoranId}",
                         "{$userName}",
                         "{$addressPhone}",
@@ -61,24 +61,25 @@ class WhatsAppService
                         "{$bankName}",
                         "{$address}",
                         "{$tanggalFormatted}",
-                        "{$waktuPenjemputan}"
-                    ]
-                ]
+                        "{$waktuPenjemputan}",
+                    ],
+                ],
             ];
 
             $response = Http::withBasicAuth($apiKey, $clientId)
                 ->withHeaders([
                     'Accept' => 'application/json',
-                    'Content-Type' => 'application/json'
+                    'Content-Type' => 'application/json',
                 ])
                 ->post($url, $payload);
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error("Error sending WhatsApp notification to {$phone}: " . $e->getMessage(), [
+            Log::error("Error sending WhatsApp notification to {$phone}: ".$e->getMessage(), [
                 'payload' => $setoranData,
-                'exception' => $e
+                'exception' => $e,
             ]);
+
             return false;
         }
     }

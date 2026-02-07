@@ -5,6 +5,42 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read \App\Models\Admin|null $admin
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Setoran> $setorans
+ * @property-read int|null $setorans_count
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah query()
+ * @property int $id
+ * @property string $kode_bank_sampah
+ * @property string $nama_bank_sampah
+ * @property string $alamat_bank_sampah
+ * @property string $nama_penanggung_jawab
+ * @property string $kontak_penanggung_jawab
+ * @property string|null $foto
+ * @property string|null $gmaps_link
+ * @property string|null $latitude
+ * @property string|null $longitude
+ * @property string $tipe_layanan
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereAlamatBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereFoto($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereGmapsLink($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereKodeBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereKontakPenanggungJawab($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereNamaBankSampah($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereNamaPenanggungJawab($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereTipeLayanan($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BankSampah whereUpdatedAt($value)
+ * @property-read \App\Models\SkBankSampah|null $sk
+ * @mixin \Eloquent
+ */
 class BankSampah extends Model
 {
     use HasFactory;
@@ -19,6 +55,8 @@ class BankSampah extends Model
         'kontak_penanggung_jawab',
         'foto',
         'gmaps_link',
+        'latitude',
+        'longitude',
         'tipe_layanan',
     ];
 
@@ -29,7 +67,7 @@ class BankSampah extends Model
     {
         // Get all existing kode numbers
         $existingKodes = self::pluck('kode_bank_sampah')->toArray();
-        
+
         if (empty($existingKodes)) {
             return 'BS-001';
         }
@@ -40,9 +78,9 @@ class BankSampah extends Model
             $number = (int) substr($kode, 3);
             $existingNumbers[] = $number;
         }
-        
+
         sort($existingNumbers);
-        
+
         // Find the first missing number starting from 1
         $nextNumber = 1;
         foreach ($existingNumbers as $number) {
@@ -52,8 +90,8 @@ class BankSampah extends Model
                 break; // Found a gap, use this number
             }
         }
-        
-        return 'BS-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+        return 'BS-'.str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -84,5 +122,13 @@ class BankSampah extends Model
     public function setorans()
     {
         return $this->hasMany(Setoran::class, 'bank_sampah_id');
+    }
+
+    /**
+     * Get the SK (Surat Keputusan) for this bank sampah.
+     */
+    public function sk(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SkBankSampah::class, 'bank_sampah_id');
     }
 }

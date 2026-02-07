@@ -181,8 +181,8 @@
         }
         
         th {
-            background: linear-gradient(135deg, #39746E 0%, #2c5530 100%);
-            color: white;
+            background-color: #39746E !important;
+            color: #ffffff !important;
             padding: 8px 4px;
             text-align: left;
             font-weight: bold;
@@ -190,6 +190,8 @@
             font-size: 8px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
         
         td {
@@ -375,11 +377,11 @@
         
         thead { display: table-header-group; }
         th {
-            background: #39746E;
-            color: white;
+            background-color: #39746E !important;
+            color: #ffffff !important;
             font-weight: bold;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     </style>
 </head>
