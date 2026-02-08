@@ -20,8 +20,13 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SampahController;
 use App\Http\Controllers\SkBankSampahController;
 use App\Http\Controllers\WasteInventoryController;
+use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\WasteTransactionController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/artisan/optimize-clear', function() {
+    echo Artisan::call('optimize:clear');
+});
 
 Route::get('/', function () {
     return view('welcome');
@@ -142,6 +147,12 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('bank-sampah/export/excel', [BankSampahController::class, 'exportExcel'])->name('dashboard.bank.export.excel');
     Route::post('bank-sampah/export/csv', [BankSampahController::class, 'exportCsv'])->name('dashboard.bank.export.csv');
     Route::post('bank-sampah/export/pdf', [BankSampahController::class, 'exportPdf'])->name('dashboard.bank.export.pdf');
+
+    // Wilayah (region cascade) routes
+    Route::get('wilayah/provinces', [WilayahController::class, 'provinces'])->name('wilayah.provinces');
+    Route::get('wilayah/cities', [WilayahController::class, 'cities'])->name('wilayah.cities');
+    Route::get('wilayah/districts', [WilayahController::class, 'districts'])->name('wilayah.districts');
+    Route::get('wilayah/villages', [WilayahController::class, 'villages'])->name('wilayah.villages');
 
     // SK Bank Sampah routes
     Route::post('sk-bank-sampah/preview', [SkBankSampahController::class, 'preview'])->name('sk-bank-sampah.preview');

@@ -56,25 +56,33 @@
                         <h3 class="sk-form-section-title">Data Wilayah</h3>
 
                         <div class="sk-form-group">
-                            <label class="sk-form-label">Nama Desa/Kelurahan <span class="required">*</span></label>
-                            <input type="text" name="nama_desa_kelurahan" class="sk-form-input" placeholder="Masukkan nama desa/kelurahan" required>
+                            <label class="sk-form-label">Provinsi <span class="required">*</span></label>
+                            <select name="provinsi" id="skProvinsi" class="sk-form-input sk-form-select" required>
+                                <option value="">-- Pilih Provinsi --</option>
+                            </select>
                         </div>
 
                         <div class="sk-form-row">
-                            <div class="sk-form-group">
-                                <label class="sk-form-label">Kecamatan <span class="required">*</span></label>
-                                <input type="text" name="kecamatan" class="sk-form-input" placeholder="Masukkan kecamatan" required>
-                            </div>
                             <div class="sk-form-group">
                                 <label class="sk-form-label">Kabupaten/Kota <span class="required">*</span></label>
-                                <input type="text" name="kabupaten" class="sk-form-input" placeholder="Masukkan kabupaten/kota" required>
+                                <select name="kabupaten" id="skKabupaten" class="sk-form-input sk-form-select" required disabled>
+                                    <option value="">-- Pilih Kabupaten/Kota --</option>
+                                </select>
+                            </div>
+                            <div class="sk-form-group">
+                                <label class="sk-form-label">Kecamatan <span class="required">*</span></label>
+                                <select name="kecamatan" id="skKecamatan" class="sk-form-input sk-form-select" required disabled>
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="sk-form-row">
                             <div class="sk-form-group">
-                                <label class="sk-form-label">Provinsi <span class="required">*</span></label>
-                                <input type="text" name="provinsi" class="sk-form-input" placeholder="Masukkan provinsi" required>
+                                <label class="sk-form-label">Desa/Kelurahan <span class="required">*</span></label>
+                                <select name="nama_desa_kelurahan" id="skDesaKelurahan" class="sk-form-input sk-form-select" required disabled>
+                                    <option value="">-- Pilih Desa/Kelurahan --</option>
+                                </select>
                             </div>
                             <div class="sk-form-group">
                                 <label class="sk-form-label">Kode Pos</label>
@@ -325,6 +333,22 @@
         min-height: 60px;
     }
 
+    .sk-form-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7271' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+        cursor: pointer;
+    }
+
+    .sk-form-select:disabled {
+        background-color: #F3F4F6;
+        color: #9CA3AF;
+        cursor: not-allowed;
+    }
+
     .sk-form-hint {
         font-size: 12px;
         color: #9CA3AF;
@@ -545,17 +569,32 @@
 <script>
     let previewTimeout = null;
     let existingSkData = null;
+    let provincesLoaded = false;
+
+    // Wilayah cascade URLs
+    const wilayahUrls = {
+        provinces: '{{ route("wilayah.provinces") }}',
+        cities: '{{ route("wilayah.cities") }}',
+        districts: '{{ route("wilayah.districts") }}',
+        villages: '{{ route("wilayah.villages") }}'
+    };
 
     // Open SK Modal
     function openSkModal() {
         document.getElementById('skBankSampahModal').classList.add('show');
         document.body.style.overflow = 'hidden';
 
+        // Load provinces on first open
+        if (!provincesLoaded) {
+            loadProvinces();
+        }
+
         // Load existing data if available
         loadExistingSkData();
 
         // Add event listeners for live preview
         setupLivePreview();
+        setupWilayahCascade();
     }
 
     // Close SK Modal
@@ -597,14 +636,13 @@
         form.querySelector('[name="nomor_surat"]').value = sk.nomor_surat || '';
         form.querySelector('[name="tanggal_ditetapkan"]').value = sk.tanggal_ditetapkan ? sk.tanggal_ditetapkan.split('T')[0] : '';
         form.querySelector('[name="tanggal_rapat_musyawarah"]').value = sk.tanggal_rapat_musyawarah ? sk.tanggal_rapat_musyawarah.split('T')[0] : '';
-        form.querySelector('[name="nama_desa_kelurahan"]').value = sk.nama_desa_kelurahan || '';
-        form.querySelector('[name="kecamatan"]').value = sk.kecamatan || '';
-        form.querySelector('[name="kabupaten"]').value = sk.kabupaten || '';
-        form.querySelector('[name="provinsi"]').value = sk.provinsi || '';
         form.querySelector('[name="kode_pos"]').value = sk.kode_pos || '';
         form.querySelector('[name="masa_bakti_mulai"]').value = sk.masa_bakti_mulai || new Date().getFullYear();
         form.querySelector('[name="masa_bakti_selesai"]').value = sk.masa_bakti_selesai || (new Date().getFullYear() + 4);
         form.querySelector('[name="nama_kepala_desa"]').value = sk.nama_kepala_desa || '';
+
+        // Populate wilayah selects with cascade loading
+        populateWilayahFromExisting(sk);
 
         // Show existing pengurus image preview
         if (data.pengurus_image_url) {
@@ -626,6 +664,163 @@
 
         // Update preview
         setTimeout(updatePreview, 500);
+    }
+
+    // Load provinces into the select
+    function loadProvinces() {
+        fetch(wilayahUrls.provinces)
+            .then(response => response.json())
+            .then(data => {
+                populateSelect(document.getElementById('skProvinsi'), data, null);
+                provincesLoaded = true;
+            })
+            .catch(error => console.error('Error loading provinces:', error));
+    }
+
+    // Populate a select element with options
+    function populateSelect(selectEl, items, existingValue) {
+        const placeholder = selectEl.options[0].textContent;
+        selectEl.innerHTML = '<option value="">' + placeholder + '</option>';
+
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name;
+            option.textContent = item.name;
+            option.dataset.code = item.code;
+            if (existingValue && item.name.toUpperCase() === existingValue.toUpperCase()) {
+                option.selected = true;
+            }
+            selectEl.appendChild(option);
+        });
+
+        selectEl.disabled = false;
+    }
+
+    // Get the code of the currently selected option
+    function getSelectedCode(selectEl) {
+        const selected = selectEl.options[selectEl.selectedIndex];
+        return selected ? selected.dataset.code || '' : '';
+    }
+
+    // Reset a select to its placeholder state
+    function resetSelect(selectEl) {
+        const placeholder = selectEl.options[0].textContent;
+        selectEl.innerHTML = '<option value="">' + placeholder + '</option>';
+        selectEl.disabled = true;
+    }
+
+    // Setup cascade event listeners for wilayah selects
+    function setupWilayahCascade() {
+        const provinsiEl = document.getElementById('skProvinsi');
+        const kabupatenEl = document.getElementById('skKabupaten');
+        const kecamatanEl = document.getElementById('skKecamatan');
+        const desaEl = document.getElementById('skDesaKelurahan');
+
+        // Remove old listeners by cloning (prevents duplicate listeners)
+        if (provinsiEl.dataset.cascadeReady) return;
+        provinsiEl.dataset.cascadeReady = 'true';
+
+        provinsiEl.addEventListener('change', function() {
+            const code = getSelectedCode(this);
+            resetSelect(kabupatenEl);
+            resetSelect(kecamatanEl);
+            resetSelect(desaEl);
+
+            if (code) {
+                fetch(wilayahUrls.cities + '?province_code=' + code)
+                    .then(response => response.json())
+                    .then(data => populateSelect(kabupatenEl, data, null))
+                    .catch(error => console.error('Error loading cities:', error));
+            }
+            debouncePreview();
+        });
+
+        kabupatenEl.addEventListener('change', function() {
+            const code = getSelectedCode(this);
+            resetSelect(kecamatanEl);
+            resetSelect(desaEl);
+
+            if (code) {
+                fetch(wilayahUrls.districts + '?city_code=' + code)
+                    .then(response => response.json())
+                    .then(data => populateSelect(kecamatanEl, data, null))
+                    .catch(error => console.error('Error loading districts:', error));
+            }
+            debouncePreview();
+        });
+
+        kecamatanEl.addEventListener('change', function() {
+            const code = getSelectedCode(this);
+            resetSelect(desaEl);
+
+            if (code) {
+                fetch(wilayahUrls.villages + '?district_code=' + code)
+                    .then(response => response.json())
+                    .then(data => populateSelect(desaEl, data, null))
+                    .catch(error => console.error('Error loading villages:', error));
+            }
+            debouncePreview();
+        });
+
+        desaEl.addEventListener('change', function() {
+            debouncePreview();
+        });
+    }
+
+    // Populate wilayah selects from existing SK data (cascade sequentially)
+    function populateWilayahFromExisting(sk) {
+        if (!sk.provinsi) return;
+
+        const provinsiEl = document.getElementById('skProvinsi');
+        const kabupatenEl = document.getElementById('skKabupaten');
+        const kecamatanEl = document.getElementById('skKecamatan');
+        const desaEl = document.getElementById('skDesaKelurahan');
+
+        // Wait for provinces to be loaded, then cascade
+        const waitForProvinces = setInterval(() => {
+            if (!provincesLoaded) return;
+            clearInterval(waitForProvinces);
+
+            // Select the existing province
+            selectOptionByName(provinsiEl, sk.provinsi);
+            const provinceCode = getSelectedCode(provinsiEl);
+            if (!provinceCode) return;
+
+            // Load cities and cascade
+            fetch(wilayahUrls.cities + '?province_code=' + provinceCode)
+                .then(response => response.json())
+                .then(cities => {
+                    populateSelect(kabupatenEl, cities, sk.kabupaten);
+                    const cityCode = getSelectedCode(kabupatenEl);
+                    if (!cityCode || !sk.kecamatan) return;
+
+                    return fetch(wilayahUrls.districts + '?city_code=' + cityCode)
+                        .then(response => response.json())
+                        .then(districts => {
+                            populateSelect(kecamatanEl, districts, sk.kecamatan);
+                            const districtCode = getSelectedCode(kecamatanEl);
+                            if (!districtCode || !sk.nama_desa_kelurahan) return;
+
+                            return fetch(wilayahUrls.villages + '?district_code=' + districtCode)
+                                .then(response => response.json())
+                                .then(villages => {
+                                    populateSelect(desaEl, villages, sk.nama_desa_kelurahan);
+                                });
+                        });
+                })
+                .catch(error => console.error('Error loading existing wilayah:', error));
+        }, 100);
+    }
+
+    // Helper to select an option by matching name (case-insensitive)
+    function selectOptionByName(selectEl, name) {
+        if (!name) return;
+        for (let i = 0; i < selectEl.options.length; i++) {
+            if (selectEl.options[i].value.toUpperCase() === name.toUpperCase()) {
+                selectEl.selectedIndex = i;
+                return;
+            }
+        }
     }
 
     // Handle pengurus image

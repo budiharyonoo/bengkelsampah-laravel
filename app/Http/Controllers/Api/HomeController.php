@@ -166,10 +166,7 @@ class HomeController extends Controller
 
         // Get app version info for Android
         $bankSampahId = $request->get('bank_sampah_id');
-        $appVersion = AppVersion::when($bankSampahId, function ($query) {
-            return $query->where('id', 4);
-        })
-            ->getLatestVersion('android');
+        $appVersion = AppVersion::getLatestVersion('android', $bankSampahId);
 
         return response()->json([
             'status' => 'success',

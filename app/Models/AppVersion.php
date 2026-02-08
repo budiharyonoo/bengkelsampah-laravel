@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion query()
+ *
  * @property int $id
  * @property string $platform
  * @property string $version
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereIsActive($value)
@@ -29,6 +31,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppVersion whereVersionCode($value)
+ *
  * @mixin \Eloquent
  */
 class AppVersion extends Model
@@ -54,10 +57,13 @@ class AppVersion extends Model
     /**
      * Get the latest version for a platform
      */
-    public static function getLatestVersion($platform)
+    public static function getLatestVersion($platform, $bankSampahId = null)
     {
         return self::where('platform', $platform)
             ->where('is_active', true)
+            ->when($bankSampahId, function ($query) {
+                return $query->where('id', 4);
+            })
             ->orderBy('version_code', 'desc')
             ->first();
     }

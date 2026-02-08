@@ -158,7 +158,10 @@
 <body>
     @php
         $garudaBase64 = null;
-        $garudaPath = asset('assets/garuda.png');
+        $garudaPath = public_path('assets/garuda.png');
+        if (!file_exists($garudaPath)) {
+            $garudaPath = asset('assets/garuda.png');
+        }
         $garudaBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($garudaPath));
     @endphp
 
@@ -385,7 +388,7 @@
 
         <div class="lampiran-title">
             SUSUNAN ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-            {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+            {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
         </div>
 
         <div class="data-section">
@@ -409,7 +412,7 @@
         <div class="data-section">
             <div class="data-section-title">II. PEMBINA :</div>
             <div style="margin-left: 20px;">
-                - KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} / lurah
+                - KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} / lurah
             </div>
         </div>
 
@@ -480,7 +483,7 @@
 
             <div class="lampiran-title">
                 STRUKTUR ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
             </div>
 
             <div class="image-section" style="margin-top: 25px;">
@@ -514,7 +517,7 @@
                 <tr>
                     <td style="width: 13%; vertical-align: top;">Lampiran 2</td>
                     <td style="width: 2%; vertical-align: top;">:</td>
-                    <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ $sk->nama_desa_kelurahan ?? 'Desa' }} {{ $sk->nama_desa_kelurahan ?? '' }}</td>
+                    <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ $sk->nama_desa_kelurahan ?? 'Desa' }}</td>
                 </tr>
                 <tr>
                     <td style="vertical-align: top;">Nomor</td>
@@ -529,13 +532,13 @@
                 <tr>
                     <td style="vertical-align: top;">Tentang</td>
                     <td style="vertical-align: top;">:</td>
-                    <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? '')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} Kecamatan {{ ucwords(strtolower($sk->kecamatan ?? '')) }} Kabupaten {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+                    <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} Kecamatan {{ ucwords(strtolower($sk->kecamatan ?? '')) }} Kabupaten {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
                 </tr>
             </table>
 
             <div class="lampiran-title">
                 STRUKTUR ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
             </div>
 
             <div class="image-section" style="margin-top: 25px;">
