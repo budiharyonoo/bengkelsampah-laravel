@@ -570,6 +570,8 @@
     let previewTimeout = null;
     let existingSkData = null;
     let provincesLoaded = false;
+    let pengurusImageBase64 = null;
+    let strukturImageBase64 = null;
 
     // Wilayah cascade URLs
     const wilayahUrls = {
@@ -829,11 +831,13 @@
         if (file) {
             document.getElementById('pengurusFileName').textContent = file.name;
 
-            // Show preview
+            // Show preview and store base64
             const reader = new FileReader();
             reader.onload = function(e) {
+                pengurusImageBase64 = e.target.result;
                 document.getElementById('pengurusPreviewImg').src = e.target.result;
                 document.getElementById('pengurusPreview').style.display = 'block';
+                debouncePreview();
             };
             reader.readAsDataURL(file);
         }
@@ -843,6 +847,11 @@
         document.getElementById('pengurusImageInput').value = '';
         document.getElementById('pengurusFileName').textContent = 'Belum ada file dipilih';
         document.getElementById('pengurusPreview').style.display = 'none';
+        pengurusImageBase64 = null;
+        if (existingSkData && existingSkData.sk) {
+            existingSkData.sk.pengurus_image_path = null;
+        }
+        debouncePreview();
     }
 
     // Handle struktur organisasi image
@@ -851,11 +860,13 @@
         if (file) {
             document.getElementById('strukturFileName').textContent = file.name;
 
-            // Show preview
+            // Show preview and store base64
             const reader = new FileReader();
             reader.onload = function(e) {
+                strukturImageBase64 = e.target.result;
                 document.getElementById('strukturPreviewImg').src = e.target.result;
                 document.getElementById('strukturPreview').style.display = 'block';
+                debouncePreview();
             };
             reader.readAsDataURL(file);
         }
@@ -865,6 +876,11 @@
         document.getElementById('strukturOrganisasiInput').value = '';
         document.getElementById('strukturFileName').textContent = 'Belum ada file dipilih';
         document.getElementById('strukturPreview').style.display = 'none';
+        strukturImageBase64 = null;
+        if (existingSkData && existingSkData.sk) {
+            existingSkData.sk.struktur_organisasi_path = null;
+        }
+        debouncePreview();
     }
 
     // Setup live preview
@@ -894,6 +910,19 @@
                 data[key] = value;
             }
         });
+
+        // Include image base64 for preview
+        if (pengurusImageBase64) {
+            data.pengurus_image_base64 = pengurusImageBase64;
+        } else if (existingSkData && existingSkData.sk && existingSkData.sk.pengurus_image_path) {
+            data.existing_pengurus_image = existingSkData.sk.pengurus_image_path;
+        }
+
+        if (strukturImageBase64) {
+            data.struktur_organisasi_base64 = strukturImageBase64;
+        } else if (existingSkData && existingSkData.sk && existingSkData.sk.struktur_organisasi_path) {
+            data.existing_struktur_image = existingSkData.sk.struktur_organisasi_path;
+        }
 
         // Show loading
         document.getElementById('skPreviewLoading').style.display = 'block';

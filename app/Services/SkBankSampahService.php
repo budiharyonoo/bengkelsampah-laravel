@@ -74,10 +74,21 @@ class SkBankSampahService
             'full_address' => $fullAddress,
         ];
 
+        // Resolve image base64 for preview
+        $pengurusBase64 = $data['pengurus_image_base64'] ?? null;
+        if (! $pengurusBase64 && ! empty($data['existing_pengurus_image'])) {
+            $pengurusBase64 = $this->getImageBase64($data['existing_pengurus_image']);
+        }
+
+        $strukturBase64 = $data['struktur_organisasi_base64'] ?? null;
+        if (! $strukturBase64 && ! empty($data['existing_struktur_image'])) {
+            $strukturBase64 = $this->getImageBase64($data['existing_struktur_image']);
+        }
+
         return view('pdf.sk-bank-sampah', [
             'sk' => $sk,
-            'pengurusImageBase64' => null,
-            'strukturOrganisasiBase64' => null,
+            'pengurusImageBase64' => $pengurusBase64,
+            'strukturOrganisasiBase64' => $strukturBase64,
             'isPreview' => true,
         ])->render();
     }
