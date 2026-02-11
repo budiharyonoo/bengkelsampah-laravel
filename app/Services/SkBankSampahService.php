@@ -37,7 +37,8 @@ class SkBankSampahService
      *     kode_pos?: string|null,
      *     masa_bakti_mulai?: int,
      *     masa_bakti_selesai?: int,
-     *     nama_kepala_desa?: string
+     *     nama_kepala_desa?: string,
+     *     tipe_jabatan?: string
      * } $data
      */
     public function generatePreviewHtml(BankSampah $bankSampah, array $data): string
@@ -56,6 +57,10 @@ class SkBankSampahService
 
         $fullAddress = implode(', ', array_filter($addressParts));
 
+        // Determine tipe jabatan and derived labels
+        $tipeJabatan = $data['tipe_jabatan'] ?? 'desa';
+        $isLurah = $tipeJabatan === 'lurah';
+
         // Create a mock SK object for preview
         $sk = (object) [
             'nama_bank_sampah' => $data['nama_bank_sampah'] ?? $bankSampah->nama_bank_sampah,
@@ -71,6 +76,10 @@ class SkBankSampahService
             'masa_bakti_mulai' => $data['masa_bakti_mulai'] ?? date('Y'),
             'masa_bakti_selesai' => $data['masa_bakti_selesai'] ?? (date('Y') + 4),
             'nama_kepala_desa' => $data['nama_kepala_desa'] ?? '',
+            'tipe_jabatan' => $tipeJabatan,
+            'jabatan_title' => $isLurah ? 'Kepala Lurah' : 'Kepala Desa',
+            'area_type_label' => $isLurah ? 'Kelurahan' : 'Desa',
+            'area_type_label_upper' => $isLurah ? 'KELURAHAN' : 'DESA',
             'full_address' => $fullAddress,
         ];
 

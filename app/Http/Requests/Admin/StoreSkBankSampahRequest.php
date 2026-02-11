@@ -61,6 +61,7 @@ class StoreSkBankSampahRequest extends FormRequest
 
             // Pengesahan
             'nama_kepala_desa' => ['required', 'string', 'max:255'],
+            'tipe_jabatan' => ['required', 'string', 'in:desa,lurah'],
 
             // Images
             'pengurus_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:5120'],
@@ -92,6 +93,8 @@ class StoreSkBankSampahRequest extends FormRequest
             'masa_bakti_selesai.required' => 'Tahun selesai masa bakti wajib diisi.',
             'masa_bakti_selesai.gte' => 'Tahun selesai harus lebih besar atau sama dengan tahun mulai.',
             'nama_kepala_desa.required' => 'Nama kepala desa/lurah wajib diisi.',
+            'tipe_jabatan.required' => 'Tipe jabatan wajib dipilih.',
+            'tipe_jabatan.in' => 'Tipe jabatan harus berupa desa atau lurah.',
             'pengurus_image.image' => 'File pengurus harus berupa gambar.',
             'pengurus_image.mimes' => 'Format gambar pengurus harus JPG, JPEG, atau PNG.',
             'pengurus_image.max' => 'Ukuran gambar pengurus maksimal 5MB.',
@@ -117,7 +120,8 @@ class StoreSkBankSampahRequest extends FormRequest
      *     kode_pos: string|null,
      *     masa_bakti_mulai: int,
      *     masa_bakti_selesai: int,
-     *     nama_kepala_desa: string
+     *     nama_kepala_desa: string,
+     *     tipe_jabatan: string
      * }
      */
     public function getSkData(): array
@@ -136,6 +140,7 @@ class StoreSkBankSampahRequest extends FormRequest
             'masa_bakti_mulai' => (int) $this->validated('masa_bakti_mulai'),
             'masa_bakti_selesai' => (int) $this->validated('masa_bakti_selesai'),
             'nama_kepala_desa' => $this->validated('nama_kepala_desa'),
+            'tipe_jabatan' => $this->validated('tipe_jabatan'),
         ];
     }
 }

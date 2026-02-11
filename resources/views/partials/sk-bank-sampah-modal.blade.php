@@ -106,9 +106,18 @@
                             </div>
                         </div>
 
-                        <div class="sk-form-group">
-                            <label class="sk-form-label">Nama Kepala Desa/Lurah <span class="required">*</span></label>
-                            <input type="text" name="nama_kepala_desa" class="sk-form-input" placeholder="Masukkan nama kepala desa/lurah" required>
+                        <div class="sk-form-row">
+                            <div class="sk-form-group">
+                                <label class="sk-form-label">Tipe Jabatan <span class="required">*</span></label>
+                                <select name="tipe_jabatan" id="skTipeJabatan" class="sk-form-input sk-form-select" required>
+                                    <option value="desa" selected>Kepala Desa</option>
+                                    <option value="lurah">Kepala Lurah</option>
+                                </select>
+                            </div>
+                            <div class="sk-form-group">
+                                <label class="sk-form-label" id="namaKepalaLabel">Nama Kepala Desa <span class="required">*</span></label>
+                                <input type="text" name="nama_kepala_desa" class="sk-form-input" placeholder="Masukkan nama kepala desa" required>
+                            </div>
                         </div>
                     </div>
 
@@ -643,6 +652,12 @@
         form.querySelector('[name="masa_bakti_selesai"]').value = sk.masa_bakti_selesai || (new Date().getFullYear() + 4);
         form.querySelector('[name="nama_kepala_desa"]').value = sk.nama_kepala_desa || '';
 
+        // Populate tipe jabatan and update label
+        if (sk.tipe_jabatan) {
+            form.querySelector('[name="tipe_jabatan"]').value = sk.tipe_jabatan;
+            updateTipeJabatanLabel(sk.tipe_jabatan);
+        }
+
         // Populate wilayah selects with cascade loading
         populateWilayahFromExisting(sk);
 
@@ -882,6 +897,25 @@
         }
         debouncePreview();
     }
+
+    // Update tipe jabatan label dynamically
+    function updateTipeJabatanLabel(value) {
+        const label = document.getElementById('namaKepalaLabel');
+        const input = document.querySelector('[name="nama_kepala_desa"]');
+        if (value === 'lurah') {
+            label.innerHTML = 'Nama Kepala Lurah <span class="required">*</span>';
+            input.placeholder = 'Masukkan nama kepala lurah';
+        } else {
+            label.innerHTML = 'Nama Kepala Desa <span class="required">*</span>';
+            input.placeholder = 'Masukkan nama kepala desa';
+        }
+    }
+
+    // Setup tipe jabatan change listener
+    document.getElementById('skTipeJabatan').addEventListener('change', function() {
+        updateTipeJabatanLabel(this.value);
+        debouncePreview();
+    });
 
     // Setup live preview
     function setupLivePreview() {

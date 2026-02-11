@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $masa_bakti_mulai
  * @property int $masa_bakti_selesai
  * @property string $nama_kepala_desa
+ * @property string $tipe_jabatan
  * @property string|null $pengurus_image_path
  * @property string|null $struktur_organisasi_path
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -36,6 +37,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read BankSampah $bankSampah
  * @property-read string $full_address
  * @property-read string $masa_bakti
+ * @property-read string $jabatan_title
+ * @property-read string $area_type_label
+ * @property-read string $area_type_label_upper
  * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SkBankSampah query()
@@ -81,6 +85,7 @@ class SkBankSampah extends Model
         'masa_bakti_mulai',
         'masa_bakti_selesai',
         'nama_kepala_desa',
+        'tipe_jabatan',
         'pengurus_image_path',
         'struktur_organisasi_path',
     ];
@@ -125,5 +130,32 @@ class SkBankSampah extends Model
         }
 
         return implode(', ', $parts);
+    }
+
+    /**
+     * Get jabatan title based on tipe_jabatan.
+     * Returns "Kepala Desa" or "Kepala Lurah".
+     */
+    public function getJabatanTitleAttribute(): string
+    {
+        return ($this->tipe_jabatan ?? 'desa') === 'lurah' ? 'Kepala Lurah' : 'Kepala Desa';
+    }
+
+    /**
+     * Get area type label based on tipe_jabatan.
+     * Returns "Desa" or "Kelurahan".
+     */
+    public function getAreaTypeLabelAttribute(): string
+    {
+        return ($this->tipe_jabatan ?? 'desa') === 'lurah' ? 'Kelurahan' : 'Desa';
+    }
+
+    /**
+     * Get uppercase area type label based on tipe_jabatan.
+     * Returns "DESA" or "KELURAHAN".
+     */
+    public function getAreaTypeLabelUpperAttribute(): string
+    {
+        return ($this->tipe_jabatan ?? 'desa') === 'lurah' ? 'KELURAHAN' : 'DESA';
     }
 }

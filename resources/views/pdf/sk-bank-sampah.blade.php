@@ -102,6 +102,7 @@
         .signature-name {
             font-weight: bold;
             text-decoration: underline;
+            white-space: nowrap;
         }
 
         .image-section {
@@ -163,6 +164,13 @@
             $garudaPath = asset('assets/garuda.png');
         }
         $garudaBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($garudaPath));
+
+        // Determine jabatan type labels based on tipe_jabatan
+        $tipeJabatan = $sk->tipe_jabatan ?? 'desa';
+        $isLurah = $tipeJabatan === 'lurah';
+        $jabatanTitle = $sk->jabatan_title ?? ($isLurah ? 'Kepala Lurah' : 'Kepala Desa');
+        $areaTypeLabel = $sk->area_type_label ?? ($isLurah ? 'Kelurahan' : 'Desa');
+        $areaTypeLabelUpper = $sk->area_type_label_upper ?? ($isLurah ? 'KELURAHAN' : 'DESA');
     @endphp
 
     <!-- Page 1: SK Document -->
@@ -176,7 +184,7 @@
         </div>
 
         <div class="document-title">
-            <h1>KEPUTUSAN KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }}</h1>
+            <h1>KEPUTUSAN {{ strtoupper($jabatanTitle) }} {{ strtoupper($sk->nama_desa_kelurahan ?? $areaTypeLabelUpper) }}</h1>
             <p class="document-number">Nomor: {{ $sk->nomor_surat ?? '____/____/____' }}</p>
         </div>
 
@@ -189,7 +197,7 @@
                 {{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
             </div>
             <div class="tentang-content-desa">
-                KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }},
+                {{ strtoupper($jabatanTitle) }} {{ strtoupper($sk->nama_desa_kelurahan ?? $areaTypeLabelUpper) }},
             </div>
         </div>
 
@@ -213,7 +221,7 @@
                 <tr>
                     <td style="vertical-align: top;">c.</td>
                     <td style="vertical-align: top; text-align: justify;">
-                        bahwa berdasarkan pertimbangan sebagaimana dimaksud dalam huruf a dan b maka perlu menetapkan Keputusan Kepala {{ $sk->nama_desa_kelurahan ?? 'Desa' }} tentang Pembentukan Bank Sampah {{ $sk->nama_desa_kelurahan ?? 'Desa' }}.
+                        bahwa berdasarkan pertimbangan sebagaimana dimaksud dalam huruf a dan b maka perlu menetapkan Keputusan {{ $jabatanTitle }} {{ $sk->nama_desa_kelurahan ?? $areaTypeLabel }} tentang Pembentukan Bank Sampah {{ $areaTypeLabel }} {{ $sk->nama_desa_kelurahan ?? '' }}.
                     </td>
                 </tr>
             </table>
@@ -260,7 +268,7 @@
                     <td style="width: 15%; vertical-align: top;">Memperhatikan</td>
                     <td style="width: 2%; vertical-align: top;">:</td>
                     <td style="width: 83%; vertical-align: top; text-align: justify;">
-                        Rapat Musyawarah Kelompok Masyarakat {{ $sk->nama_desa_kelurahan ?? 'Desa' }} tanggal {{ $sk->tanggal_rapat_musyawarah ? $sk->tanggal_rapat_musyawarah->translatedFormat('d F Y') : '____' }}.
+                        Rapat Musyawarah Kelompok Masyarakat {{ $areaTypeLabel }} {{ $sk->nama_desa_kelurahan ?? '' }} tanggal {{ $sk->tanggal_rapat_musyawarah ? $sk->tanggal_rapat_musyawarah->translatedFormat('d F Y') : '____' }}.
                     </td>
                 </tr>
             </table>
@@ -276,7 +284,7 @@
                     <td style="width: 2%; vertical-align: top;">:</td>
                     <td style="width: 83%; vertical-align: top; text-align: justify;">
                         <strong>
-                            KEPUTUSAN KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} TENTANG PEMBENTUKAN BANK SAMPAH {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }} {{ strtoupper($sk->kabupaten ?? 'KABUPATEN') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                            KEPUTUSAN {{ strtoupper($jabatanTitle) }} {{ strtoupper($sk->nama_desa_kelurahan ?? $areaTypeLabelUpper) }} TENTANG PEMBENTUKAN BANK SAMPAH {{ $areaTypeLabelUpper }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }} {{ strtoupper($sk->kabupaten ?? 'KABUPATEN') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
                         </strong>
                     </td>
                 </tr>
@@ -287,7 +295,7 @@
                     <td style="width: 15%; vertical-align: top;">KESATU</td>
                     <td style="width: 2%; vertical-align: top;">:</td>
                     <td style="width: 83%; vertical-align: top; text-align: justify;">
-                        Mengesahkan berdirinya Bank Sampah {{ $sk->nama_desa_kelurahan ?? 'Desa' }} dengan nama "{{ $sk->nama_bank_sampah ?? '' }}" {{ $sk->nama_desa_kelurahan ?? 'Desa' }};
+                        Mengesahkan berdirinya Bank Sampah {{ $areaTypeLabel }} {{ $sk->nama_desa_kelurahan ?? '' }} dengan nama "{{ $sk->nama_bank_sampah ?? '' }}" {{ $areaTypeLabel }} {{ $sk->nama_desa_kelurahan ?? '' }};
                     </td>
                 </tr>
             </table>
@@ -297,7 +305,7 @@
                     <td style="width: 15%; vertical-align: top;">KEDUA</td>
                     <td style="width: 2%; vertical-align: top;">:</td>
                     <td style="width: 83%; vertical-align: top; text-align: justify;">
-                        Menetapkan saudara-saudara yang namanya dan jabatannya tercantum dalam lampiran keputusan ini sebagai pengurus kelompok Pengelola Bank Sampah "{{ $sk->nama_bank_sampah ?? '' }}" {{ $sk->nama_desa_kelurahan ?? 'Desa' }} sebagaimana lampiran yang tidak terpisahkan dengan keputusan ini;
+                        Menetapkan saudara-saudara yang namanya dan jabatannya tercantum dalam lampiran keputusan ini sebagai pengurus kelompok Pengelola Bank Sampah "{{ $sk->nama_bank_sampah ?? '' }}" {{ $areaTypeLabel }} {{ $sk->nama_desa_kelurahan ?? '' }} sebagaimana lampiran yang tidak terpisahkan dengan keputusan ini;
                     </td>
                 </tr>
             </table>
@@ -352,7 +360,7 @@
                     <tr>
                         <td></td>
                         <td style="text-align: center; padding-top: 10px;">
-                            <div class="signature-title">Kepala Desa/lurah</div>
+                            <div class="signature-title">{{ $jabatanTitle }}</div>
                             <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
                         </td>
                     </tr>
@@ -367,7 +375,7 @@
             <tr>
                 <td style="width: 13%; vertical-align: top;">Lampiran 1</td>
                 <td style="width: 2%; vertical-align: top;">:</td>
-                <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }}</td>
+                <td style="width: 85%; vertical-align: top;">Keputusan {{ $jabatanTitle }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? $areaTypeLabel)) }}</td>
             </tr>
             <tr>
                 <td style="vertical-align: top;">Nomor</td>
@@ -382,13 +390,13 @@
             <tr>
                 <td style="vertical-align: top;">Tentang</td>
                 <td style="vertical-align: top;">:</td>
-                <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} {{ ucwords(strtolower($sk->kecamatan ?? '')) }} {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+                <td style="vertical-align: top;">Keputusan {{ $jabatanTitle }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? $areaTypeLabel)) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} {{ ucwords(strtolower($sk->kecamatan ?? '')) }} {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
             </tr>
         </table>
 
         <div class="lampiran-title">
             SUSUNAN ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-            {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+            {{ $areaTypeLabelUpper }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
         </div>
 
         <div class="data-section">
@@ -412,7 +420,7 @@
         <div class="data-section">
             <div class="data-section-title">II. PEMBINA :</div>
             <div style="margin-left: 20px;">
-                - KEPALA {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} / lurah
+                - {{ strtoupper($jabatanTitle) }} {{ strtoupper($sk->nama_desa_kelurahan ?? $areaTypeLabelUpper) }}
             </div>
         </div>
 
@@ -447,7 +455,7 @@
                 <tr>
                     <td></td>
                     <td style="text-align: center; padding-top: 10px;">
-                        <div class="signature-title">Kepala Desa/lurah</div>
+                        <div class="signature-title">{{ $jabatanTitle }}</div>
                         <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
                     </td>
                 </tr>
@@ -462,7 +470,7 @@
                 <tr>
                     <td style="width: 13%; vertical-align: top;">Lampiran 2</td>
                     <td style="width: 2%; vertical-align: top;">:</td>
-                    <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }}</td>
+                    <td style="width: 85%; vertical-align: top;">Keputusan {{ $jabatanTitle }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? $areaTypeLabel)) }}</td>
                 </tr>
                 <tr>
                     <td style="vertical-align: top;">Nomor</td>
@@ -477,13 +485,13 @@
                 <tr>
                     <td style="vertical-align: top;">Tentang</td>
                     <td style="vertical-align: top;">:</td>
-                    <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} {{ ucwords(strtolower($sk->kecamatan ?? '')) }} {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+                    <td style="vertical-align: top;">Keputusan {{ $jabatanTitle }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? $areaTypeLabel)) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} {{ ucwords(strtolower($sk->kecamatan ?? '')) }} {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
                 </tr>
             </table>
 
             <div class="lampiran-title">
                 STRUKTUR ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                {{ $areaTypeLabelUpper }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
             </div>
 
             <div class="image-section" style="margin-top: 25px;">
@@ -504,7 +512,7 @@
                     <tr>
                         <td></td>
                         <td style="text-align: center; padding-top: 10px;">
-                            <div class="signature-title">Kepala Desa</div>
+                            <div class="signature-title">{{ $jabatanTitle }}</div>
                             <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
                         </td>
                     </tr>
@@ -517,7 +525,7 @@
                 <tr>
                     <td style="width: 13%; vertical-align: top;">Lampiran 2</td>
                     <td style="width: 2%; vertical-align: top;">:</td>
-                    <td style="width: 85%; vertical-align: top;">Keputusan Kepala {{ $sk->nama_desa_kelurahan ?? 'Desa' }}</td>
+                    <td style="width: 85%; vertical-align: top;">Keputusan {{ $jabatanTitle }} {{ $sk->nama_desa_kelurahan ?? $areaTypeLabel }}</td>
                 </tr>
                 <tr>
                     <td style="vertical-align: top;">Nomor</td>
@@ -532,13 +540,13 @@
                 <tr>
                     <td style="vertical-align: top;">Tentang</td>
                     <td style="vertical-align: top;">:</td>
-                    <td style="vertical-align: top;">Keputusan Kepala {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? 'Desa')) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} Kecamatan {{ ucwords(strtolower($sk->kecamatan ?? '')) }} Kabupaten {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
+                    <td style="vertical-align: top;">Keputusan {{ $jabatanTitle }} {{ ucwords(strtolower($sk->nama_desa_kelurahan ?? $areaTypeLabel)) }} Tentang Pembentukan Bank Sampah {{ ucwords(strtolower($sk->nama_bank_sampah ?? '')) }} Kecamatan {{ ucwords(strtolower($sk->kecamatan ?? '')) }} Kabupaten {{ ucwords(strtolower($sk->kabupaten ?? '')) }}</td>
                 </tr>
             </table>
 
             <div class="lampiran-title">
                 STRUKTUR ORGANISASI BANK SAMPAH {{ strtoupper($sk->nama_bank_sampah ?? 'BANK SAMPAH') }}<br>
-                {{ strtoupper($sk->nama_desa_kelurahan ?? 'DESA') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                {{ $areaTypeLabelUpper }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
             </div>
 
             <div class="image-section" style="margin-top: 25px;">
@@ -560,7 +568,7 @@
                     <tr>
                         <td></td>
                         <td style="text-align: center; padding-top: 10px;">
-                            <div class="signature-title">Kepala Desa/lurah</div>
+                            <div class="signature-title">{{ $jabatanTitle }}</div>
                             <div class="signature-name">{{ strtoupper($sk->nama_kepala_desa ?? '') }}</div>
                         </td>
                     </tr>
