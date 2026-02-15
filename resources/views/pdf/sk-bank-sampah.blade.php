@@ -284,7 +284,7 @@
                     <td style="width: 2%; vertical-align: top;">:</td>
                     <td style="width: 83%; vertical-align: top; text-align: justify;">
                         <strong>
-                            KEPUTUSAN {{ strtoupper($jabatanTitle) }} {{ strtoupper($sk->nama_desa_kelurahan ?? $areaTypeLabelUpper) }} TENTANG PEMBENTUKAN BANK SAMPAH {{ $areaTypeLabelUpper }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }} {{ strtoupper($sk->kabupaten ?? 'KABUPATEN') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
+                            KEPUTUSAN {{ strtoupper($jabatanTitle) }} {{ strtoupper($sk->nama_desa_kelurahan ?? $areaTypeLabelUpper) }} TENTANG PEMBENTUKAN BANK SAMPAH {{ $areaTypeLabelUpper }} {{ strtoupper($sk->nama_desa_kelurahan ?? '') }} {{ strtoupper($sk->kabupaten ?? 'KABUPATEN') }} KECAMATAN {{ strtoupper($sk->kecamatan ?? 'KECAMATAN') }} PROVINSI {{ strtoupper($sk->provinsi ?? 'PROVINSI') }} MASA BAKTI {{ $sk->masa_bakti_mulai ?? date('Y') }}-{{ $sk->masa_bakti_selesai ?? date('Y') + 4 }}
                         </strong>
                     </td>
                 </tr>
