@@ -31,12 +31,57 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Analyzing error logs
   - **Important**: use laravel-boost proactively without waiting for user to ask
 
+## Quick Start
+
+### First Time Setup
+```bash
+# 1. Copy environment file
+cp .env.example .env
+
+# 2. Install PHP dependencies
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 composer install
+
+# 3. Generate app key
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan key:generate
+
+# 4. Run migrations and seed
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan migrate:fresh --seed
+
+# 5. Create storage symlink
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan storage:link
+
+# 6. Install frontend dependencies
+npm install && npm run build
+```
+
+### Daily Development
+```bash
+# Run tests after changes
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan test --compact --filter=YourTest
+
+# Clear caches during development
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan optimize:clear
+
+# Format code before commit
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 ./vendor/bin/pint
+```
+
 ## Project Overview
 
-**Bengkel Sampah** is a Laravel 10.x waste management platform with:
-- **Mobile REST API**: User-facing API for waste deposit, points, events, and content
-- **Admin Dashboard**: Full-featured web interface for management and reporting
-- **Dual notification system**: Firebase FCM + WhatsApp (TCast API)
+**Bengkel Sampah** is a Laravel 10.x waste management platform with **two main interfaces**:
+
+1. **Mobile REST API** (`routes/api.php`):
+   - User-facing API for waste deposit, points, events, and content
+   - Laravel Sanctum authentication
+   - Comprehensive Swagger/OpenAPI documentation at `/api/documentation`
+
+2. **Admin Web Dashboard** (`routes/web.php`):
+   - Full-featured web interface for management and reporting
+   - Session-based authentication
+   - Export capabilities: PDF, Excel, CSV
+
+**Additional Systems**:
+- **Dual notification**: Firebase FCM (push) + WhatsApp (TCast API)
 - **Multi-format exports**: PDF receipts, Excel/CSV reports
 
 ## Development Environment
