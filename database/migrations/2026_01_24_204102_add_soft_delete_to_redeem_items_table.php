@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (! Schema::hasTable('redeem_items')) {
+            return;
+        }
+
         Schema::table('redeem_items', function (Blueprint $table) {
             $table->softDeletes();
         });
