@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Models\Point;
 use App\Models\Sampah;
 use App\Models\Setoran;
 use Carbon\Carbon;
@@ -623,9 +624,28 @@ class SetoranRepository
     }
 
     /**
+     * Bulk delete setorans and their related points.
+     *
+     * @param  array<int>  $ids
+     * @return int Number of setorans deleted
+     */
+    public function bulkDelete(array $ids): int
+    {
+        return DB::transaction(function () use ($ids) {
+            Point::whereIn('setoran_id', $ids)->delete();
+
+            $deleted = Setoran::whereIn('id', $ids)->delete();
+
+            $this->clearCache();
+
+            return $deleted;
+        });
+    }
+
+    /**
      * Clear dashboard cache for bank sampah.
      */
-    public function clearCache(?int $bankSampahId = null): void
+    public function clearCache(): void
     {
         // Clear all dashboard-related cache keys
         Cache::flush(); // In production, use more targeted cache invalidation

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Api\SetoranApiController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\BankSampahController;
@@ -77,4 +78,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/redeems', [RedeemItemController::class, 'history']);
     Route::post('/redeems', [RedeemItemController::class, 'store']);
     Route::post('/redeems/{id}/cancel', [RedeemItemController::class, 'cancel']);
+
+    Route::post('setoran/bulk-delete', [SetoranApiController::class, 'bulkDestroy']);
 });
