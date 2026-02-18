@@ -11,11 +11,18 @@ return new class extends Migration
     public function up(): void
     {
         // Update event covers from relative paths to full URLs
+        $prefix = env('APP_URL').'/uploads/';
+        $driver = DB::getDriverName();
+
+        $expression = $driver === 'sqlite'
+            ? "'{$prefix}' || cover"
+            : "CONCAT('{$prefix}', cover)";
+
         DB::table('events')
             ->whereNotNull('cover')
             ->where('cover', 'not like', 'http%')
             ->update([
-                'cover' => DB::raw("CONCAT('".env('APP_URL')."/uploads/', cover)"),
+                'cover' => DB::raw($expression),
             ]);
     }
 
@@ -25,11 +32,13 @@ return new class extends Migration
     public function down(): void
     {
         // Revert back to relative paths
+        $prefix = env('APP_URL').'/uploads/';
+
         DB::table('events')
             ->whereNotNull('cover')
-            ->where('cover', 'like', env('APP_URL').'/uploads/%')
+            ->where('cover', 'like', $prefix.'%')
             ->update([
-                'cover' => DB::raw("REPLACE(cover, '".env('APP_URL')."/uploads/', '')"),
+                'cover' => DB::raw("REPLACE(cover, '{$prefix}', '')"),
             ]);
     }
 };
