@@ -173,6 +173,29 @@ npm run dev
 npm run build
 ```
 
+### Frontend Development Workflow
+
+**Tech Stack:**
+- Vite 5.x for asset bundling
+- Vanilla JavaScript (no framework for admin dashboard)
+- Blade templates for admin views
+
+**Asset Structure:**
+- `resources/views/`: Blade templates
+- `public/`: Static assets (icons, images)
+- Vite compiles assets to `public/build/`
+
+**Development:**
+```bash
+# Watch mode (auto-rebuild on changes)
+npm run dev
+
+# If frontend changes don't reflect: rebuild
+npm run build
+```
+
+**Note:** Admin dashboard uses server-rendered Blade templates, not SPA architecture.
+
 ## Architecture Overview
 
 ### API Response Pattern
