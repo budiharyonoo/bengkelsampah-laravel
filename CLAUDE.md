@@ -566,11 +566,34 @@ Interactive API documentation is available via L5-Swagger:
 
 ## Testing Approach
 
-The project uses PHPUnit for testing:
-- **Unit tests**: `tests/Unit/`
-- **Feature tests**: `tests/Feature/`
-- Test environment automatically uses array cache/sessions
-- Database connection for tests defined in `phpunit.xml`
+### Test Organization
+- **Feature tests** (`tests/Feature/`): API endpoints, controllers, integration tests
+- **Unit tests** (`tests/Unit/`): Services, repositories, helpers
+- **Admin feature tests** (`tests/Feature/Admin/`): Admin-specific functionality
+
+### Testing Patterns in This Project
+1. **Use factories** for model creation (check `database/factories/`)
+2. **Follow existing conventions**: Check sibling tests for structure
+3. **Database transactions**: Tests automatically rollback
+4. **Form Request validation**: Test via controller endpoints, not in isolation
+
+### Running Tests
+```bash
+# All tests
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan test --compact
+
+# Specific file
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan test --compact tests/Feature/Admin/BulkDeleteSetoranTest.php
+
+# Filter by name
+docker exec -i -w /var/www/html/bengkelsampah-laravel php8.2 php artisan test --compact --filter=testCanBulkDeleteSetoran
+```
+
+### Coverage Strategy
+- All Repository methods have feature tests via controllers
+- Service layer business rules have unit tests
+- API endpoints have comprehensive feature tests
+- Form Request validation tested through endpoints
 
 ## Common Troubleshooting
 
