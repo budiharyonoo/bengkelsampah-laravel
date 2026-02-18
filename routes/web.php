@@ -20,13 +20,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SampahController;
 use App\Http\Controllers\SkBankSampahController;
 use App\Http\Controllers\WasteInventoryController;
-use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\WasteTransactionController;
+use App\Http\Controllers\WilayahController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/artisan/optimize-clear', function() {
-    echo Artisan::call('optimize:clear');
-});
 
 Route::get('/', function () {
     return view('welcome');
