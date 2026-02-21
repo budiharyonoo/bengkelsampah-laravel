@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Api\SetoranApiController;
 use App\Http\Controllers\Admin\XPResetController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ArtikelController;
@@ -61,6 +62,8 @@ Route::prefix('dashboard')->middleware(['admin'])->group(function () {
     Route::post('/dashboard/transaksi/export/excel', [DashboardTransaksiController::class, 'exportExcel'])->name('dashboard.transaksi.export.excel');
     Route::post('/dashboard/transaksi/export/csv', [DashboardTransaksiController::class, 'exportCsv'])->name('dashboard.transaksi.export.csv');
     Route::post('/dashboard/transaksi/export/pdf', [DashboardTransaksiController::class, 'exportPdf'])->name('dashboard.transaksi.export.pdf');
+
+    Route::post('setoran/bulk-delete', [SetoranApiController::class, 'bulkDestroy'])->name('dashboard.setoran.bulk-delete');
 
     // Sampah routes
     Route::resource('sampah', SampahController::class)->names([
