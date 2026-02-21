@@ -17,7 +17,23 @@ class DashboardUserController extends Controller
 {
     public function index(Request $request)
     {
+        // Ambil admin yang sedang login (jika ada)
+        $admin = null;
+        if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
+            $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+        }
+
         $query = User::query()->with('bankSampah');
+
+        // Jika admin cabang, filter user_type sesuai id_bank_sampah admin
+        if ($admin) {
+            // Asumsi super admin: role == 'super', admin cabang: role == 'cabang'
+            if ($admin->role === 'cabang' && $admin->id_bank_sampah) {
+                $query->where('user_type', $admin->id_bank_sampah);
+            }
+            // Jika super admin, tidak ada filter tambahan (lihat semua user)
+        }
+        // Jika bukan admin, bisa diatur sesuai kebutuhan (misal: tampilkan semua user)
 
         // Search functionality
         if ($request->filled('search')) {
@@ -213,14 +229,16 @@ class DashboardUserController extends Controller
     public function exportExcel(Request $request)
     {
         try {
-            $users = User::with(['addresses', 'bankSampah'])->orderBy('created_at', 'desc')->get();
-
+            $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+            $query = User::with(['addresses', 'bankSampah'])->orderBy('created_at', 'desc');
+            if ($admin && $admin->role === 'cabang' && $admin->id_bank_sampah) {
+                $query->where('user_type', $admin->id_bank_sampah);
+            }
+            $users = $query->get();
             // Generate Excel file
             return $this->generateExcelFile($users);
-
         } catch (\Exception $e) {
             \Log::error('Error in DashboardUserController@exportExcel: '.$e->getMessage());
-
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal export Excel: '.$e->getMessage(),
@@ -366,14 +384,16 @@ class DashboardUserController extends Controller
     public function exportCsv(Request $request)
     {
         try {
-            $users = User::with(['addresses', 'bankSampah'])->orderBy('created_at', 'desc')->get();
-
+            $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+            $query = User::with(['addresses', 'bankSampah'])->orderBy('created_at', 'desc');
+            if ($admin && $admin->role === 'cabang' && $admin->id_bank_sampah) {
+                $query->where('user_type', $admin->id_bank_sampah);
+            }
+            $users = $query->get();
             // Generate CSV file
             return $this->generateCsvFile($users);
-
         } catch (\Exception $e) {
             \Log::error('Error in DashboardUserController@exportCsv: '.$e->getMessage());
-
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal export CSV: '.$e->getMessage(),
@@ -449,14 +469,16 @@ class DashboardUserController extends Controller
     public function exportPdf(Request $request)
     {
         try {
-            $users = User::with('addresses')->orderBy('created_at', 'desc')->get();
-
+            $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+            $query = User::with('addresses')->orderBy('created_at', 'desc');
+            if ($admin && $admin->role === 'cabang' && $admin->id_bank_sampah) {
+                $query->where('user_type', $admin->id_bank_sampah);
+            }
+            $users = $query->get();
             // Generate PDF
             return $this->generatePdfFile($users);
-
         } catch (\Exception $e) {
             \Log::error('Error in DashboardUserController@exportPdf: '.$e->getMessage());
-
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal export PDF: '.$e->getMessage(),

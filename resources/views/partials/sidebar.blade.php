@@ -13,6 +13,15 @@
             'subroutes' => ['dashboard.transaksi', 'dashboard.transaksi.show'],
         ],
     ];
+    // Tambahkan menu User ke standaloneMenu jika cabang
+    if ($isCabang) {
+        $standaloneMenu[] = [
+            'route' => 'dashboard.user',
+            'icon' => 'icon/ic_pelanggan.svg',
+            'label' => 'User',
+            'subroutes' => ['dashboard.user', 'dashboard.user.edit', 'dashboard.user.show'],
+        ];
+    }
 
     // Hierarchical menus with parent groups
     $hierarchicalMenu = [
